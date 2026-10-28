@@ -1,0 +1,20 @@
+{
+  "name": "halloween-display",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "shared",
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,client -c red,magenta \"npm run dev -w server\" \"npm run dev -w client\"",
+    "dev:fresh": "node -e \"require('fs').rmSync('server/data/world.json', { force: true })\" && npm run dev",
+    "build": "npm run build -w client",
+    "start": "npm run start -w server",
+    "typecheck": "npm run typecheck -w shared && npm run typecheck -w server && npm run typecheck -w client"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
+}

@@ -1,0 +1,195 @@
+/**
+ * arw style: glass
+ *
+ * Adapted from taste-skill's high-end-visual-design ("soft-skill") "Ethereal
+ * Glass" archetype and its glassmorphism / aurora-mesh guidance
+ * (github.com/leonxlnx/taste-skill, MIT): OLED near-black, slow radial mesh
+ * orbs, frosted panes with white hairlines and an inner top highlight. Per
+ * taste's honesty rule this is an approximation of "liquid glass" built from
+ * backdrop-filter + layered borders + highlights; there is no official web
+ * implementation. Emerald + blue orbs rather than the AI-default purple glow.
+ * Space Grotesk + Geist Mono.
+ *
+ * Opacity split, on purpose: the contract tokens (`--arw-surface` etc.) stay
+ * OPAQUE so every base-backed component (Select, Toast, TextField, ...) stays
+ * legible without a blur behind it. Translucency lives only in the extras
+ * below, consumed by glass's own overrides. Blur is applied only to fixed /
+ * portal layers (Dialog, Menu, Tooltip), never to scrolling content (Card is
+ * a translucent pane with no blur), matching the source's GPU rule.
+ *
+ * Dark-primary (the source archetype is OLED black); light is a synthesized
+ * frosted-white pass.
+ *
+ * Extras beyond the contract:
+ *   --arw-glass-pane       translucent fill for in-flow panes (Card)
+ *   --arw-glass-frost      translucent fill for blurred floating layers
+ *   --arw-glass-edge       hairline border of a pane
+ *   --arw-glass-highlight  inset top highlight (the "inner refraction")
+ *   --arw-glass-sheen      bright center of the top-edge sheen line
+ *   --arw-scrim            dialog backdrop tint
+ *   --arw-aurora-1/2/3     orb colors for PageLayout's backdrop
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Tokens ─────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Surfaces (opaque fallbacks; see header) */
+  --arw-bg: #f3f5f7;
+  --arw-bg-alt: #eceff3;
+  --arw-surface: #ffffff;
+  --arw-muted: #eef1f4;
+  --arw-border: rgb(15 23 42 / 0.09);
+  --arw-divider: rgb(15 23 42 / 0.05);
+
+  /* Text */
+  --arw-text-1: #0f1115;
+  --arw-text-2: #5b6170;
+  --arw-text-3: #9aa0ad;
+
+  /* Brand (emerald) */
+  --arw-brand: #059669;
+  --arw-brand-hover: #047857;
+  --arw-brand-muted-bg: #e3f5ee;
+  --arw-brand-muted-text: #047857;
+  --arw-on-brand: #ffffff;
+  --arw-ring: #10b981;
+
+  /* Destructive */
+  --arw-danger: #e11d48;
+  --arw-danger-hover: #be123c;
+
+  /* Status chip pairs */
+  --arw-status-default-bg: #eef1f4;
+  --arw-status-default-text: #5b6170;
+  --arw-status-default-dot: #9aa0ad;
+  --arw-status-running-bg: #e3edfd;
+  --arw-status-running-text: #1d4ed8;
+  --arw-status-running-dot: #3b82f6;
+  --arw-status-pending-bg: #fdf4dc;
+  --arw-status-pending-text: #a16207;
+  --arw-status-pending-dot: #eab308;
+  --arw-status-retry-bg: #feeadb;
+  --arw-status-retry-text: #c2410c;
+  --arw-status-retry-dot: #f97316;
+  --arw-status-success-bg: #e3f5ee;
+  --arw-status-success-text: #047857;
+  --arw-status-success-dot: #10b981;
+  --arw-status-error-bg: #fde3e8;
+  --arw-status-error-text: #be123c;
+  --arw-status-error-dot: #f43f5e;
+  --arw-status-warning-bg: #fdf4dc;
+  --arw-status-warning-text: #a16207;
+  --arw-status-warning-dot: #eab308;
+
+  /* Spacing scale (4pt grid), same values as klomp */
+  --arw-space-xxsm: 0.25rem;
+  --arw-space-xsm: 0.5rem;
+  --arw-space-sm: 0.75rem;
+  --arw-space-md: 1rem;
+  --arw-space-lg: 1.25rem;
+  --arw-space-xl: 1.5rem;
+  --arw-space-xxl: 2.5rem;
+  --arw-space-xxxl: 3.5rem;
+  --arw-space-huge: 4.5rem;
+
+  /* Shape & type */
+  --arw-radius-sm: 0.5rem;
+  --arw-radius-md: 0.875rem;
+  --arw-radius-lg: 1.25rem;
+  --arw-font-sans: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --arw-font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --arw-shadow-overlay: 0 24px 60px -18px rgb(15 23 42 / 0.25);
+
+  /* Extras */
+  --arw-glass-pane: rgb(255 255 255 / 0.55);
+  --arw-glass-frost: rgb(255 255 255 / 0.6);
+  --arw-glass-edge: rgb(15 23 42 / 0.08);
+  --arw-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.9);
+  --arw-glass-sheen: rgb(255 255 255 / 0.95);
+  --arw-scrim: rgb(243 245 247 / 0.35);
+  --arw-aurora-1: rgb(16 185 129 / 0.3);
+  --arw-aurora-2: rgb(59 130 246 / 0.24);
+  --arw-aurora-3: rgb(45 212 191 / 0.24);
+}
+
+.dark {
+  /* Surfaces (OLED; opaque fallbacks) */
+  --arw-bg: #050505;
+  --arw-bg-alt: #08080a;
+  --arw-surface: #0f1013;
+  --arw-muted: #17181c;
+  --arw-border: rgb(255 255 255 / 0.1);
+  --arw-divider: rgb(255 255 255 / 0.06);
+
+  /* Text */
+  --arw-text-1: #f5f5f7;
+  --arw-text-2: #a1a1aa;
+  --arw-text-3: #5b5b66;
+
+  /* Brand */
+  --arw-brand: #34d399;
+  --arw-brand-hover: #6ee7b7;
+  --arw-brand-muted-bg: rgb(52 211 153 / 0.12);
+  --arw-brand-muted-text: #6ee7b7;
+  --arw-on-brand: #04120c;
+  --arw-ring: #6ee7b7;
+
+  /* Destructive */
+  --arw-danger: #f43f5e;
+  --arw-danger-hover: #fb7185;
+
+  /* Status chip pairs */
+  --arw-status-default-bg: #17181c;
+  --arw-status-default-text: #a1a1aa;
+  --arw-status-running-bg: rgb(59 130 246 / 0.14);
+  --arw-status-running-text: #93c5fd;
+  --arw-status-pending-bg: rgb(234 179 8 / 0.14);
+  --arw-status-pending-text: #fde047;
+  --arw-status-retry-bg: rgb(249 115 22 / 0.14);
+  --arw-status-retry-text: #fdba74;
+  --arw-status-success-bg: rgb(52 211 153 / 0.12);
+  --arw-status-success-text: #6ee7b7;
+  --arw-status-error-bg: rgb(244 63 94 / 0.14);
+  --arw-status-error-text: #fda4af;
+  --arw-status-warning-bg: rgb(234 179 8 / 0.14);
+  --arw-status-warning-text: #fde047;
+
+  --arw-shadow-overlay: 0 24px 60px -18px rgb(0 0 0 / 0.8);
+
+  /* Extras */
+  --arw-glass-pane: rgb(255 255 255 / 0.04);
+  --arw-glass-frost: rgb(20 20 24 / 0.55);
+  --arw-glass-edge: rgb(255 255 255 / 0.1);
+  --arw-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.08);
+  --arw-glass-sheen: rgb(255 255 255 / 0.4);
+  --arw-scrim: rgb(0 0 0 / 0.4);
+  --arw-aurora-1: rgb(16 185 129 / 0.34);
+  --arw-aurora-2: rgb(59 130 246 / 0.28);
+  --arw-aurora-3: rgb(20 184 166 / 0.22);
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────────── */
+
+/* PageLayout's orb drift: transform-only, applied under motion-safe. */
+@keyframes arw-aurora-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(6%, -4%, 0) scale(1.1);
+  }
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────── */
+
+@layer base {
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}

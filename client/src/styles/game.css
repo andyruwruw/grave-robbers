@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+html,
+body,
+#root {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+/* Scroll areas that shouldn't show a bar (the TV sidebar). */
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* A thin bar in the glass theme's hairline color (dropdown lists). */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--arw-glass-edge) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--arw-glass-edge);
+  border-radius: 3px;
+}
+
+/* The phone's "+6 candy" toast popping in. */
+@keyframes toast-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.85);
+  }
+
+  60% {
+    opacity: 1;
+    transform: translateY(0) scale(1.06);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.toast-pop {
+  animation: toast-pop 220ms ease-out;
+}
