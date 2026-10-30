@@ -1,0 +1,11 @@
+{
+  "name": "@halloween/game-ui",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "dependencies": {
+    "@halloween/shared": "*",
+    "lucide-react": "^1.60.0",
+    "react": "^19.3.1"
+  }
+}

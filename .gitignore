@@ -4,3 +4,7 @@ dist
 .env
 server/data
 server/media/music
+*.tsbuildinfo
+.claude/settings.local.json
+.DS_Store
+Thumbs.db

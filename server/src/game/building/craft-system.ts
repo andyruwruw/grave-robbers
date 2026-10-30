@@ -1,0 +1,80 @@
+// Packages
+import { ammoMade, isMatRecipe } from '@halloween/shared/crafting/material-recipes';
+import { MAX_CRAFT, RECIPES, craftCost, needsAnvil } from '@halloween/shared/crafting/recipes';
+import { RESOURCES } from '@halloween/shared/goods/goods';
+import { itemLabel, itemNames } from '@halloween/shared/inventory/item-keys';
+import { TREE, TREE_NODE } from '@halloween/shared/skill-tree/nodes';
+import { levelOf, nodeUnlocked, recipeUnlocked } from '@halloween/shared/skill-tree/progress';
+import { upgradeCost } from '@halloween/shared/skill-tree/upgrade-cost';
+
+// Local Imports
+import { GameSystem } from '../core/game-system';
+import { freshItem } from './helpers/fresh-item';
+
+// Types
+import type { RecipeId } from '@halloween/shared/crafting/recipes';
+import type { Resource } from '@halloween/shared/goods/goods';
+import type { BagItem } from '@halloween/shared/inventory/bag-items';
+import type { NodeId, TreeNode } from '@halloween/shared/skill-tree/types/skill-tree';
+
+/**
+ * Crafting from carried materials and buying skill tree upgrades.
+ */
+export class CraftSystem extends GameSystem {
+  /**
+   * Makes a stack of a material, a fresh piece of gear, or one structure
+   * from carried materials (late gear and parts only beside an anvil, for
+   * less the better it is). Gear and structures go where Grab would put
+   * them, or at the player's feet when the bag is full.
+   * @param token The player's token.
+   * @param recipe What to make.
+   * @param count How many to make.
+   */
+  craft(token: string, recipe: RecipeId, count = 1): void {
+    const p = this.players.get(token);
+    if (!p || p.dead || !RECIPES.includes(recipe) || !Number.isFinite(count)) {
+      return;
+    }
+    let made = 0;
+    for (; made < Math.min(MAX_CRAFT, Math.max(1, Math.floor(count))); made++) {
+      if (!recipeUnlocked(recipe, this._game.gameTab.treeOf(p)) || (needsAnvil(recipe) && p.anvil === null) || (!this.settings.freeCrafting && !this._game.bag.pay(p, craftCost(recipe, p.anvil)))) {
+        break;
+      }
+      const item: BagItem = isMatRecipe(recipe) ? { material: recipe, count: ammoMade(recipe) } : freshItem(recipe, p.tree);
+      const left = this._game.bag.takeIn(p, item, true);
+      if (left) {
+        this._game.drops.dropAt(p.x, p.y, left);
+      }
+    }
+    this.outbox.inventoryChanged.add(p.token);
+    this.outbox.sound(p, made > 0 ? 'craft' : 'error');
+  }
+
+  /**
+   * Raises one of a player's skill tree nodes a level, paid for in candy
+   * and blood (less by a research table, `research`). The TV feed says who did it
+   * and anything it opened up for them.
+   * @param token The player's token.
+   * @param node The skill tree node.
+   */
+  upgrade(token: string, node: NodeId): void {
+    const p = this.players.get(token);
+    if (!p || p.dead || !TREE_NODE[node]) {
+      return;
+    }
+    const cost = upgradeCost(node, p.tree, p.research);
+    if (cost === null || !nodeUnlocked(node, this._game.gameTab.treeOf(p)) || RESOURCES.some((r: Resource): boolean => p.inventory[r] < cost[r])) {
+      this.outbox.sound(p, 'error');
+      return;
+    }
+    for (const r of RESOURCES) {
+      p.inventory[r] -= cost[r];
+    }
+    const before = TREE.filter((n: TreeNode): boolean => nodeUnlocked(n.id, p.tree));
+    p.tree.levels[node] = levelOf(node, p.tree) + 1;
+    const opened = TREE.filter((n: TreeNode): boolean => nodeUnlocked(n.id, p.tree) && !before.includes(n)).map((n: TreeNode): NodeId => n.id);
+    this.outbox.sound(p, 'unlock');
+    this.outbox.events.push({ t: 'research', finder: p.name, finderColor: p.color, label: itemLabel(node), level: levelOf(node, p.tree), opens: itemNames(opened) });
+    this.outbox.inventoryChanged.add(p.token);
+  }
+}

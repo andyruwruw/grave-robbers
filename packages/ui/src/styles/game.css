@@ -1,0 +1,132 @@
+html,
+body,
+#root {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+/* Nothing wider than the screen may widen the page (a phone would zoom out to fit it). */
+html,
+body {
+  overflow-x: hidden;
+}
+
+/* Scroll areas that shouldn't show a bar (the TV sidebar). */
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* A thin bar in the theme's border color (dropdown lists). */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--arw-border) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--arw-border);
+  border-radius: 3px;
+}
+
+/* The phone's "+6 candy" toast popping in. */
+@keyframes toast-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.85);
+  }
+
+  60% {
+    opacity: 1;
+    transform: translateY(0) scale(1.06);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.toast-pop {
+  animation: toast-pop 220ms ease-out;
+}
+
+/* Killing another player: the word shakes, and the screen fades out at the end. */
+@keyframes naughty-shake {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  20% {
+    transform: translate(-6px, 2px) rotate(-3deg);
+  }
+
+  40% {
+    transform: translate(5px, -3px) rotate(2deg);
+  }
+
+  60% {
+    transform: translate(-4px, -2px) rotate(-2deg);
+  }
+
+  80% {
+    transform: translate(6px, 3px) rotate(3deg);
+  }
+}
+
+.naughty-shake {
+  animation: naughty-shake 180ms linear 6;
+}
+
+@keyframes naughty-fade {
+  0% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+
+  8%,
+  85% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+.naughty-fade {
+  animation: naughty-fade 3200ms ease-out forwards;
+}
+
+/* Hearts healing back from the ritual knife's kills: they strobe until they're in. */
+@keyframes heal-strobe {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.heal-strobe {
+  animation: heal-strobe 450ms ease-in-out infinite;
+}
+
+/* What a gamepad on /play has selected in a menu (A presses it). */
+.pad-focus {
+  outline: 2px solid var(--arw-brand);
+  outline-offset: 2px;
+}

@@ -1,0 +1,213 @@
+/**
+ * arw style: studio
+ *
+ * taste-skill's stitch-design-taste "Taste Standard" DESIGN.md
+ * (github.com/leonxlnx/taste-skill, MIT): Canvas White #f9fafb, Pure Surface
+ * white, Charcoal Ink #18181b, Steel Secondary #71717a, semi-transparent
+ * whisper borders, and one accent chosen per project. Electric Blue is the
+ * default; `.accent-emerald` / `.accent-rose` / `.accent-amber` swap it (see
+ * the Accents block). Geist + Geist Mono.
+ *
+ * Deviations from the source, both deliberate: tertiary text is zinc-400
+ * rather than the source's slate #94a3b8 (its own rules ban mixing warm and
+ * cool greys), and `radius-lg` is 1.25rem rather than 2.5rem, because the
+ * base kit's cards use ~1rem padding and a 2.5rem corner would clip content
+ * that the source pads at 2 to 2.5rem.
+ *
+ * Dark is a synthesized zinc-950 pass. Base-backed: tokens only.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Tokens ─────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Surfaces */
+  --arw-bg: #f9fafb;
+  --arw-bg-alt: #f4f4f5;
+  --arw-surface: #ffffff;
+  --arw-muted: #f4f4f5;
+  --arw-border: rgb(228 228 231 / 0.8);
+  --arw-divider: rgb(228 228 231 / 0.5);
+
+  /* Text */
+  --arw-text-1: #18181b;
+  --arw-text-2: #71717a;
+  --arw-text-3: #a1a1aa;
+
+  /* Brand */
+  --arw-brand: #2563eb;
+  --arw-brand-hover: #1d4ed8;
+  --arw-brand-muted-bg: #eff6ff;
+  --arw-brand-muted-text: #1d4ed8;
+  --arw-on-brand: #ffffff;
+  --arw-ring: #3b82f6;
+
+  /* Destructive */
+  --arw-danger: #e11d48;
+  --arw-danger-hover: #be123c;
+
+  /* Status chip pairs */
+  --arw-status-default-bg: #f4f4f5;
+  --arw-status-default-text: #52525b;
+  --arw-status-default-dot: #a1a1aa;
+  --arw-status-running-bg: #eff6ff;
+  --arw-status-running-text: #1d4ed8;
+  --arw-status-running-dot: #3b82f6;
+  --arw-status-pending-bg: #fffbeb;
+  --arw-status-pending-text: #b45309;
+  --arw-status-pending-dot: #f59e0b;
+  --arw-status-retry-bg: #fff7ed;
+  --arw-status-retry-text: #c2410c;
+  --arw-status-retry-dot: #f97316;
+  --arw-status-success-bg: #ecfdf5;
+  --arw-status-success-text: #047857;
+  --arw-status-success-dot: #10b981;
+  --arw-status-error-bg: #fff1f2;
+  --arw-status-error-text: #be123c;
+  --arw-status-error-dot: #e11d48;
+  --arw-status-warning-bg: #fffbeb;
+  --arw-status-warning-text: #b45309;
+  --arw-status-warning-dot: #f59e0b;
+
+  /* Spacing scale (4pt grid), same values as klomp */
+  --arw-space-xxsm: 0.25rem;
+  --arw-space-xsm: 0.5rem;
+  --arw-space-sm: 0.75rem;
+  --arw-space-md: 1rem;
+  --arw-space-lg: 1.25rem;
+  --arw-space-xl: 1.5rem;
+  --arw-space-xxl: 2.5rem;
+  --arw-space-xxxl: 3.5rem;
+  --arw-space-huge: 4.5rem;
+
+  /* Shape & type */
+  --arw-radius-sm: 0.375rem;
+  --arw-radius-md: 0.625rem;
+  --arw-radius-lg: 1.25rem;
+  --arw-font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --arw-font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --arw-shadow-overlay: 0 20px 40px -15px rgb(24 24 27 / 0.12), 0 0 0 1px rgb(228 228 231 / 0.6);
+}
+
+.dark {
+  /* Surfaces */
+  --arw-bg: #09090b;
+  --arw-bg-alt: #0c0c0e;
+  --arw-surface: #131316;
+  --arw-muted: #1c1c20;
+  --arw-border: rgb(255 255 255 / 0.08);
+  --arw-divider: rgb(255 255 255 / 0.05);
+
+  /* Text */
+  --arw-text-1: #fafafa;
+  --arw-text-2: #a1a1aa;
+  --arw-text-3: #52525b;
+
+  /* Brand */
+  --arw-brand: #3b82f6;
+  --arw-brand-hover: #60a5fa;
+  --arw-brand-muted-bg: rgb(59 130 246 / 0.15);
+  --arw-brand-muted-text: #93c5fd;
+  --arw-on-brand: #ffffff;
+  --arw-ring: #60a5fa;
+
+  /* Destructive */
+  --arw-danger: #f43f5e;
+  --arw-danger-hover: #fb7185;
+
+  /* Status chip pairs */
+  --arw-status-default-bg: #1c1c20;
+  --arw-status-default-text: #a1a1aa;
+  --arw-status-running-bg: rgb(59 130 246 / 0.15);
+  --arw-status-running-text: #93c5fd;
+  --arw-status-pending-bg: rgb(245 158 11 / 0.15);
+  --arw-status-pending-text: #fcd34d;
+  --arw-status-retry-bg: rgb(249 115 22 / 0.15);
+  --arw-status-retry-text: #fdba74;
+  --arw-status-success-bg: rgb(16 185 129 / 0.15);
+  --arw-status-success-text: #6ee7b7;
+  --arw-status-error-bg: rgb(244 63 94 / 0.15);
+  --arw-status-error-text: #fda4af;
+  --arw-status-warning-bg: rgb(245 158 11 / 0.15);
+  --arw-status-warning-text: #fcd34d;
+
+  --arw-shadow-overlay: 0 20px 40px -15px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(255 255 255 / 0.06);
+}
+
+/* ── Accents ───────────────────────────────────────────────────────────────
+ * The source's "pick ONE accent per project" set. Electric Blue is the
+ * default above; add one of these classes to <html> (or any subtree) to swap
+ * it. Fills use a deeper shade than the source's named hex where the named
+ * hex fails white-text contrast (emerald, amber); the named hex is kept for
+ * rings. Amber takes dark ink on its fill for the same reason.
+ */
+
+.accent-emerald {
+  --arw-brand: #059669;
+  --arw-brand-hover: #047857;
+  --arw-brand-muted-bg: #ecfdf5;
+  --arw-brand-muted-text: #047857;
+  --arw-on-brand: #ffffff;
+  --arw-ring: #10b981;
+}
+
+.accent-rose {
+  --arw-brand: #e11d48;
+  --arw-brand-hover: #be123c;
+  --arw-brand-muted-bg: #fff1f2;
+  --arw-brand-muted-text: #be123c;
+  --arw-on-brand: #ffffff;
+  --arw-ring: #fb7185;
+}
+
+.accent-amber {
+  --arw-brand: #f59e0b;
+  --arw-brand-hover: #d97706;
+  --arw-brand-muted-bg: #fffbeb;
+  --arw-brand-muted-text: #b45309;
+  --arw-on-brand: #18181b;
+  --arw-ring: #f59e0b;
+}
+
+.dark.accent-emerald,
+.dark .accent-emerald {
+  --arw-brand: #10b981;
+  --arw-brand-hover: #34d399;
+  --arw-brand-muted-bg: rgb(16 185 129 / 0.15);
+  --arw-brand-muted-text: #6ee7b7;
+  --arw-on-brand: #09090b;
+  --arw-ring: #34d399;
+}
+
+.dark.accent-rose,
+.dark .accent-rose {
+  --arw-brand: #f43f5e;
+  --arw-brand-hover: #fb7185;
+  --arw-brand-muted-bg: rgb(244 63 94 / 0.15);
+  --arw-brand-muted-text: #fda4af;
+  --arw-on-brand: #ffffff;
+  --arw-ring: #fb7185;
+}
+
+.dark.accent-amber,
+.dark .accent-amber {
+  --arw-brand: #fbbf24;
+  --arw-brand-hover: #fcd34d;
+  --arw-brand-muted-bg: rgb(245 158 11 / 0.15);
+  --arw-brand-muted-text: #fcd34d;
+  --arw-on-brand: #09090b;
+  --arw-ring: #fbbf24;
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────── */
+
+@layer base {
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": [
+      "ES2023",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@halloween/ui/*": [
+        "./packages/ui/src/*"
+      ],
+      "@halloween/renderer/*": [
+        "./packages/renderer/src/*"
+      ],
+      "@halloween/game-ui/*": [
+        "./packages/game-ui/src/*"
+      ],
+      "@halloween/controls/*": [
+        "./packages/controls/src/*"
+      ]
+    }
+  }
+}

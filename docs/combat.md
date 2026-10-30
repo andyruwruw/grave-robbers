@@ -1,0 +1,92 @@
+# Players and combat
+
+## Health
+
+- 10 hearts (`MAX_HP`). No regeneration.
+- Damage from the last 10 seconds (`FRESH_WOUND_SECONDS`) can't be healed yet: grey hearts on the phone, a grey end on the TV bar.
+
+| Healing | Amount |
+|---|---|
+| Rest within 2 tiles of a burning campfire, soul fire, or blood fountain | 1 heart per 4s |
+| Drink a tonic from the bag | +4 hearts (refused when nothing could heal) |
+| Kill with the ritual knife | 4 hearts over 8s per kill (+2 per level) |
+
+## Death and respawn
+
+```mermaid
+flowchart LR
+  Hit[Health reaches 0] --> Spill[Bag spills where you fell]
+  Spill --> Toll[Lose half your candy and blood]
+  Toll --> Screen[Phone death screen: time survived, killer]
+  Screen -->|5s| Respawn[Respawn at your coffin or a random spawn]
+  Respawn --> Protect[10s spawn protection]
+```
+
+- Equipped gear stays on you.
+- The spill (one pile of materials, with gear and structure crates around it) can only be picked up by you.
+- Spawn protection ends early when you attack or build. Monsters ignore protected players and disconnected phones.
+- The TV kill feed shows every death.
+
+## Player vs player
+
+PvP is always on, but it's hard and it's naughty.
+
+| Rule | Value |
+|---|---|
+| A player's hit or shot on another player | 25% damage (`PVP_DAMAGE`) |
+| Killing another player | The killer loses all their candy |
+| The victim's lost half of blood | Goes to the killer instead of vanishing |
+| Looting | Impossible: a dead player's spill is theirs alone |
+
+The killer's phone gets `{ t: 'naughty', candy }` and shows a huge shaking NAUGHTY with the candy count draining to 0 (`naughty-screen.tsx`).
+
+## Melee
+
+- A swing lands `STRIKE_DELAY` (0.22s) after the press, or after the weapon's `windup` for heavy weapons, and hits everything within reach in its arc.
+- Hits knock back (half a tile for the hammer), throw sparks, shake the screen, and buzz the phone.
+- Player hits never cancel a monster's attack, except the morning star's stagger and the quarterstaff's stun.
+
+- **Lag:** a melee blow is judged against where monsters stood when the attacker's screen showed them (their ping plus their screen's smoothing, at most 0.25s back; `MeleeSystem.lagOf`, `Horde.targetsAt` over `RewindBuffer`), so hits land on what they saw.
+
+### What a swing is made with
+
+```mermaid
+flowchart TD
+  Press[Action pressed] --> Vamp{Vampire in stake reach, stake in bag?}
+  Vamp -- yes --> Stake[Swing the bagged stake]
+  Vamp -- no --> Job{Facing a job tile, nobody in reach?}
+  Job -- yes --> Hammer[Swing the hammer]
+  Job -- no --> Ranged{Ranged weapon?}
+  Ranged -- yes --> Shoot[Shoot, with aim assist]
+  Ranged -- no --> Weapon[Swing the weapon]
+```
+
+- **Job tiles:** anything gathered, dug, robbed, smashed, opened, refueled, or knocked down (`GATHERABLE`, structures, `HAMMER_JOBS`). The hammer does every job, whatever is equipped.
+- **Drawn items** (the hammer or a bagged stake) show in hand for 1.2s (`PlayerState.drawn`), then the weapon comes back.
+- **Digging a grave** (a headstone or cross) is still a hammer swing with the hammer's stats, but it's shown as digging (`PlayerState.digging`, `PlayerFighter.digUntil`): a spade instead of the hammer, and dirt tossed over the digger's shoulder.
+- **Tile jobs never wear the weapon.**
+
+### Heavy swings
+
+The battle axe and warhammer have a `windup` (0.7s and 0.8s). The blow lands after it, and the swinger moves at 35% speed (`HEAVY_SWING_SLOW`) from the press until `HEAVY_FOLLOW_THROUGH` (0.35s) after the blow lands, so they leave you exposed. The TV stretches the swing animation to match.
+
+### Ranged
+
+- Shots carry their weapon (`Shot.weapon`), so holy and blood rules follow the weapon that fired them.
+- **Aim assist:** every shot bends toward the monster closest to straight ahead within 0.35 rad (`AIM_ASSIST`) and range.
+- See [weapons.md](weapons.md) for draw, bursts, pellets, and piercing.
+
+## Blocking and armor
+
+| Defense | Effect |
+|---|---|
+| Shield, held up (phone's Block button) | Hits from the front x0.12 (3% less per level); you move at half speed and can't attack. Only beside a one-handed weapon. |
+| Quarterstaff, held | Hits from the front x0.85 (10% less per level), no shield needed |
+| Armor | Every hit times its guard (0.05 less per level); see [weapons.md](weapons.md#armor) |
+
+- The flail ignores a raised shield.
+- On the TV, past halfway up the shield leaves the arm and stands square in front of the chest.
+
+## Panic
+
+The phone's Panic button runs the player from monsters within 4 tiles for 1 second along a path, then walks them back home once it's safe. It also closes whatever menu is open.
