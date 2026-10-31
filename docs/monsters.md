@@ -105,7 +105,7 @@ stateDiagram-v2
 ### Ghoul
 - Circles its prey 3 tiles out (`GHOUL_ORBIT`), switching direction every few seconds or when it bumps into something, until it can pounce.
 - Never pounces from closer than 2 tiles (`GHOUL_MIN_POUNCE`).
-- Hunched, bounding on all fours at an unhurried stride even when hunting (`GAIT` 8.5); hisses while hunting, rattles quick clicks as it crouches to pounce (`ghoul-click`), and bites as it lands.
+- Hunched on all fours with long reaching arms and short hind shins (`GhoulAvatar`), bounding at an unhurried stride even when hunting (`GAIT` 8.5); hisses while hunting, rattles quick clicks as it crouches to pounce (`ghoul-click`), and bites as it lands.
 
 ### Demon
 - At most 2 at once (`MAX_DEMONS`).

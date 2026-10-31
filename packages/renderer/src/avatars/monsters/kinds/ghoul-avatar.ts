@@ -97,28 +97,29 @@ export class GhoulAvatar extends ChargingMonsterAvatar {
     for (const side of [-1, 1]) {
       const upper = new Group();
       upper.position.set(0.14, 0.28, 0.15 * side);
-      upper.rotation.x = 0.35 * side;
+      upper.rotation.x = 0.2 * side;
       const lower = new Group();
-      lower.position.set(0, -0.17, 0);
+      lower.position.set(0, -0.22, 0);
       lower.add(
-        box([0.045, 0.17, 0.045], [0, -0.085, 0], skin),
-        box([0.09, 0.03, 0.07], [0.035, -0.17, 0], skin),
-        box([0.035, 0.02, 0.07], [0.085, -0.175, 0], dark),
+        box([0.045, 0.22, 0.045], [0, -0.11, 0], skin),
+        box([0.09, 0.03, 0.07], [0.035, -0.22, 0], skin),
+        box([0.035, 0.02, 0.07], [0.085, -0.225, 0], dark),
       );
-      upper.add(box([0.055, 0.17, 0.055], [0, -0.085, 0], skin), box([0.07, 0.07, 0.07], [0, -0.03, 0], shirt), lower);
+      upper.add(box([0.055, 0.22, 0.055], [0, -0.11, 0], skin), box([0.07, 0.07, 0.07], [0, -0.03, 0], shirt), lower);
       this._crawl.push({ upper, lower, front: true, side });
       this.body.add(upper);
     }
     for (const side of [-1, 1]) {
       const upper = new Group();
-      upper.position.set(-0.2, 0.34, 0.12 * side);
+      upper.position.set(-0.2, 0.3, 0.12 * side);
       upper.rotation.x = 0.45 * side;
       const lower = new Group();
       lower.position.set(0, 0.3, 0);
+      lower.rotation.x = -0.7 * side;
       lower.add(
-        box([0.06, 0.58, 0.06], [0, -0.29, 0], pants),
+        box([0.06, 0.4, 0.06], [0, -0.2, 0], pants),
         box([0.065, 0.06, 0.065], [0, 0, 0], dark),
-        box([0.13, 0.04, 0.07], [0.04, -0.58, 0], skin),
+        box([0.13, 0.04, 0.07], [0.04, -0.4, 0], skin),
       );
       upper.add(box([0.075, 0.3, 0.075], [0, 0.15, 0], pants), lower);
       this._crawl.push({ upper, lower, front: false, side });
@@ -167,7 +168,7 @@ export class GhoulAvatar extends ChargingMonsterAvatar {
       const at = ph + (limb.front ? 0 : Math.PI);
       const swing = Math.sin(at) * run;
       const lift = Math.max(0, Math.cos(at)) * run;
-      const rest = limb.front ? [0.35 + swing * 0.6, -0.5 - lift * 0.6] : [-0.75 + swing * 0.4, 0.85 + lift * 0.3];
+      const rest = limb.front ? [0.95 + swing * 0.4, -0.3 - lift * 0.5] : [-1.35 + swing * 0.4, 0.7 + lift * 0.3];
       const coiled = limb.front ? [0.6, -1.1] : [-1.05, 1.4];
       const flung = limb.front ? [1.4, -0.2] : [-0.1, 0.3];
       limb.upper.rotation.z = mix(mix(rest[0], coiled[0], crouch), flung[0], stretch);

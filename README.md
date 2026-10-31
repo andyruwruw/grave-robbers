@@ -7,25 +7,22 @@ Grave Robbers
 </h1>
 
 <p align="center">
-<img src="./docs/media/models/materials/candy.gif" width="40" alt="Candy" title="Candy" />
-<img src="./docs/media/models/materials/candy.gif" width="40" alt="Candy" title="Candy" />
-<img src="./docs/media/models/materials/candy.gif" width="40" alt="Candy" title="Candy" />
-<img src="./docs/media/models/materials/candy.gif" width="40" alt="Candy" title="Candy" />
-<img src="./docs/media/models/materials/candy.gif" width="40" alt="Candy" title="Candy" />
-<img src="./docs/media/models/materials/candy.gif" width="40" alt="Candy" title="Candy" />
-<img src="./docs/media/models/materials/candy.gif" width="40" alt="Candy" title="Candy" />
-<img src="./docs/media/models/materials/candy.gif" width="40" alt="Candy" title="Candy" />
-</p>
-
-<p align="center">
 <i>
-Candy, candy, candy, CANDY, CANDY, CANDY
+Candy, candy, candy, CANDY, CANDY, CANDY 
 </i>
 </p>
 
 A spooky top-down survival party game for Halloween nights. Up to 8 players rob graves, chop and mine, craft weapons, and build walls, lamps, and traps in a graveyard that's always dark.
 
 The horde comes: zombies, vampires, ghosts, werewolves, necromancers, and more, worse under a blood moon. Candy from graves and blood from monsters buy skill tree upgrades.
+
+<p align="center">
+<img src="./docs/media/models/gear/battle-axe.gif" width="120" alt="Battle axe" title="Battle axe" />
+<img src="./docs/media/models/gear/greatsword.gif" width="120" alt="Greatsword" title="Greatsword" />
+<img src="./docs/media/models/gear/morning-star.gif" width="120" alt="Morning star" title="Morning star" />
+<img src="./docs/media/models/gear/repeating-crossbow.gif" width="120" alt="Repeating crossbow" title="Repeating crossbow" />
+<img src="./docs/media/models/gear/ritual-knife.gif" width="120" alt="Ritual knife" title="Ritual knife" />
+</p>
 
 ## Play from the couch
 
@@ -52,145 +49,55 @@ Maps are also allowed to be generated large, no need to limit it.
 Create occult alters, research weapons, automate resource gathering, create assembly lines, defend your base with automated flame throwers. The monsters get meaner and meaner.
 
 <p align="center">
+<img src="./docs/media/models/monsters/brute.gif" width="120" alt="Brute" title="Brute" />
+<img src="./docs/media/models/monsters/ghoul.gif" width="120" alt="Ghoul" title="Ghoul" />
+<img src="./docs/media/models/monsters/werewolf.gif" width="120" alt="Werewolf" title="Werewolf" />
+<img src="./docs/media/models/monsters/zombie.gif" width="120" alt="Zombie" title="Zombie" />
+</p>
+
+<p align="center">
 <img src="./docs/media/blood.jpg" />
 </p>
+
+
+<p align="center">
+<img src="./docs/media/models/buildables/altar.gif" width="120" alt="Altar" title="Altar" />
+<img src="./docs/media/models/buildables/bloodforge.gif" width="120" alt="Bloodforge" title="Bloodforge" />
+<img src="./docs/media/models/buildables/effigy.gif" width="120" alt="Effigy" title="Effigy" />
+<img src="./docs/media/models/buildables/cauldron.gif" width="120" alt="Cauldron" title="Cauldron" />
+</p>
+
 <p align="center">
 <img src="./docs/media/base.jpg" />
 </p>
+
+<p align="center">
+<img src="./docs/media/models/buildables/ballista.gif" width="120" alt="Ballista" title="Ballista" />
+<img src="./docs/media/models/buildables/iron-spikes.gif" width="120" alt="Iron spikes" title="Iron spikes" />
+<img src="./docs/media/models/buildables/swiper.gif" width="120" alt="Swiper" title="Swiper" />
+<img src="./docs/media/models/buildables/palisade.gif" width="120" alt="Palisade" title="Palisade" />
+</p>
+
 <p align="center">
 <img src="./docs/media/knowledge.jpg" />
 </p>
+
+<p align="center">
+<img src="./docs/media/models/buildables/research-table.gif" width="120" alt="Research table" title="Research table" />
+<img src="./docs/media/models/buildables/furnace.gif" width="120" alt="Furnace" title="Furnace" />
+<img src="./docs/media/models/buildables/sawmill.gif" width="120" alt="Sawmill" title="Sawmill" />
+<img src="./docs/media/models/buildables/stash.gif" width="120" alt="Stash" title="Stash" />
+</p>
+
 <p align="center">
 <img src="./docs/media/automation.jpg" />
 </p>
 
-## The cast
-
-#### The horde
-
 <p align="center">
-<img src="./docs/media/models/monsters/bloater.gif" width="120" alt="Bloater" title="Bloater" />
-<img src="./docs/media/models/monsters/brute.gif" width="120" alt="Brute" title="Brute" />
-<img src="./docs/media/models/monsters/demon.gif" width="120" alt="Demon" title="Demon" />
-<img src="./docs/media/models/monsters/ghost.gif" width="120" alt="Ghost" title="Ghost" />
-<img src="./docs/media/models/monsters/ghoul.gif" width="120" alt="Ghoul" title="Ghoul" />
-<img src="./docs/media/models/monsters/necromancer.gif" width="120" alt="Necromancer" title="Necromancer" />
-<img src="./docs/media/models/monsters/skeleton.gif" width="120" alt="Skeleton" title="Skeleton" />
-<img src="./docs/media/models/monsters/vampire.gif" width="120" alt="Vampire" title="Vampire" />
-<img src="./docs/media/models/monsters/werewolf.gif" width="120" alt="Werewolf" title="Werewolf" />
-<img src="./docs/media/models/monsters/witch.gif" width="120" alt="Witch" title="Witch" />
-<img src="./docs/media/models/monsters/zombie.gif" width="120" alt="Zombie" title="Zombie" />
-</p>
-
-#### Weapons and armor
-
-<p align="center">
-<img src="./docs/media/models/gear/battle-axe.gif" width="120" alt="Battle axe" title="Battle axe" />
-<img src="./docs/media/models/gear/blood-gun.gif" width="120" alt="Blood gun" title="Blood gun" />
-<img src="./docs/media/models/gear/bone-armor.gif" width="120" alt="Bone armor" title="Bone armor" />
-<img src="./docs/media/models/gear/bow.gif" width="120" alt="Bow" title="Bow" />
-<img src="./docs/media/models/gear/crossbow.gif" width="120" alt="Crossbow" title="Crossbow" />
-<img src="./docs/media/models/gear/femur.gif" width="120" alt="Femur" title="Femur" />
-<img src="./docs/media/models/gear/flail.gif" width="120" alt="Flail" title="Flail" />
-<img src="./docs/media/models/gear/glaive.gif" width="120" alt="Glaive" title="Glaive" />
-<img src="./docs/media/models/gear/greatsword.gif" width="120" alt="Greatsword" title="Greatsword" />
-<img src="./docs/media/models/gear/hammer.gif" width="120" alt="Hammer" title="Hammer" />
-<img src="./docs/media/models/gear/infused-hammer.gif" width="120" alt="Infused hammer" title="Infused hammer" />
-<img src="./docs/media/models/gear/morning-star.gif" width="120" alt="Morning star" title="Morning star" />
-<img src="./docs/media/models/gear/musket.gif" width="120" alt="Musket" title="Musket" />
-<img src="./docs/media/models/gear/plate.gif" width="120" alt="Plate" title="Plate" />
-<img src="./docs/media/models/gear/quarterstaff.gif" width="120" alt="Quarterstaff" title="Quarterstaff" />
-<img src="./docs/media/models/gear/repeating-crossbow.gif" width="120" alt="Repeating crossbow" title="Repeating crossbow" />
-<img src="./docs/media/models/gear/ritual-knife.gif" width="120" alt="Ritual knife" title="Ritual knife" />
-<img src="./docs/media/models/gear/scythe.gif" width="120" alt="Scythe" title="Scythe" />
-<img src="./docs/media/models/gear/shield.gif" width="120" alt="Shield" title="Shield" />
-<img src="./docs/media/models/gear/short-sword.gif" width="120" alt="Short sword" title="Short sword" />
-<img src="./docs/media/models/gear/shovel.gif" width="120" alt="Shovel" title="Shovel" />
-<img src="./docs/media/models/gear/spear.gif" width="120" alt="Spear" title="Spear" />
-<img src="./docs/media/models/gear/spiked-gauntlet.gif" width="120" alt="Spiked gauntlet" title="Spiked gauntlet" />
-<img src="./docs/media/models/gear/stake.gif" width="120" alt="Stake" title="Stake" />
-<img src="./docs/media/models/gear/stick.gif" width="120" alt="Stick" title="Stick" />
-<img src="./docs/media/models/gear/stone-armor.gif" width="120" alt="Stone armor" title="Stone armor" />
-<img src="./docs/media/models/gear/torch.gif" width="120" alt="Torch" title="Torch" />
-<img src="./docs/media/models/gear/warhammer.gif" width="120" alt="Warhammer" title="Warhammer" />
-<img src="./docs/media/models/gear/wood-armor.gif" width="120" alt="Wood armor" title="Wood armor" />
-<img src="./docs/media/models/gear/wrench.gif" width="120" alt="Wrench" title="Wrench" />
-</p>
-
-#### Buildables
-
-<p align="center">
-<img src="./docs/media/models/buildables/altar.gif" width="120" alt="Altar" title="Altar" />
-<img src="./docs/media/models/buildables/anvil.gif" width="120" alt="Anvil" title="Anvil" />
-<img src="./docs/media/models/buildables/ballista.gif" width="120" alt="Ballista" title="Ballista" />
-<img src="./docs/media/models/buildables/barbed-wire.gif" width="120" alt="Barbed wire" title="Barbed wire" />
-<img src="./docs/media/models/buildables/bell.gif" width="120" alt="Bell" title="Bell" />
 <img src="./docs/media/models/buildables/belt.gif" width="120" alt="Belt" title="Belt" />
-<img src="./docs/media/models/buildables/blood-fountain.gif" width="120" alt="Blood fountain" title="Blood fountain" />
-<img src="./docs/media/models/buildables/bloodforge.gif" width="120" alt="Bloodforge" title="Bloodforge" />
-<img src="./docs/media/models/buildables/bolt-turret.gif" width="120" alt="Bolt turret" title="Bolt turret" />
-<img src="./docs/media/models/buildables/bone-wall.gif" width="120" alt="Bone wall" title="Bone wall" />
-<img src="./docs/media/models/buildables/campfire.gif" width="120" alt="Campfire" title="Campfire" />
-<img src="./docs/media/models/buildables/cauldron.gif" width="120" alt="Cauldron" title="Cauldron" />
-<img src="./docs/media/models/buildables/coffin.gif" width="120" alt="Coffin" title="Coffin" />
-<img src="./docs/media/models/buildables/digger.gif" width="120" alt="Digger" title="Digger" />
-<img src="./docs/media/models/buildables/door.gif" width="120" alt="Door" title="Door" />
-<img src="./docs/media/models/buildables/effigy.gif" width="120" alt="Effigy" title="Effigy" />
-<img src="./docs/media/models/buildables/flamethrower.gif" width="120" alt="Flamethrower" title="Flamethrower" />
-<img src="./docs/media/models/buildables/furnace.gif" width="120" alt="Furnace" title="Furnace" />
-<img src="./docs/media/models/buildables/ghost-lamp.gif" width="120" alt="Ghost lamp" title="Ghost lamp" />
-<img src="./docs/media/models/buildables/iron-spikes.gif" width="120" alt="Iron spikes" title="Iron spikes" />
-<img src="./docs/media/models/buildables/lantern.gif" width="120" alt="Lantern" title="Lantern" />
-<img src="./docs/media/models/buildables/obelisk.gif" width="120" alt="Obelisk" title="Obelisk" />
-<img src="./docs/media/models/buildables/oven.gif" width="120" alt="Oven" title="Oven" />
-<img src="./docs/media/models/buildables/palisade.gif" width="120" alt="Palisade" title="Palisade" />
-<img src="./docs/media/models/buildables/platform.gif" width="120" alt="Platform" title="Platform" />
-<img src="./docs/media/models/buildables/quarry.gif" width="120" alt="Quarry" title="Quarry" />
-<img src="./docs/media/models/buildables/research-table.gif" width="120" alt="Research table" title="Research table" />
-<img src="./docs/media/models/buildables/sawmill.gif" width="120" alt="Sawmill" title="Sawmill" />
-<img src="./docs/media/models/buildables/scarecrow.gif" width="120" alt="Scarecrow" title="Scarecrow" />
-<img src="./docs/media/models/buildables/seeds.gif" width="120" alt="Seeds" title="Seeds" />
-<img src="./docs/media/models/buildables/sentry.gif" width="120" alt="Sentry" title="Sentry" />
 <img src="./docs/media/models/buildables/sifter.gif" width="120" alt="Sifter" title="Sifter" />
 <img src="./docs/media/models/buildables/sorter.gif" width="120" alt="Sorter" title="Sorter" />
-<img src="./docs/media/models/buildables/soul-cage.gif" width="120" alt="Soul cage" title="Soul cage" />
-<img src="./docs/media/models/buildables/soul-fire.gif" width="120" alt="Soul fire" title="Soul fire" />
-<img src="./docs/media/models/buildables/spikes.gif" width="120" alt="Spikes" title="Spikes" />
-<img src="./docs/media/models/buildables/sprout.gif" width="120" alt="Sprout" title="Sprout" />
-<img src="./docs/media/models/buildables/stash.gif" width="120" alt="Stash" title="Stash" />
-<img src="./docs/media/models/buildables/steps.gif" width="120" alt="Steps" title="Steps" />
-<img src="./docs/media/models/buildables/stone-wall.gif" width="120" alt="Stone wall" title="Stone wall" />
-<img src="./docs/media/models/buildables/swiper.gif" width="120" alt="Swiper" title="Swiper" />
-<img src="./docs/media/models/buildables/torch.gif" width="120" alt="Torch" title="Torch" />
-<img src="./docs/media/models/buildables/wood-fence.gif" width="120" alt="Wood fence" title="Wood fence" />
-<img src="./docs/media/models/buildables/wood-wall.gif" width="120" alt="Wood wall" title="Wood wall" />
-</p>
-
-#### Materials and loot
-
-<p align="center">
-<img src="./docs/media/models/materials/arrows.gif" width="120" alt="Arrows" title="Arrows" />
-<img src="./docs/media/models/materials/blood.gif" width="120" alt="Blood" title="Blood" />
-<img src="./docs/media/models/materials/bloodsteel.gif" width="120" alt="Bloodsteel" title="Bloodsteel" />
-<img src="./docs/media/models/materials/bolts.gif" width="120" alt="Bolts" title="Bolts" />
-<img src="./docs/media/models/materials/bone.gif" width="120" alt="Bone" title="Bone" />
-<img src="./docs/media/models/materials/brimstone.gif" width="120" alt="Brimstone" title="Brimstone" />
-<img src="./docs/media/models/materials/brute-tendon.gif" width="120" alt="Brute tendon" title="Brute tendon" />
-<img src="./docs/media/models/materials/candy.gif" width="120" alt="Candy" title="Candy" />
-<img src="./docs/media/models/materials/chain.gif" width="120" alt="Chain" title="Chain" />
-<img src="./docs/media/models/materials/cursed-core.gif" width="120" alt="Cursed core" title="Cursed core" />
-<img src="./docs/media/models/materials/ectoplasm.gif" width="120" alt="Ectoplasm" title="Ectoplasm" />
-<img src="./docs/media/models/materials/ghoul-fang.gif" width="120" alt="Ghoul fang" title="Ghoul fang" />
-<img src="./docs/media/models/materials/hex-shard.gif" width="120" alt="Hex shard" title="Hex shard" />
-<img src="./docs/media/models/materials/holy-water.gif" width="120" alt="Holy water" title="Holy water" />
-<img src="./docs/media/models/materials/iron.gif" width="120" alt="Iron" title="Iron" />
-<img src="./docs/media/models/materials/planks.gif" width="120" alt="Planks" title="Planks" />
-<img src="./docs/media/models/materials/pumpkin.gif" width="120" alt="Pumpkin" title="Pumpkin" />
-<img src="./docs/media/models/materials/silver.gif" width="120" alt="Silver" title="Silver" />
-<img src="./docs/media/models/materials/stone.gif" width="120" alt="Stone" title="Stone" />
-<img src="./docs/media/models/materials/tonic.gif" width="120" alt="Tonic" title="Tonic" />
-<img src="./docs/media/models/materials/watering-can.gif" width="120" alt="Watering can" title="Watering can" />
-<img src="./docs/media/models/materials/wood.gif" width="120" alt="Wood" title="Wood" />
+<img src="./docs/media/models/buildables/oven.gif" width="120" alt="Oven" title="Oven" />
 </p>
 
 # Setup
