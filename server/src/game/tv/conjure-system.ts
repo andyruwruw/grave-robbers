@@ -1,10 +1,11 @@
 // Packages
 import { isMonsterKind } from '@halloween/shared/monsters/monster-kinds';
-import { SPAWN_KINDS } from '@halloween/shared/protocol/tv-tools';
+import { GIVE_GEAR_MAX, GIVE_KINDS, GIVE_MAX, SPAWN_KINDS } from '@halloween/shared/protocol/tv-tools';
 import { gearWear } from '@halloween/shared/skill-tree/upgrades/gear-upgrades';
 import { canBuildOn } from '@halloween/shared/structures/placement';
 
 // Local Imports
+import { freshItem } from '../building/helpers/fresh-item';
 import { NO_TREE } from '../config/loot';
 import { FREE_FLOORS } from './config/conjure';
 import { GameSystem } from '../core/game-system';
@@ -12,16 +13,54 @@ import { randomLoot } from '../helpers/loot-rolls';
 
 // Types
 import type { GearKind } from '@halloween/shared/gear/types/gear-def';
-import type { GearItem } from '@halloween/shared/inventory/bag-items';
-import type { SpawnKind, SpawnTile } from '@halloween/shared/protocol/tv-tools';
+import type { Material, Resource } from '@halloween/shared/goods/goods';
+import type { BagItem, GearItem } from '@halloween/shared/inventory/bag-items';
+import type { CraftKey } from '@halloween/shared/inventory/item-keys';
+import type { GiveKind, SpawnKind, SpawnTile } from '@halloween/shared/protocol/tv-tools';
 import type { StructureKind } from '@halloween/shared/structures/types/structures';
 import type { Player } from '../players/player';
 
 /**
  * The TV's Game tab and the admin's Spawn page conjuring things onto the
- * map, or killing every monster.
+ * map, or killing every monster, and the admin's Give page handing
+ * players things.
  */
 export class ConjureSystem extends GameSystem {
+  /**
+   * Gives a player (by public id) up to GIVE_MAX of something (GIVE_GEAR_MAX
+   * of gear): candy and
+   * blood always fit, everything else goes into the bag (gear made with
+   * their tree, as if crafted), and what doesn't fit drops at their feet.
+   * @param id The player's public id.
+   * @param kind What to give.
+   * @param count How many.
+   */
+  give(id: string, kind: GiveKind, count: number): void {
+    const p = [...this.players.values()].find((other: Player): boolean => other.id === id);
+    if (!p || !GIVE_KINDS.includes(kind) || !Number.isInteger(count) || count < 1) {
+      return;
+    }
+    const n = Math.min(count, kind.startsWith('gear:') ? GIVE_GEAR_MAX : GIVE_MAX);
+    const items: BagItem[] = kind.startsWith('res:')
+      ? []
+      : kind.startsWith('mat:')
+        ? [{ material: kind.slice(4) as Material, count: n }]
+        : kind.startsWith('build:')
+          ? [{ build: kind.slice(6) as StructureKind, count: n }]
+          : Array.from({ length: n }, (): BagItem => freshItem(kind as CraftKey, p.tree));
+    if (kind.startsWith('res:')) {
+      this._game.bag.take(p, kind.slice(4) as Resource, n);
+    }
+    for (const item of items) {
+      const left = this._game.bag.store(p, item, false);
+      if (left) {
+        this._game.drops.dropAt(p.x, p.y, left);
+      }
+    }
+    this.outbox.inventoryChanged.add(p.token);
+    this.outbox.sound(p, 'pickup');
+  }
+
   /**
    * Conjures something: a tree, pumpkin, chest, or rock, a random piece of
    * loot, a piece of gear, a monster, or a structure. Without `at` it goes

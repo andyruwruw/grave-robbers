@@ -2,7 +2,7 @@
 import { useEffect, useRef } from 'react';
 
 // Local Imports
-import { SCENIC_ABERRATION, SCENIC_FADE_MS, SCENIC_FOG } from '../config/tv';
+import { SCENIC_ABERRATION, SCENIC_FADE_MS, SCENIC_FOG, SCENIC_PIXELATION } from '../config/tv';
 
 // Types
 import type React from 'react';
@@ -11,9 +11,9 @@ import type { WorldRenderer } from '@halloween/renderer/world/world-renderer';
 
 /**
  * Fades the TV into a more scenic look while Incognito shows the music:
- * chromatic aberration and ground fog ease up to SCENIC_ABERRATION and
- * SCENIC_FOG over SCENIC_FADE_MS, and back down to the TV's own settings
- * when it hides.
+ * chromatic aberration, ground fog, and pixelation ease up to
+ * SCENIC_ABERRATION, SCENIC_FOG, and SCENIC_PIXELATION over SCENIC_FADE_MS,
+ * and back down to the TV's own settings when it hides.
  *
  * @param on - Whether the music screen is showing.
  * @param base - The TV's display settings.
@@ -38,7 +38,10 @@ export function useScenicLook(on: boolean, base: DisplaySettings, all: (f: (rend
       level.current = target > level.current ? Math.min(target, level.current + move) : Math.max(target, level.current - move);
       const k = level.current * level.current * (3 - 2 * level.current);
       look.current = { ...base, aberration: base.aberration + (SCENIC_ABERRATION - base.aberration) * k, fog: base.fog + (SCENIC_FOG - base.fog) * k };
-      all((renderer: WorldRenderer): void => renderer.setDisplaySettings(look.current));
+      all((renderer: WorldRenderer): void => {
+        renderer.setDisplaySettings(look.current);
+        renderer.setPixelBoost(1 + (SCENIC_PIXELATION - 1) * k);
+      });
       if (level.current !== target) {
         frame = requestAnimationFrame(step);
       }

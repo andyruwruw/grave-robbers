@@ -38,10 +38,31 @@ interface PlaylistPickerProps {
 }
 
 /**
+ * Room (px) the menu keeps from the window's edge.
+ */
+const EDGE = 12;
+
+/**
+ * Where the menu opens: below its button, or above it when there's more
+ * room there and too little below, always kept inside the window (its list
+ * scrolls for the rest).
+ * @param at The button's box.
+ * @returns The menu's position and size.
+ */
+function menuPlace(at: DOMRect): React.CSSProperties {
+  const below = window.innerHeight - at.bottom - EDGE;
+  const above = at.top - EDGE;
+  return below >= 240 || below >= above
+    ? { left: at.left, width: at.width, top: at.bottom + 4, maxHeight: below - 4 }
+    : { left: at.left, width: at.width, bottom: window.innerHeight - at.top + 4, maxHeight: above - 4 };
+}
+
+/**
  * Picks one of the linked account's playlists: the chosen one with its
  * cover, opening a menu over the page (it doesn't push anything down) with
- * a search box and every playlist with its cover. Closes on a pick, a
- * click outside, Escape, or scrolling.
+ * a search box and every playlist with its cover, below the button or
+ * above it near the bottom of the screen (`menuPlace`). Closes on a pick,
+ * a click outside, Escape, or scrolling.
  *
  * @param {PlaylistPickerProps} props - Component props.
  * @returns {React.JSX.Element} The rendered picker.
@@ -134,7 +155,7 @@ function PlaylistPicker({
         <div
           ref={menu}
           className='fixed z-50 flex flex-col overflow-hidden rounded-md border border-border bg-background shadow-[0_12px_40px_rgba(0,0,0,0.6)]'
-          style={{ left: open.left, top: open.bottom + 4, width: open.width, maxHeight: Math.max(160, window.innerHeight - open.bottom - 12) }}>
+          style={menuPlace(open)}>
           <label className='flex items-center gap-xsm border-b border-border px-sm py-xsm text-foreground-muted'>
             <Search
               size={14}

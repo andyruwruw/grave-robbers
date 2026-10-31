@@ -77,6 +77,12 @@ export interface MeleeTricks {
   harvest?: number;
 
   /**
+   * A wrench's share of a structure's full health one swing mends (see
+   * `RepairJob`).
+   */
+  repair?: number;
+
+  /**
    * Multiplies damage to targets past TIP_FROM of its reach.
    */
   tip?: number;

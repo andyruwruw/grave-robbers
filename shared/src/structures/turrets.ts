@@ -28,6 +28,12 @@ export const SENTRY_COOLDOWN = 1.2;
 export const SENTRY_DAMAGE = 3;
 
 /**
+ * Chance per upgrade that a turret's shot spends no ammo (see
+ * `turretThrift`).
+ */
+export const TURRET_THRIFT_PER_LEVEL = 0.15;
+
+/**
  * Every turret's stats, weakest to strongest (the phone lists them in this
  * order).
  */

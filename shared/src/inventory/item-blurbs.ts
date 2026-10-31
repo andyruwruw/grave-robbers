@@ -17,6 +17,7 @@ export const GEAR_BLURBS: Record<GearKind, string> = {
   'battle-axe': 'A slow, heavy chop that bites harder for every extra monster caught in it.',
   'scythe': 'The reaper\'s own tool. A wide, weak sweep around you that drags blood from the harvest.',
   'spear': 'Pokes from a safe distance, in a straight line and nowhere else.',
+  'wrench': 'Tightens bolts and nails boards back on. Barely a weapon.',
   'stake': 'Through the heart, and a vampire is dust. It splinters after a few swings.',
   'ritual-knife': 'Every cut that lands takes a little of your blood. Every kill gives it back.',
   'crossbow': 'Takes a breath to aim, then puts a bolt exactly where it should go. Vampires hate it.',

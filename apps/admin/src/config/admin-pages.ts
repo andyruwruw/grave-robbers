@@ -2,6 +2,7 @@
 import {
   BookOpen,
   Gamepad2,
+  Gift,
   Globe,
   LayoutGrid,
   Map,
@@ -20,6 +21,7 @@ export const ADMIN_PAGES: AdminPageInfo[] = [
   { id: 'players', label: 'Players', icon: Users },
   { id: 'gameplay', label: 'Gameplay', icon: Gamepad2 },
   { id: 'spawn', label: 'Spawn', icon: Skull },
+  { id: 'give', label: 'Give', icon: Gift },
   { id: 'catalogue', label: 'Item Catalogue', icon: BookOpen, wide: true },
   { id: 'tree', label: 'Knowledge Tree', icon: Network, wide: true },
   { id: 'map', label: 'Map', icon: Map },

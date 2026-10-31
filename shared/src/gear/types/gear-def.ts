@@ -15,7 +15,7 @@ export type GearSlot = 'weapon' | 'offhand' | 'armor';
 export type GearKind =
   | 'hammer' | 'wood-armor' | 'bone-armor' | 'stone-armor'
   | 'battle-axe' | 'scythe' | 'spear' | 'stake' | 'ritual-knife' | 'crossbow' | 'blood-gun' | 'torch' | 'shield' | 'plate'
-  | 'short-sword' | 'greatsword' | 'flail' | 'morning-star' | 'warhammer' | 'quarterstaff' | 'glaive' | 'spiked-gauntlet'
+  | 'short-sword' | 'greatsword' | 'flail' | 'morning-star' | 'warhammer' | 'quarterstaff' | 'glaive' | 'spiked-gauntlet' | 'wrench'
   | 'bow' | 'repeating-crossbow' | 'musket'
   | 'stick' | 'femur' | 'shovel'
   | 'infused-hammer';

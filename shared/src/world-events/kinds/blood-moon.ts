@@ -16,6 +16,7 @@ export const BLOOD_MOON: WorldEventDef = {
     { on: 'monster-power', scale: 1.25 },
     { on: 'monster-speed', scale: 1.12 },
     { on: 'monster-hunt' },
+    { on: 'raid', share: 0.75 },
     { on: 'blackout', within: 7, sputter: 1.4 },
     { on: 'sky', moon: '#ff7a66', ambient: [0.26, 0.09, 0.12], fog: '#6e3640', fogThicken: 0.6 },
     { on: 'eyes', color: '#ff2414' },

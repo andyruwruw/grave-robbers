@@ -1,6 +1,6 @@
 # TV display
 
-The TV is `/tv`, the `apps/tv` app. The three.js scene lives in plain TS classes in `packages/renderer`, fed snapshots directly (not through React state), and the sidebar's controls in `packages/controls`, both shared with the admin console ([admin.md](admin.md)). The TV shows only the map, the kill feed, and a small faded join QR.
+The TV is `/tv`, the `apps/tv` app. The three.js scene lives in plain TS classes in `packages/renderer`, fed snapshots directly (not through React state), and the sidebar's controls in `packages/controls`, both shared with the admin console ([admin.md](admin.md)). The TV shows only the map, the kill feed, and a faint join QR in the bottom-left corner (`JoinPanel`: 60px at 35% opacity on a soft dark glow, no box or label; hover brightens it). It's meant to be found, not advertised.
 
 - **Display settings:** the TV holds its own `DisplaySettings` (`DEFAULT_DISPLAY_SETTINGS`, with no menu to change them) and gives them to every split-screen pane's renderer with `setDisplaySettings`, with no player of its own (`setLocalPlayer(null)`, `PaneGrid`).
 - **Overlay:** when its Show TPS, Show FPS, or Show server ticks flags are on, `PerfOverlay` (`packages/controls/src/components/hud/perf-overlay.tsx`) shows the server's ticks per second, the first pane's frames per second, and ms per server tick under the sidebar's corner, refreshed once a second (`usePerfReadout`), not per snapshot. The admin console and /play use the same overlay.
@@ -192,6 +192,7 @@ Hover the top-right corner and click the chevron. Clicking outside closes it. Th
 
 - `GameSettings` are held by `Game`, sent back in every state message, and not saved.
 - All unlocks and Free crafting apply per player through `GameTabSystem.treeOf`. Free crafting also needs no anvil: anvil recipes and infusions work anywhere, as if beside a level 0 anvil (`CraftSystem.craft` and `infuse`; on the phone, `useCraftSelection`, `levelState`, and the details' anvil note).
+- Free crafting also makes candy and blood unlimited (`BagSystem.unlimited`): upgrades, blood ammo, the flamethrower, and watering cost none (`BagSystem.has` and `pay`), and phones are told `UNLIMITED` (999999) of each (`ViewSystem.carried`), which the counters show as ∞ (`InventoryBar`). The real counts are never touched, so turning it off gives players back exactly what they had. Dropping and dying still use the real counts.
 - Daytime only changes the TV's look.
 - Spawns use `ConjureSystem.spawn` (`Regrowth.spawnTile`, `Horde.summon`), inside the preset's `view` if it has one. Each button shows the thing's own 3D model (`itemIconUrl`: `tile:` and `monster:` icon keys besides gear). On the TV a click spawns at a random spot; the admin's Spawn page picks instead and can place it (`spawn` with `at`: right on the clicked tile past the usual rules, never on top of something; see [admin.md](admin.md#pages). `Horde.summonAt`, `BuildSystem.conjure` with `anyway`, `FREE_FLOORS` in `server/src/game/tv/config/conjure.ts`).
 
@@ -214,7 +215,7 @@ Not while typing or in the map editor. The Game tab shows each letter beside its
 
 ### Incognito
 
-`apps/tv/src/components/incognito-screen.tsx` shows the album art, title, and artist over the live graveyard, hides the QR and kill feed, and mutes SFX. Off when the page opens. It's a mode: turned on (I, the music panel, a remote control), it shows only while no player is connected. It fades away as soon as one connects and comes back once all have left, as long as the mode is still on; Escape or the toggle turns the mode off (`incognitoMode` and `playersHere` in `display-page.tsx`). While the music shows, the graveyard behind it turns more scenic: chromatic aberration and ground fog ease up to 0.9 and 1 over the screen's 1.5s fade, and back to the TV's own settings when it hides (`useScenicLook`, `SCENIC_ABERRATION`, `SCENIC_FOG`, `SCENIC_FADE_MS`).
+`apps/tv/src/components/incognito-screen.tsx` shows the album art, title, and artist over the live graveyard, hides the kill feed, and mutes SFX; the join QR stays up so people can still jump in. Off when the page opens. It's a mode: turned on (I, the music panel, a remote control), it shows only while no player is connected. It fades away as soon as one connects and comes back once all have left, as long as the mode is still on; Escape or the toggle turns the mode off (`incognitoMode` and `playersHere` in `display-page.tsx`). While the music shows, the graveyard behind it turns more scenic: chromatic aberration eases up to 0.9, the ground fog to 1.7 (past the Fog setting's 0 to 1, a heavy mist), and the pixels to 1.8 times their size (`WorldRenderer.setPixelBoost`) over the screen's 1.5s fade, and back to the TV's own settings when it hides (`useScenicLook`, `SCENIC_ABERRATION`, `SCENIC_FOG`, `SCENIC_PIXELATION`, `SCENIC_FADE_MS`).
 
 ## Controllers on the TV
 

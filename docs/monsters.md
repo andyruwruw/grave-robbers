@@ -19,6 +19,8 @@ Stats live in `shared/src/monsters/` (`MONSTERS` in `monster-stats.ts`, each kin
 | Werewolf | 45 | 6 | 3.5 | 0.3s | 0.8s | 1.05, pounces from 2.2 to 5.5 | 16 | Shambler | 14 blood, 3 bones, 1 ghoul fang |
 
 - **Shamblers** (`isShambler`) chase, path with A* (built structures costed by their HP), and chew through what's in the way.
+  - **Scent:** after losing sight of a player, a shambler keeps going for where they really are for 25s while they stay within 22 tiles (`Shambler.scent`, `SCENT_SECONDS`, `SCENT_RADIUS`), so it follows them home and chews through their door and walls after them.
+  - **Raids:** in a blood moon, 75% of shamblers (picked by id, `EventModifiers.raid`) go for the nearest base structure within 50 tiles instead of the players (`Shambler.raid`, `raidTarget`, `RAID_TARGETS` in `server/src/game/horde/config/raid.ts`: tables, stations, fires, coffins, turrets, wards; never a storage chest), chewing through walls and doors on the way and repicking every 4s. A player within 5 tiles (`RAID_DISTRACT`) pulls a raider off to fight.
 - **Shadow walkers** (`isShadowWalker`) stay on dark tiles: they won't enter the brighter 75% of any light (`LIT_FRACTION`), wait at the edge, and dash in when a light dies.
 - **Burning monsters as lights:** a monster burning from Hell's Edge or Infernal Mandate (`burning.light`, `STATUS_GLOWING`) lights the tiles around it (`LightField.update` takes the roster; glows go in their own per-tile count, `_glow`). It's a light for every other monster, for spawning, and in the `lights` list, but not for itself: `LightField.isLit(tx, ty, self)` skips the asking monster's own glow, so a burning vampire or demon still hunts. Two burning shadow walkers side by side do light each other.
 - Health, damage, and blood all scale with the world level (see [difficulty.md](difficulty.md)).
@@ -151,18 +153,19 @@ stateDiagram-v2
 | Rule | Normal | Blood moon |
 |---|---|---|
 | Cap | 2 + 4 per living player (+ world level bonus), at most 60 | 2 + 7 per player |
-| Spawn interval | 4.5s | 1s |
+| Spawn interval | 4.5s, and never more than one walker every 6s anywhere on the server (`CALM_SPAWN_GAP`) | 1s (no server-wide limit) |
 | Ghosts | 1 per 3 burning built lights, at most one every 20s | 1 per 2 lights |
 
 - Monsters appear on dark tiles within 5 tiles of the map edge, at least 10 tiles from anyone.
 - **Mix:** each spawn rolls a kind by its weight (`spawnWeights`, see [difficulty.md](difficulty.md#spawn-weights-by-world-level)), but only among kinds still under their share of the cap (weight over total weight, times the cap, rounded up; `pickKind` in `horde/helpers/spawn-mix.ts`). Kinds that live longer (vampires keep up with players and shrug off blood weapons) can't crowd out the rest. At a small cap a rare kind still gets one slot, so one long-lived demon or witch can be a bigger share than its weight. Demons also stop at `MAX_DEMONS` (2). A zombie when every kind is full.
 - With nobody playing, 10 zombies keep wandering so the TV is never empty.
-- **Huge worlds** (`Spawner.trickleNear`): every player has their own spawn clock and cap, so a player far from the rest still feels the horde.
+- **Huge worlds** (`Spawner.trickleNear`): every player has their own spawn clock and cap, so a player far from the rest still feels the horde. The server-wide 6s limit still holds, so many spread-out players share it.
+- **Calm limit** (`Spawner.calmAllows`): outside a world event that sets the pace, at most one walking monster spawns every 6s across the whole server, whatever the player count, world size, or world level.
   - Their cap counts the walkers within `PRESSURE_RADIUS` (30) tiles of them, and is 2 plus the per-player number for every player within that reach, them included.
   - Their clock runs at the interval times that many players, so a group together gets the same pace and cap as on a small map, and split up, each gets a solo player's.
   - The mix holds in the walkers around each player. `MAX_MONSTERS` (60) still holds across the world.
   - Each monster appears on a dark, open tile `SPAWN_MIN_DISTANCE` to `SPAWN_RING_MAX` (24) tiles from the player it comes for and no closer to anyone else (`Spawner.spawnNear`). One more than `DESPAWN_DISTANCE` (44) tiles from every player for `DESPAWN_AFTER` (8s) is removed (`Spawner.despawnStrays`). Nothing spawns, and no idle zombies wander, while nobody is playing.
-- **Blood moon:** a world event (see [world-events.md](world-events.md)). Rises after 8 to 12 minutes of play, lasts 90s, puts the built lights out, and while it's up every monster goes for the nearest player, hits 1.25x harder, and moves 1.12x faster, and werewolves join the mix (about 7% of spawns). The Game tab (or the B key on the TV) summons one.
+- **Blood moon:** a world event (see [world-events.md](world-events.md)). Rises after 8 to 12 minutes of play, lasts 90s, puts the built lights out, and while it's up most monsters swarm the nearest base and the rest go for the nearest player (see Raids above), they hit 1.25x harder, and moves 1.12x faster, and werewolves join the mix (about 7% of spawns). The Game tab (or the B key on the TV) summons one.
 
 - **Natural spawning** (`GameSettings.spawning`, the Game tab) stops the trickle, idle zombies, ghosts, the world event clocks, and regrowth. A `quiet` preset starts with it off.
 

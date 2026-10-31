@@ -73,12 +73,12 @@ A chest holds only raw goods (`CHEST_LOOT` in `shared/src/loot/chests.ts`, rolle
 - The phone's Craft list shows everything unlocked; tap one, pick a count (up to what you can afford), press Craft.
 - What's made goes into the bag; costs come out of the bag and pockets.
 - **Parts:** some structures build gear in (`StructureDef.parts`, `recipeParts`): the bolt turret and ballista each use up a crossbow. It must be a plain (uninfused) one in the bag, not in hand (`partsCount`, `CraftSystem.craft`). Cost rows show it with the materials, red when you don't carry it.
-- **Prices** are set so a base takes a grind: walls and doors 4 wood, spikes 5 wood and 2 stone, a campfire 12 wood and 12 stone. Every turret needs iron, and the stronger ones (flamethrower, ballista, blood sentry) silver too; the flamethrower also needs brimstone, which only demons drop.
+- **Prices** are set so a base takes a grind: walls and doors 4 wood, spikes 5 wood and 2 stone, a campfire 12 wood and 12 stone. Every turret needs iron, and the stronger ones (flamethrower, ballista, blood sentry) silver too; the flamethrower also needs brimstone, which only demons drop. The anvil (36 iron, 30 stone, 10 planks, behind Furnace Lv 2) is meant to take a lone player past the 15 minute mark, and everything past it (anvil gear, automation, turrets, infusions) costs a lot more.
 - **Material recipes** (`MAT_RECIPES`) make a stack of a material:
 
 | Recipe | Cost | Makes | Opens with | Anvil |
 |---|---|---|---|---|
-| Arrows | 1 wood | 4 | start | |
+| Arrows | 1 wood | 3 | start | |
 | Bolts | 1 wood | 3 | CrossBones (`opens`) | |
 | Chain | 2 iron | 1 | Anvil | yes |
 | Cursed core | 1 bloodsteel, 1 silver | 1 | Anvil | yes |
@@ -91,7 +91,11 @@ A chest holds only raw goods (`CHEST_LOOT` in `shared/src/loot/chests.ts`, rolle
 
 ## Structures
 
-HP grows 30% per builder level. Each structure keeps its builder's level.
+HP grows 30% per builder level, or 50% for fortifications (everything on the Fortifications branch, turrets included: `structureHp`, `isFortification`, `FORTIFICATION_HP_PER_LEVEL`). Each structure keeps its builder's level.
+
+### Repairing
+
+The Wrench (6 wood, 4 stone, Fortifications branch after Wood wall Lv 1) mends structures. Its swing at any damaged structure (anyone's) restores a quarter of its full health (`repair` 0.25, +0.1 per Wrench upgrade) for one of the material its recipe uses most (`repairMaterial` in `shared/src/structures/repair.ts`: wood for a wood wall, stone for a stone wall, planks for a bolt turret). It's `RepairJob`, tried before any job that breaks a structure, so a wrench never knocks one down. A structure already whole, or no material to mend it with, buzzes. With a wrench out, facing a structure swings the wrench, not the hammer (`ActionSystem.act`).
 
 ### Fortifications
 
@@ -102,28 +106,29 @@ HP grows 30% per builder level. Each structure keeps its builder's level.
 | Door | 4 wood | 20 | Fence Lv 1 | Players pass, monsters don't (vampires smash it) |
 | Scarecrow | 10 wood, 2 stone, 5 blood, 5 candy | 30 | Fence Lv 1 | Decoy: zombies within 8 tiles go for it first |
 | Spikes | 5 wood, 2 stone | 15 | Fence Lv 1 | 2 dmg/s to monsters standing on it (+30% a level) |
-| Iron spikes | 2 iron, 4 wood, 2 stone | 30 | Spikes Lv 1 | Twice the damage |
+| Iron spikes | 4 iron, 6 wood, 2 stone | 30 | Spikes Lv 1 | Twice the damage |
 | Barbed wire | 4 wood, 1 iron | 20 | Spikes Lv 1 | Barely cuts; monsters slowed to 40%, players to 60% unharmed |
 | Platform | 6 wood | 25 | Wood wall Lv 1 | Wooden deck a level up, climbed by steps |
 | Steps | 3 wood | 15 | Wood wall Lv 1 | Ramp up to the highest tile beside it |
-| Palisade | 4 wood | 35 | Wood wall Lv 1 | Zombies that chew it take 1 damage a bite |
+| Palisade | 6 planks | 35 | Wood wall Lv 1 | Zombies that chew it take 1 damage a bite |
 | Stone wall | 6 stone | 50 | Palisade Lv 1 | |
 | Bone wall | 6 bone, 2 stone | 70 | Stone wall Lv 1 | |
 
 ### Turrets
 
-Weakest to strongest. Each acts on its own every `cooldown` against monsters in range (`TURRETS`, `TurretSystem.fireTurrets`, each firing through a `TurretFire`: `ShotTurretFire`, `SweepTurretFire`, `FlameTurretFire`), never hurts players, never targets a risen ally (Grave Fists, see [infusions.md](infusions.md)), and gives its kills to the nearest player like a trap. Damage grows 20% a level (`turretDamage`).
+Weakest to strongest. Each acts on its own every `cooldown` against monsters in range (`TURRETS`, `TurretSystem.fireTurrets`, each firing through a `TurretFire`: `ShotTurretFire`, `SweepTurretFire`, `FlameTurretFire`), never hurts players, never targets a risen ally (Grave Fists, see [infusions.md](infusions.md)), and gives its kills to the nearest player like a trap. Damage grows 20% a level (`turretDamage`), and each level gives a 15% chance that a shot spends no ammo (`turretThrift`, `TURRET_THRIFT_PER_LEVEL`, checked in `TurretAmmo.readyTurrets`).
 
 | Turret | Cost | HP | Unlock | Ammo | Does |
 |---|---|---|---|---|---|
-| Bolt turret | 6 planks, 4 iron, 1 crossbow | 25 | Spikes Lv 1 | 1 bolt a shot (holds 30) | Shoots the nearest monster within 6 tiles every 1.5s for 4.5 |
-| Sword swiper | 6 planks, 8 iron, 4 bone | 40 | Bolt turret Lv 1 | none | Blades sweep round every 1s, hitting every monster within 1.5 tiles for 3 |
-| Blood sentry | 1 cursed core, 6 iron, 2 silver, 4 bone, 4 planks | 30 | Blunderbuss Lv 1 | 1 blood for 3 shots (holds 30) | Shoots the nearest within 6 tiles every 1.2s for 3 |
-| Flamethrower | 8 iron, 6 stone, 4 planks, 1 silver, 1 brimstone | 35 | Bolt turret Lv 2 | 1 wood for 6 gouts (holds 48) | Every 0.35s, fire hits every monster within 3.5 tiles and 0.45 rad of the nearest for 0.7, and sets them burning (the same burn status as Enflamed weapons: 1.5 a second for 2s, `FLAME_BURN_SECONDS`, not ghosts) |
-| Ballista | 8 planks, 10 iron, 2 chain, 2 silver, 1 crossbow (anvil) | 45 | Bolt turret Lv 3 | 1 bolt a shot (holds 20) | A huge bolt at the nearest within 9 tiles every 2.5s for 18, piercing 3 more |
+| Bolt turret | 10 planks, 8 iron, 1 crossbow | 25 | Spikes Lv 1 | 1 bolt a shot (holds 30) | Shoots the nearest monster within 6 tiles every 1.5s for 4.5 |
+| Sword swiper | 10 planks, 14 iron, 6 bone | 40 | Bolt turret Lv 1 | none | Blades sweep round every 1s, hitting every monster within 1.5 tiles for 3 |
+| Blood sentry | 1 cursed core, 10 iron, 3 silver, 6 bone, 6 planks | 30 | Blunderbuss Lv 1 | 1 blood for 3 shots (holds 30) | Shoots the nearest within 6 tiles every 1.2s for 3 |
+| Flamethrower | 14 iron, 8 stone, 6 planks, 2 silver, 1 brimstone | 35 | Bolt turret Lv 2 | 1 wood for 6 gouts (holds 48) | Every 0.35s, fire hits every monster within 3.5 tiles and 0.45 rad of the nearest for 0.7, and sets them burning (the same burn status as Enflamed weapons: 1.5 a second for 2s, `FLAME_BURN_SECONDS`, not ghosts) |
+| Ballista | 12 planks, 16 iron, 4 chain, 3 silver, 1 crossbow (anvil) | 45 | Bolt turret Lv 3 | 1 bolt a shot (holds 20) | A huge bolt at the nearest within 9 tiles every 2.5s for 18, piercing 3 more |
 
 - **Loading:** USE on a turret spends one ammo from the bag (or pockets, for blood) for a load, if a whole load still fits (`TurretAmmo.load`).
 - **Feeding:** a turret also loads itself from piles within `STATION_REACH` (`TurretAmmo.tick`), so a conveyor belt ending at it keeps it stocked.
+- **Breaking:** a turret that breaks spills its loaded ammo on its tile as the goods it was loaded with (whole loads only), and, unless a player is taking it down to carry off, a fresh copy of the gear it was built with (the crossbow in a bolt turret or ballista) (`StructureDamage.salvage`).
 - Shooters fire real shots (bolts count as crossbow bolts, so holy x3 to vampires). Swipers and flamethrowers hit directly; the TV shows a whirl of blade glints or a gout of fire (`turret` events).
 
 ### Lights
@@ -151,10 +156,10 @@ Vampires won't enter the brighter 75% of any light. Pumpkins and lamp posts ligh
 | Furnace | 20 stone, 8 wood | 40 | Research table Lv 2 | 1 stone in, 1 iron every 6s |
 | Grave sifter | 12 wood, 8 planks | 25 | Furnace Lv 1 | 2 stone in, 1 silver every 7s |
 | Bone digger | 12 bone, 12 wood, 1 iron | 25 | Sawmill Lv 1 | Only goes on a grave (`DIGGER_FLOORS`). Digs it again every `DIGGER_SECONDS` (240s, about as long as a dug grave takes to fill; a third faster per level, twice as fast at Lv 3, `diggerSeconds`), turning up what digging the grave by hand would (`rollGrave`, no blueprints; about 2 bones a dig, so 1 bone a minute at Lv 3). It hands that to a station in reach or a belt leading away, else keeps it (`hoard`, up to `DIGGER_CAPACITY` 60 goods, then it stops digging). Its builder collects everything from its USE panel; broken, it spills its hoard for them alone. The grave under it can't be dug by hand until the digger is broken off, and a mound under it starts filling again |
-| Conveyor belt | 1 planks, 1 iron | 15 | Sawmill Lv 1 | Walkable; carries one thing to a tile the way it was laid, pulling from chests, diggers, and stations behind it (see [Automation](#automation)) |
-| Belt sorter | 2 planks, 1 iron | 15 | Conveyor belt Lv 1 | Walkable; a belt tile that sends the things you pick out other sides (see [Automation](#automation)) |
-| Quarry | 8 iron, 4 chain, 16 planks | 50 | Furnace Lv 2 | Takes nothing; cuts 1 stone every 30s for good (a station with an empty input, so it keeps its own queue full) |
-| Anvil | 12 iron, 12 stone | 50 | Furnace Lv 1 | Late gear and parts are crafted beside it (see [Crafting](#crafting)) |
+| Conveyor belt | 2 planks, 2 iron | 15 | Sawmill Lv 1 | Walkable; carries one thing to a tile the way it was laid, pulling from chests, diggers, and stations behind it (see [Automation](#automation)) |
+| Belt sorter | 4 planks, 3 iron | 15 | Conveyor belt Lv 1 | Walkable; a belt tile that sends the things you pick out other sides (see [Automation](#automation)) |
+| Quarry | 16 iron, 6 chain, 20 planks | 50 | Furnace Lv 2 | Takes nothing; cuts 1 stone every 30s for good (a station with an empty input, so it keeps its own queue full) |
+| Anvil | 36 iron, 30 stone, 10 planks | 50 | Furnace Lv 2 | Late gear and parts are crafted beside it (see [Crafting](#crafting)) |
 
 Stations work 50% faster per level and glow while working.
 
@@ -171,7 +176,7 @@ Stations work 50% faster per level and glow while working.
 | Witch's oven | 16 stone, 4 iron, 8 bone | 40 | Cauldron Lv 1 | 1 pumpkin, 2 bone, and 1 blood in, 4 candy every 10s |
 | Cursed obelisk | 8 stone, 4 bone | 60 | Effigy Lv 2 | Monsters within 4 tiles (+0.5 a level) take 25% more damage |
 | Silver bell | 2 silver, 1 wood, 1 ectoplasm | 20 | Grave sifter Lv 1 | Ghosts can't come within 3.5 tiles (+0.5 a level) |
-| Blood sentry | 1 cursed core, 6 iron, 2 silver, 4 bone, 4 planks | 30 | Blunderbuss Lv 1 | A turret (see [Turrets](#turrets)): 1 blood loads 3 shots (holds 30); shoots monsters within 6 tiles every 1.2s for 3 damage (+20% a level); never hits players |
+| Blood sentry | 1 cursed core, 10 iron, 3 silver, 6 bone, 6 planks | 30 | Blunderbuss Lv 1 | A turret (see [Turrets](#turrets)): 1 blood loads 3 shots (holds 30); shoots monsters within 6 tiles every 1.2s for 3 damage (+20% a level); never hits players |
 
 Glowing occult works are `GHOSTPROOF`.
 

@@ -13,13 +13,14 @@
 
 ## Pages
 
-The menu, titled "Admin Controls", has a button with an icon and a name per page (`ADMIN_PAGES` in `config/admin-pages.ts`: Players, Gameplay, Spawn, Item Catalogue, Knowledge Tree, Map, Worlds), and the server stats (`ServerStats`) pushed to the bottom of the panel.
+The menu, titled "Admin Controls", has a button with an icon and a name per page (`ADMIN_PAGES` in `config/admin-pages.ts`: Players, Gameplay, Spawn, Give, Item Catalogue, Knowledge Tree, Map, Worlds), and the server stats (`ServerStats`) pushed to the bottom of the panel.
 
 | Page | What it holds |
 |---|---|
 | Players | Players (`PlayerRoster`), then Follow (`components/follow-panel.tsx`: the whole map, the spawn on a huge world, or any player, and while following or on a huge world the TV view presets, `TV_VIEWS`), then Controllers (`ControllersPanel`) |
 | Gameplay | Manipulate (`ManipulateCard`: the difficulty, a stepped slider from Easy to Hardest (`DifficultyRow`, see [difficulty.md](difficulty.md#server-difficulty)), the world level, a button per world event, Kill all monsters, Destroy ground items (`clear-items`, `GroundItems.clear`), and how many trees, hedges, pumpkins, chests, and rocks the world keeps: the count now, then - and + around the target, shift for 10 (`StockTargets`, see [world.md](world.md#regrowth))), then Cheats (`CheatsCard`: every switch in `SWITCHES`, and daytime) |
 | Spawn | Objects, Monsters, Gear, and Buildables, each a button with the thing's own 3D model (`SpawnCard` picking mode), then Random Location, pinned to the bottom of the panel at any scroll |
+| Give | Hand a player things straight into their bag (`components/give-page.tsx`). Player picks who (the followed player first, else the first in the roster), Amount picks 1, 10, 50, or 99 (`GIVE_AMOUNTS` in `config/give.ts`), then Goods (candy, blood, every material), Gear, and Buildables each list a button per thing with its own 3D model (`GIVE_SECTIONS`). A click sends `give`. See [Giving](#giving) |
 | Map | Tabs (`ControlTabs`): New Map (regenerate on a preset or a random map, `NewMapPage`) and Map Editor, whose tab is open exactly while the editor is (`useMapEditor`, `MapEditor` over the world view, framing the whole map). Back or Escape closes the editor |
 | Item Catalogue | Dialog. Everything craftable, every recipe open, with the picked one's details (`components/catalog-panel.tsx`, from `RecipeList` and `ItemDetails`). View only: nothing is crafted |
 | Knowledge Tree | Dialog. The skill tree with every node open (`components/tree-viewer.tsx`, `TreePanel` embedded). With a mouse, details show on hover and the tree pans by dragging, as on /play |
@@ -39,6 +40,15 @@ The menu, titled "Admin Controls", has a button with an icon and a name per page
 - A ping over `INTERP_PING_MS` turns on interpolation, as on the TV.
 - No keyboard shortcuts besides WASD, no game controllers of its own, no sound.
 - **Display settings:** like every display it holds a `DisplaySettings` (`DEFAULT_DISPLAY_SETTINGS`, no menu to change them), given to its renderer with `setDisplaySettings` and no player of its own. The TPS, FPS, and server ticks overlay (`PerfOverlay`) shows in the world view's bottom right corner when those flags are on.
+
+## Giving
+
+`give` (`{ player, item, count }`, `GiveKind` and `GIVE_KINDS` in `shared/src/protocol/tv-tools.ts`) goes to `ConjureSystem.give` through the TV tools handler.
+
+- **Candy and blood** are added to the counters (`BagSystem.take`).
+- **Materials and buildables** go onto stacks in the bag (`BagSystem.store`), never into a hand.
+- **Gear** is made fresh with the player's own tree (`freshItem`, as if crafted), one bag slot each, at most `GIVE_GEAR_MAX` (20) a click. Infused-only gear isn't listed.
+- At most `GIVE_MAX` (999) a click. Whatever doesn't fit drops at the player's feet (`DropSystem.dropAt`). The phone plays the pickup sound.
 
 ## Worlds
 

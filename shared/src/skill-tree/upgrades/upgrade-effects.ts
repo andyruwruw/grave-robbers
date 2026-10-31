@@ -4,8 +4,9 @@ import { WEAPON_PERKS } from '../../gear/perks/weapon-perks';
 import { STEADY_SUPPLY } from '../../gear/ranged-rules';
 import { ANVIL_DISCOUNT_PER_LEVEL, STATIONS } from '../../structures/stations';
 import { STRUCTURES } from '../../structures/structure-catalog';
-import { TURRETS } from '../../structures/turrets';
+import { TURRET_THRIFT_PER_LEVEL, TURRETS } from '../../structures/turrets';
 import { RESEARCH_DISCOUNT_PER_LEVEL } from '../upgrade-cost';
+import { FORTIFICATION_HP_PER_LEVEL, isFortification, STRUCTURE_HP_PER_LEVEL } from './structure-upgrades';
 
 // Types
 import type { GearKind } from '../../gear/types/gear-def';
@@ -26,9 +27,9 @@ export const STRUCTURE_UPGRADE_EFFECTS: Partial<Record<StructureKind, string>> =
   'research-table': `Upgrades nearby cost ${Math.round(RESEARCH_DISCOUNT_PER_LEVEL * 100)}% less, +30% health`,
   'altar': 'Kills nearby bleed more, +30% health',
   'bell': 'Wider ward, +30% health',
-  'spikes': '+30% damage and health',
-  'iron-spikes': '+30% damage and health',
-  'barbed-wire': '+30% damage and health',
+  'spikes': `+30% damage, +${Math.round(FORTIFICATION_HP_PER_LEVEL * 100)}% health`,
+  'iron-spikes': `+30% damage, +${Math.round(FORTIFICATION_HP_PER_LEVEL * 100)}% health`,
+  'barbed-wire': `+30% damage, +${Math.round(FORTIFICATION_HP_PER_LEVEL * 100)}% health`,
   'effigy': 'Wider curse, +30% health',
   'obelisk': 'Wider curse, +30% health',
   'soul-cage': 'Reaches further, +30% health',
@@ -63,8 +64,10 @@ export function upgradeEffect(id: NodeId): string {
   if (effect) {
     return effect;
   }
-  if (TURRETS[what]) {
-    return '+20% damage, +30% health';
+  const health = `+${Math.round((isFortification(what) ? FORTIFICATION_HP_PER_LEVEL : STRUCTURE_HP_PER_LEVEL) * 100)}% health`;
+  const turret = TURRETS[what];
+  if (turret) {
+    return turret.ammo ? `+20% damage, ${Math.round(TURRET_THRIFT_PER_LEVEL * 100)}% more chance a shot spends no ammo, ${health}` : `+20% damage, ${health}`;
   }
-  return STRUCTURES[what].light ? 'Wider, brighter light, +30% health' : '+30% health';
+  return STRUCTURES[what].light ? `Wider, brighter light, ${health}` : health;
 }

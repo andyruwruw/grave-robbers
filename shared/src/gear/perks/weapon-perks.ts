@@ -22,6 +22,7 @@ export const WEAPON_PERKS: Partial<Record<GearKind, WeaponPerk>> = {
     stats.harvest = level;
   }),
   'battle-axe': new ScaledPerk('Heavy blows', '+20% damage', 'damage', 0.2, 'tenth'),
+  'wrench': new AddedPerk('Steady hands', 'mends 10% more a swing', 'repair', 0.1, 'hundredth'),
   'warhammer': new ScaledPerk('Heavy blows', '+20% damage', 'damage', 0.2, 'tenth'),
   'short-sword': new ScaledPerk('Relentless assault', 'swings 8% faster', 'cooldown', -0.08, 'hundredth'),
   'greatsword': new CustomPerk('Execution', '+25% damage to the badly wounded', (stats: WeaponStats, base: WeaponStats, level: number): void => {

@@ -39,12 +39,12 @@ Standard costs below. A variant row in [Weapons](#weapons) that lists its own co
 
 | Essence | Source | Per min at L15 | Level 1 | Level 2 | Minutes at L15 (L1 / L2) | Rarity |
 |---|---|---|---|---|---|---|
-| Holy water | Crafted: 1 silver + 4 blood (`MAT_RECIPES['holy-water']`), opened by the grave sifter node | about 2 (silver-bound) | 2 silver, 6 holy water | 4 silver, 12 holy water | 3 / 6 | Common |
-| Brute tendons | Brute, always 1 | 1.1 | 2 silver, 3 tendons | 4 silver, 6 tendons | 2.8 / 5.6 | Uncommon |
-| Ghoul fang | Ghoul, 35%; werewolf, always 1 (blood moon only) | 1.1 (more in a blood moon) | 2 silver, 3 fangs | 4 silver, 6 fangs | 2.7 / 5.4 | Uncommon |
-| Ectoplasm | Ghost, 1 (already drops) | about 1.5 | 2 silver, 4 ectoplasm | 4 silver, 8 ectoplasm | 2.7 / 5.3 | Uncommon (also spent on ghost lamps and bells) |
-| Hex shard | Witch, 50%; necromancer, always 1 | 1.3 | 2 silver, 3 shards | 4 silver, 6 shards | 2.3 / 4.7 | Rare (witches from about L5, necromancers from about L11) |
-| Brimstone | Demon, always 1 | 0.6 | 2 silver, 2 brimstone | 4 silver, 4 brimstone | 3.1 / 6.3 | Rarest (demons from about L9, 1% at L10) |
+| Holy water | Crafted: 1 silver + 4 blood (`MAT_RECIPES['holy-water']`), opened by the grave sifter node | about 2 (silver-bound) | 4 silver, 9 holy water | 8 silver, 18 holy water | 4.5 / 9 | Common |
+| Brute tendons | Brute, always 1 | 1.1 | 4 silver, 4 tendons | 8 silver, 9 tendons | 3.6 / 8.2 | Uncommon |
+| Ghoul fang | Ghoul, 35%; werewolf, always 1 (blood moon only) | 1.1 (more in a blood moon) | 4 silver, 4 fangs | 8 silver, 9 fangs | 3.6 / 8.2 | Uncommon |
+| Ectoplasm | Ghost, 1 (already drops) | about 1.5 | 4 silver, 6 ectoplasm | 8 silver, 12 ectoplasm | 4 / 8 | Uncommon (also spent on ghost lamps and bells) |
+| Hex shard | Witch, 50%; necromancer, always 1 | 1.3 | 4 silver, 4 shards | 8 silver, 9 shards | 3.1 / 6.9 | Rare (witches from about L5, necromancers from about L11) |
+| Brimstone | Demon, always 1 | 0.6 | 4 silver, 3 brimstone | 8 silver, 6 brimstone | 5 / 10 | Rarest (demons from about L9, 1% at L10) |
 
 Drops go to the killer (`MonsterSpoilsSystem`), so the minutes are for one player getting every drop; split across a group they stretch.
 
@@ -92,12 +92,12 @@ Every variant is its path's package at its level (see [Essence packages](#essenc
 | | Flesh-Sprung Maul | Tendons 2 | Infused hammer; arc widened to 200°, kicks up dust on the TV (`MAUL_DUST`) | 10.2 | about 15 in crowds |
 | | Enflamed Hammer | Brimstone 1 | Infused hammer; the package only | 10.1 | 10.6 |
 | | Hellfire Hammer | Brimstone 2 | Infused hammer; hits scorch the ground 4s (a 0.8-tile patch under each monster hit); zombies, brutes, ghouls standing in it keep burning | 12.0 | 13.1, more with ground fire |
-| **Spear** (2.7) | Ghoul Poker | Fang 1 | 20% chance to poison (0.5 a second for 4s) | 3.7 | down the whole line |
+| **Spear** (2.4) | Ghoul Poker | Fang 1 | 20% chance to poison (0.5 a second for 4s) | 3.7 | down the whole line |
 | | The Impaler | Fang 2 | Keeps the poison; a monster on the tip (past `TIP_FROM` of its reach) is pinned 1.5s and takes +50% from other players | 4.2 | team +50% on the pinned target |
 | **Short sword** (7.5) | Ephemeral Blade | Ecto 1 | The package only | 8.0 | skeletons 12, ghosts x4 |
 | | Phantom Edge | Ecto 2 | 20% chance to put the ghost's ecto slow on what it hits | 8.4 | skeletons 16.5, ghosts x6 |
-| | Silvered Shortsword | Holy 1 | x1.4 to vampires and ghouls instead of Blessed; costs 4 silver, 8 holy water | 8.3 | 10.5 |
-| | Moonsilver Saber | Holy 2 | The Blessed level 2 package (not Silvered's x1.4); faint light (radius 1); one-shots a vampire or ghoul, 12s recharge (the blade dims); costs 8 silver, 16 holy water | about 9.5 | about 3x vs vampires |
+| | Silvered Shortsword | Holy 1 | x1.4 to vampires and ghouls instead of Blessed; costs 6 silver, 12 holy water | 8.3 | 10.5 |
+| | Moonsilver Saber | Holy 2 | The Blessed level 2 package (not Silvered's x1.4); faint light (radius 1); one-shots a vampire or ghoul, 12s recharge (the blade dims); costs 12 silver, 24 holy water | about 9.5 | about 3x vs vampires |
 | **Ritual knife** (11.4) | Bloodletter | Hex 1 | Hits bleed (1 a second); bleeding kills heal double, and a bleed it opened feeds when it kills | 13.3 | |
 | | Heart Devourer | Hex 2 | Keeps the bleed (1 a second); kill heals past full become overheal, up to 2 hearts, gone 15s after the last top-up | 14.9 | plus overheal |
 | **Scythe** (3.5 per target) | Ghostreaper | Ecto 1 | The package only | 3.7 | ghosts x4 across the sweep |
@@ -126,7 +126,7 @@ Every variant is its path's package at its level (see [Essence packages](#essenc
 | | Archangel's Fists | Holy 2 | The super uppercut sends out a 3-tile holy nova that shoves demons 3 tiles, into the light | 9.4 | 19.8 |
 | | Plague Knuckles | Hex 1 | 25% chance a bleeding zombie turns on other monsters for 3s | 9.3 | about 9.9 in crowds |
 | | Grave Fists | Hex 2 | Keeps the turn; zombies that die from your bleed rise on your side for 3s | 10.7 | about 11 in crowds |
-| **Bow** (10) | Spirit Bow | Ecto 1 | Arrows slow by 30% for 2s | 5.9 | skeletons 9, ghosts x4 |
+| **Bow** (7.8) | Spirit Bow | Ecto 1 | Arrows slow by 30% for 2s | 5.9 | skeletons 9, ghosts x4 |
 | | Wraithstring | Ecto 2 | Keeps the slow; full-draw arrows pass through walls and cliffs | 6.3 | skeletons 12.3, ghosts x6 |
 | | Flame Bow | Brimstone 1 | The package only | 7.3 | 7.6 |
 | | Pyre Bow | Brimstone 2 | Arrows leave a trail of fire on the ground (0.5 tiles wide, 3s) | 8.8 | about 11 in crowds |
@@ -138,11 +138,11 @@ Every variant is its path's package at its level (see [Essence packages](#essenc
 | | Hellmouth | Brimstone 2 | Becomes a flamethrower: hold Action to spray a 3-tile cone (0.5 rad) for 6.5 a second plus the burn, 1 blood every 0.5s. The flame reaches the first 3 monsters in the cone; the 2nd and 3rd take half (the front ones block it) | 9.4 | 10.8 favored, about 21 vs a crowd |
 | **Musket** (11.1) | Ephemeral Musket | Ecto 1 | The shot passes through walls, structures, trees, cliffs, and anything else in the way | 10.9 | skeletons 17.8, ghosts x4 |
 | | Ghostlock | Ecto 2 | Also pierces every monster in its line out to 10 tiles | 11.6 | about 23 vs a line of 2 |
-| **Shield** | Mirror Shield | Silver only (4 silver) | A raised block sends back skeleton arrows, witch potions, and ghost ectoplasm, which then hurt only monsters. The only shield upgrade | about +1 while blocking | vs skeletons, witches, ghosts |
+| **Shield** | Mirror Shield | Silver only (8 silver) | A raised block sends back skeleton arrows, witch potions, and ghost ectoplasm, which then hurt only monsters. The only shield upgrade | about +1 while blocking | vs skeletons, witches, ghosts |
 | **Torch** | Brimstone Torch | Brimstone 1 | Light radius +60% (`lightMult` 1.6), no burn. The only torch upgrade | 0 | |
 | **Stake** | none | | Single use, so no infusions | | |
 
-- **Stale rows:** the spiked gauntlet, bow, CrossBones, and Rattlebones base damage went up (the numbers in brackets are current), but their variants' Mix and Best columns are still from before and run low by about the same share.
+- **Stale rows:** the spear, spiked gauntlet, bow, CrossBones, and Rattlebones base damage changed (the numbers in brackets are current), but their variants' Mix and Best columns are still from before and are off by about the same share.
 
 ### Design notes
 

@@ -8,6 +8,7 @@ import {
   GHOST_SPAWN_INTERVAL,
   IDLE_ZOMBIES,
   LIGHTS_PER_GHOST,
+  CALM_SPAWN_GAP,
   MAX_MONSTERS,
   MONSTERS_PER_PLAYER,
   PRESSURE_RADIUS,
@@ -43,6 +44,11 @@ export class Spawner<P extends Target> extends HordePart<P> {
    * clock is in `_nextNear`).
    */
   private _nextSpawnAt = 0;
+
+  /**
+   * When a walking monster last spawned anywhere (see CALM_SPAWN_GAP).
+   */
+  private _lastWalkerAt = -Infinity;
 
   /**
    * On a huge world, when the next monster may come around each player.
@@ -101,8 +107,9 @@ export class Spawner<P extends Target> extends HordePart<P> {
       this.trickleNear(world, present, level, interval, perPlayer);
     } else if (walkers >= cap) {
       this._nextSpawnAt = time + interval;
-    } else if (time >= this._nextSpawnAt) {
+    } else if (time >= this._nextSpawnAt && this.calmAllows(time)) {
       this._nextSpawnAt = time + interval;
+      this._lastWalkerAt = time;
       const out = [...this.roster.values()].filter((m: { kind: MonsterKind }): boolean => m.kind !== 'ghost');
       this.spawnAtEdge(idle ? 'zombie' : pickKind(level, cap, out, this.roster.count('demon'), this._horde.mods.spawnMix), world, present, level);
     }
@@ -144,13 +151,25 @@ export class Spawner<P extends Target> extends HordePart<P> {
       const next = this._nextNear.get(p) ?? time + wait;
       if (walkers.length >= MAX_MONSTERS * this._horde.loadScale || around.length >= cap) {
         this._nextNear.set(p, time + wait);
-      } else if (time >= next) {
+      } else if (time >= next && this.calmAllows(time)) {
         this._nextNear.set(p, time + wait);
+        this._lastWalkerAt = time;
         this.spawnNear(pickKind(level, cap, around, this.roster.count('demon'), this._horde.mods.spawnMix), world, present, level, p);
       } else {
         this._nextNear.set(p, next);
       }
     }
+  }
+
+  /**
+   * Whether a walking monster may spawn now: always while a world event
+   * sets the pace (a blood moon), else only CALM_SPAWN_GAP seconds after
+   * the last one anywhere.
+   * @param time The game clock.
+   * @returns True when one may come.
+   */
+  private calmAllows(time: number): boolean {
+    return this._horde.mods.spawning.interval !== null || time - this._lastWalkerAt >= CALM_SPAWN_GAP;
   }
 
   /**

@@ -172,12 +172,14 @@ export class CraftSystem extends GameSystem {
       return;
     }
     const cost = upgradeCost(node, p.tree, p.research);
-    if (cost === null || !nodeUnlocked(node, this._game.gameTab.treeOf(p)) || RESOURCES.some((r: Resource): boolean => p.inventory[r] < cost[r])) {
+    if (cost === null || !nodeUnlocked(node, this._game.gameTab.treeOf(p)) || RESOURCES.some((r: Resource): boolean => !this._game.bag.has(p, r, cost[r]))) {
       this.outbox.sound(p, 'error');
       return;
     }
-    for (const r of RESOURCES) {
-      p.inventory[r] -= cost[r];
+    if (!this._game.bag.unlimited) {
+      for (const r of RESOURCES) {
+        p.inventory[r] -= cost[r];
+      }
     }
     const before = TREE.filter((n: TreeNode): boolean => nodeUnlocked(n.id, p.tree));
     p.tree.levels[node] = levelOf(node, p.tree) + 1;

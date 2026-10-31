@@ -25,7 +25,7 @@ export class WateringJob extends TileJob {
    */
   tryStrike(p: Player, tx: number, ty: number, tile: Tile, chop: number): boolean {
     if ((tile === 'seeds' || tile === 'sprout') && p.count('watering-can') > 0) {
-      const grew = p.inventory.blood >= WATER_BLOOD ? this.world.gardens.water(tx, ty) : false;
+      const grew = this._game.bag.has(p, 'blood', WATER_BLOOD) ? this.world.gardens.water(tx, ty) : false;
       if (grew === true) {
         this._game.bag.pay(p, stock({ blood: WATER_BLOOD }));
         this.outbox.inventoryChanged.add(p.token);

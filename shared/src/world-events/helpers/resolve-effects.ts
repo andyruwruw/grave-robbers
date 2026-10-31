@@ -30,6 +30,7 @@ export function resolveEffects(events: EventWeight[]): EventModifiers {
     monsterPower: 1,
     monsterSpeed: 1,
     hunt: false,
+    raid: 0,
     sky: null,
     eyes: null,
     aberration: 0,
@@ -59,6 +60,8 @@ export function resolveEffects(events: EventWeight[]): EventModifiers {
         mods.monsterSpeed *= 1 + (e.scale - 1) * weight;
       } else if (e.on === 'monster-hunt') {
         mods.hunt = true;
+      } else if (e.on === 'raid') {
+        mods.raid = Math.max(mods.raid, e.share * weight);
       } else if (e.on === 'sky' && weight > (mods.sky?.amount ?? 0)) {
         mods.sky = { moon: e.moon, ambient: e.ambient, fog: e.fog, fogThicken: e.fogThicken, amount: weight };
       } else if (e.on === 'eyes' && weight > (mods.eyes?.amount ?? 0)) {

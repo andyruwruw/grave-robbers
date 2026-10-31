@@ -48,12 +48,13 @@ Standing within 2.5 tiles of a research table (`RESEARCH_RADIUS`) takes 25% off,
 | Weapons | Their own perk (see [weapons.md](weapons.md#tricks-and-upgrades)), applied before any infusion. The infused hammer has no node: it levels with the Hammer node (`weaponStats`). Infusing needs no node at all (see [infusions.md](infusions.md)); the Hellmouth's spray grows with Wider bore |
 | Armor and shield | Block 0.05 more (shield 0.03) |
 | Lights | 15% wider, 10% brighter, 30% more health |
+| Fortifications (walls, doors, fences, platforms, steps, scarecrow, traps, turrets) | 50% more health (`FORTIFICATION_HP_PER_LEVEL`) |
 | Other structures | 30% more health (new ones; a structure keeps its builder's level) |
 | Spikes, iron spikes, barbed wire | 30% more damage |
 | Stations | Half again as fast |
 | Bone digger | A third faster (twice as fast at level 3) |
 | Anvil | 15% off the parts and late gear crafted beside it, and off infusions done there |
-| Turrets (bolt turret, sword swiper, blood sentry, flamethrower, ballista) | +20% damage, +30% health |
+| Turrets (bolt turret, sword swiper, blood sentry, flamethrower, ballista) | +20% damage, +50% health, and those with ammo a 15% better chance a shot spends none (`turretThrift`) |
 | Blood fountain | Drains 30% faster (and pumps that much more blood) |
 | Research table | 10% more off upgrades nearby |
 | Altar | Kills near it while awake bleed +0.5x more |
@@ -116,6 +117,7 @@ flowchart TD
   Fence --> Door
   Fence --> Scarecrow
   Fence --> Spikes
+  Wall --> Wrench
   Wall --> Platform
   Wall --> Steps
   Wall --> Palisade --> Stone[Stone wall] --> Bone[Bone wall]
@@ -137,7 +139,7 @@ flowchart TD
   Table -->|Lv 2| Furnace --> Sifter[Grave sifter] --> Bell[Silver bell]
   Furnace -.-> Iron([Iron])
   Sifter -.-> Silver([Silver]) -.-> Holy([Holy water])
-  Furnace --> Anvil
+  Furnace -->|Lv 2| Anvil
   Anvil -.-> Chain([Chain])
   Anvil -.-> Core([Cursed core])
   Furnace -->|Lv 2| Quarry

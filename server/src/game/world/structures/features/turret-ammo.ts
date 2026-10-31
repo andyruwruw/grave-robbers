@@ -1,4 +1,5 @@
 // Packages
+import { turretThrift } from '@halloween/shared/skill-tree/upgrades/structure-upgrades';
 import { STATION_REACH } from '@halloween/shared/structures/stations';
 import { isStructure } from '@halloween/shared/structures/structure-catalog';
 import { TURRETS } from '@halloween/shared/structures/turrets';
@@ -49,7 +50,8 @@ export class TurretAmmo extends TickingFeature {
   /**
    * Every turret ready to act (loaded, if it takes ammo, and cooled
    * down): where it is, what it is, its builder's level, and a callback
-   * that spends a shot and sets when it may act again.
+   * that spends a shot (unless its upgrades spare it, `turretThrift`) and
+   * sets when it may act again.
    * @returns The ready turrets, in build order.
    */
   readyTurrets(): ReadyTurret[] {
@@ -66,7 +68,7 @@ export class TurretAmmo extends TickingFeature {
           kind: kind as StructureKind,
           level: s.level ?? 0,
           fire: (): void => {
-            if (def.ammo) {
+            if (def.ammo && Math.random() >= turretThrift(s.level ?? 0)) {
               s.ammo = (s.ammo ?? 1) - 1;
             }
             s.readyAt = this.clock.now + def.cooldown;

@@ -14,6 +14,7 @@ import {
   LEATHER,
   PALE_WOOD,
   RUST,
+  STEEL,
   WRAP,
 } from './config/palette';
 import { headOf } from './helpers/head-of';
@@ -272,6 +273,26 @@ export const buildShovel = (box: BoxFactory): GearModel => {
       box([0.05, 0.62, 0.05], [0, -0.3, 0], HANDLE),
       blade,
       box([0.08, 0.06, 0.032], [-0.02, -0.66, 0.02], RUST),
+      tip,
+    ],
+    tip,
+    flame: null,
+  };
+};
+
+/**
+ * The wrench: a wrapped grip, a steel shaft, and an open iron jaw.
+ * @param box Makes each box.
+ * @returns The model.
+ */
+export const buildWrench = (box: BoxFactory): GearModel => {
+  const tip = box([0.04, 0.11, 0.045], [0.06, -0.55, 0], IRON);
+  return {
+    parts: [
+      box([0.065, 0.16, 0.05], [0, -0.06, 0], LEATHER),
+      box([0.05, 0.36, 0.035], [0, -0.3, 0], STEEL),
+      box([0.17, 0.06, 0.05], [0, -0.48, 0], IRON),
+      box([0.04, 0.11, 0.045], [-0.06, -0.55, 0], IRON),
       tip,
     ],
     tip,

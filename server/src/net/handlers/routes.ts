@@ -74,6 +74,7 @@ export function buildRoutes(hub: ConnectionHub): RouteTable {
     'spawn': tvTools,
     'regrowth-target': tvTools,
     'clear-items': tvTools,
+    give: tvTools,
     'hello-controller': controllerSession,
     'join': controllerSession,
     'leave': controllerSession,

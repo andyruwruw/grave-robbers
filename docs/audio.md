@@ -82,5 +82,6 @@ flowchart TD
 ## Spotify
 
 - `mountSpotify` (`net/spotify/spotify-routes.ts`) does the OAuth code flow; `SpotifyAccount` keeps the refresh token in `server/data/spotify.json` (`SPOTIFY_SESSION_PATH`, `SPOTIFY_SAVE` overrides), or takes `SPOTIFY_REFRESH_TOKEN` (which wins). `spotify-playlists.ts` lists the account's playlists.
+- The TV reads a chosen playlist's songs from `/playlists/{id}/items` (`playlistTracks` in `packages/ui/src/audio/spotify/spotify-api.ts`). Spotify retired `/tracks` for apps in development mode in March 2026 (it answers 403) and moved each entry from `track` to `item`; both are read while Spotify sends both. In development mode Spotify only lists the songs of playlists the account owns or collaborates on, so a followed playlist (or one of Spotify's own) still answers 403.
 - `server/.env` holds `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`.
 - The TV only gets short-lived access tokens from `/api/spotify/token`. Vite proxies `/api` and `/auth`.

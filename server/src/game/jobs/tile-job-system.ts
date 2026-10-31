@@ -11,6 +11,7 @@ import { GatherJob } from './gather-job';
 import { GraveJob } from './grave-job';
 import { LampJob } from './lamp-job';
 import { PumpkinJob } from './pumpkin-job';
+import { RepairJob } from './repair-job';
 import { StashJob } from './stash-job';
 import { StructureJob } from './structure-job';
 import { TombJob } from './tomb-job';
@@ -28,12 +29,14 @@ import type { TileJob } from './tile-job';
 export class TileJobSystem extends GameSystem {
   /**
    * Every job a tile can be, in the order they're tried. The order
-   * matters: the stash (which a swing never breaks) comes before the
+   * matters: a wrench's repair comes before anything that breaks a
+   * structure, and the stash (which a swing never breaks) before the
    * catch-all structure job.
    */
   private readonly _jobs: TileJob[] = [
     new PumpkinJob(this._game),
     new ChestJob(this._game),
+    new RepairJob(this._game),
     new StashJob(this._game),
     new StructureJob(this._game),
     new GraveJob(this._game),

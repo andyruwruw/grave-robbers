@@ -63,7 +63,7 @@ export class StructureJob extends TileJob {
       return 1 - hits / BREAK_HITS;
     }
     this._knocks.delete(i);
-    this.world.structureDamage.damage(tx, ty, Infinity);
+    this.world.structureDamage.damage(tx, ty, Infinity, true);
     this._game.pickups.pocket(p, { build: tile === 'sprout' ? 'seeds' : tile, count: 1 }, tx + 0.5, ty + 0.5);
     return 0;
   }

@@ -20,7 +20,7 @@ export const GEAR_SLOTS: GearSlot[] = ['weapon', 'offhand', 'armor'];
 export const GEAR_KINDS: GearKind[] = [
   'hammer', 'infused-hammer', 'wood-armor', 'bone-armor', 'stone-armor',
   'battle-axe', 'scythe', 'spear', 'stake', 'ritual-knife', 'crossbow', 'blood-gun', 'torch', 'shield', 'plate',
-  'short-sword', 'greatsword', 'flail', 'morning-star', 'warhammer', 'quarterstaff', 'glaive', 'spiked-gauntlet',
+  'short-sword', 'greatsword', 'flail', 'morning-star', 'warhammer', 'quarterstaff', 'glaive', 'spiked-gauntlet', 'wrench',
   'bow', 'repeating-crossbow', 'musket',
   'stick', 'femur', 'shovel',
 ];
@@ -69,6 +69,7 @@ export const GEAR: Record<GearKind, GearDef> = {
   'quarterstaff': MELEE_WEAPONS.quarterstaff,
   'glaive': MELEE_WEAPONS.glaive,
   'spiked-gauntlet': MELEE_WEAPONS['spiked-gauntlet'],
+  'wrench': MELEE_WEAPONS.wrench,
   'bow': RANGED_WEAPONS.bow,
   'repeating-crossbow': RANGED_WEAPONS['repeating-crossbow'],
   'musket': RANGED_WEAPONS.musket,

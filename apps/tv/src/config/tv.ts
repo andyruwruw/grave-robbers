@@ -36,9 +36,16 @@ export const GAME_KEYS: Record<string, keyof Pick<GameSettings, 'allUnlocks' | '
 export const SCENIC_ABERRATION = 0.9;
 
 /**
- * Ground fog thickness (0 to 1) while Incognito shows the music.
+ * Ground fog thickness while Incognito shows the music: past the 0 to 1
+ * the Fog setting allows, for a heavy mist.
  */
-export const SCENIC_FOG = 1;
+export const SCENIC_FOG = 1.7;
+
+/**
+ * How much coarser the pixels get while Incognito shows the music (the
+ * zoom's own pixel size times this).
+ */
+export const SCENIC_PIXELATION = 1.8;
 
 /**
  * Milliseconds the scenic look takes to fade in or out (the Incognito

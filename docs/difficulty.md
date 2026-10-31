@@ -80,7 +80,7 @@ The trickle's mix is set in percent at chosen world levels (`SPAWN_MIX` in `hord
 - Bloaters blend in from 0 at level 4 (about 1.5% by level 6); necromancers from 0 at level 10. A necromancer's raised skeletons come on top of the mix.
 - Werewolves aren't in `SPAWN_MIX`: a blood moon adds them (8 weight on top of these 100, `extra` in `spawnWeights`).
 
-Pace and cap by world level (the cap is at most 60):
+Pace and cap by world level (the cap is at most 60). Outside a blood moon no spawn comes sooner than 6s after the last one anywhere (`CALM_SPAWN_GAP`), so the faster paces below only matter in events:
 
 | World level | One spawn every | Cap (1 / 2 / 4 players) |
 |---|---|---|

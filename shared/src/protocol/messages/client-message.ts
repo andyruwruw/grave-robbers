@@ -11,7 +11,7 @@ import type { WorldEventKind } from '../../world-events/types/world-events';
 import type { GameSettings } from '../game-settings';
 import type { SortKey, SortSide } from '../../structures/sorting';
 import type { PadState } from '../pads';
-import type { LiftTarget, SpawnKind } from '../tv-tools';
+import type { GiveKind, LiftTarget, SpawnKind } from '../tv-tools';
 import type { RegrowthTile } from '../../world/regrowth';
 
 /**
@@ -231,6 +231,11 @@ export type ClientMessage =
    * The admin destroys every item on the ground.
    */
   | { t: 'clear-items' }
+  /**
+   * The admin gives a player (by public id) `count` of something, straight
+   * into their bag.
+   */
+  | { t: 'give'; player: string; item: GiveKind; count: number }
   /**
    * The TV lists the game controllers plugged into it.
    */

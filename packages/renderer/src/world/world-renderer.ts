@@ -220,6 +220,15 @@ export class WorldRenderer extends WorldScene {
   }
 
   /**
+   * Coarsens the zoom's own pixel size by `boost` (1 for none), for the
+   * TV's scenic Incognito look. Ignored while a pixel size is fixed.
+   * @param boost The multiplier.
+   */
+  setPixelBoost(boost: number): void {
+    this._pixelBoost = boost;
+  }
+
+  /**
    * Applies a display's settings (see `DisplaySettings`): brightness,
    * camera angle, glow, aberration, fog, screen shake, blood, pickups,
    * names, and health bars. The overlay flags (TPS, FPS, server ticks) are

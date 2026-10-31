@@ -42,7 +42,7 @@ export interface MatRecipeDef {
  * Every material recipe (key order is the Craft list's order).
  */
 export const MAT_RECIPES: Record<MatRecipe, MatRecipeDef> = {
-  'arrows': { cost: stock({ wood: 1 }), makes: 4 },
+  'arrows': { cost: stock({ wood: 1 }), makes: 3 },
   'bolts': { cost: stock({ wood: 1 }), makes: 3, opens: 'gear:crossbow' },
   'chain': { cost: stock({ iron: 2 }), makes: 1, opens: 'build:anvil', anvil: true },
   'cursed-core': { cost: stock({ bloodsteel: 1, silver: 1 }), makes: 1, opens: 'build:anvil', anvil: true },

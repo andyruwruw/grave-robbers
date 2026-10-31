@@ -34,7 +34,7 @@ export const OFFHAND = {
     label: 'Shield',
     slot: 'offhand',
     wear: 30,
-    cost: stock({ wood: 2 }),
+    cost: stock({ wood: 5 }),
     loot: 2,
     guard: BLOCK_GUARD,
   },

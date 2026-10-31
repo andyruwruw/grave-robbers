@@ -48,6 +48,7 @@ export const GROUND_POSE: Record<GearKind, GroundPose> = {
   'stick': { rx: 0, rz: Math.PI / 2, offset: [-0.3, 0.03, 0], scale: 0.8 },
   'femur': { rx: 0, rz: Math.PI / 2, offset: [-0.24, 0.04, 0], scale: 0.9 },
   'shovel': { rx: 0, rz: Math.PI / 2, offset: [-0.35, 0.04, 0], scale: 0.75 },
+  'wrench': { rx: 0, rz: Math.PI / 2, offset: [-0.28, 0.04, 0], scale: 0.85 },
   'short-sword': { rx: 0, rz: Math.PI / 2, offset: [-0.24, 0.03, 0], scale: 0.95 },
   'greatsword': { rx: 0, rz: Math.PI / 2, offset: [-0.4, 0.04, 0], scale: 0.7 },
   'flail': { rx: 0, rz: Math.PI / 2, offset: [-0.26, 0.06, 0], scale: 0.85 },

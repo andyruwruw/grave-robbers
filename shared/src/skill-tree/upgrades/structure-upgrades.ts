@@ -5,21 +5,54 @@ import { LIT } from '../../structures/lights';
 import { ALTAR_BLEED, BELL_RADIUS } from '../../structures/occult';
 import { STATIONS } from '../../structures/stations';
 import { STRUCTURES } from '../../structures/structure-catalog';
-import { SENTRY_DAMAGE, TURRETS } from '../../structures/turrets';
+import { SENTRY_DAMAGE, TURRET_THRIFT_PER_LEVEL, TURRETS } from '../../structures/turrets';
+import { TREE_NODE } from '../nodes';
 
 // Types
 import type { Station, StructureKind } from '../../structures/types/structures';
 
 /**
+ * Health each upgrade adds to a structure, as a share of its base.
+ */
+export const STRUCTURE_HP_PER_LEVEL = 0.3;
+
+/**
+ * Health each upgrade adds to a fortification (anything on the
+ * Fortifications branch: walls, doors, fences, traps, turrets).
+ */
+export const FORTIFICATION_HP_PER_LEVEL = 0.5;
+
+/**
+ * Whether a structure is on the Fortifications branch.
+ *
+ * @param kind The structure.
+ * @returns True for a fortification.
+ */
+export function isFortification(kind: StructureKind): boolean {
+  return TREE_NODE[`build:${kind}`]?.branch === 'fortifications';
+}
+
+/**
  * A structure's full hit points at its builder's level: each upgrade adds
- * 30%.
+ * STRUCTURE_HP_PER_LEVEL, or FORTIFICATION_HP_PER_LEVEL for a
+ * fortification.
  *
  * @param kind The structure.
  * @param level Its builder's level.
  * @returns Its full hit points.
  */
 export function structureHp(kind: StructureKind, level: number): number {
-  return Math.round(STRUCTURES[kind].hp * (1 + 0.3 * level));
+  return Math.round(STRUCTURES[kind].hp * (1 + (isFortification(kind) ? FORTIFICATION_HP_PER_LEVEL : STRUCTURE_HP_PER_LEVEL) * level));
+}
+
+/**
+ * The chance a turret's shot spends no ammo at its builder's level.
+ *
+ * @param level Its builder's level.
+ * @returns The chance, 0 to 1.
+ */
+export function turretThrift(level: number): number {
+  return TURRET_THRIFT_PER_LEVEL * level;
 }
 
 /**

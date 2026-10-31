@@ -9,7 +9,7 @@ import type { DisplaySession } from '../types/session';
 /**
  * Messages this family handles.
  */
-type TvToolMessage = 'kill-monsters' | 'tv-lift' | 'tv-light' | 'start-world-event' | 'game-settings' | 'spawn' | 'regrowth-target' | 'clear-items';
+type TvToolMessage = 'kill-monsters' | 'tv-lift' | 'tv-light' | 'start-world-event' | 'game-settings' | 'spawn' | 'regrowth-target' | 'clear-items' | 'give';
 
 /**
  * The TV's tools: killing monsters, the mouse's lift and light, world
@@ -45,6 +45,9 @@ export class TvToolsHandler extends DisplayHandler<TvToolMessage> {
         return;
       case 'clear-items':
         this.game.world.items.clear();
+        return;
+      case 'give':
+        this.game.conjure.give(msg.player, msg.item, msg.count);
         return;
       case 'spawn':
         this.game.conjure.spawn(msg.kind, msg.at && Number.isFinite(msg.at.x) && Number.isFinite(msg.at.y) ? msg.at : null);

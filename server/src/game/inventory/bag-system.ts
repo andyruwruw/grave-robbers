@@ -8,7 +8,7 @@ import { GameSystem } from '../core/game-system';
 import { handsClash } from './helpers/hands-clash';
 
 // Types
-import type { Bundle, Goods } from '@halloween/shared/goods/goods';
+import type { Bundle, Goods, Resource } from '@halloween/shared/goods/goods';
 import type { BagItem } from '@halloween/shared/inventory/bag-items';
 import type { Player } from '../players/player';
 
@@ -102,13 +102,39 @@ export class BagSystem extends GameSystem {
   }
 
   /**
+   * Whether candy and blood cost nothing right now (Free crafting): their
+   * counts are left alone while it's on, so turning it off leaves players
+   * with what they really had.
+   * @returns True while Free crafting is on.
+   */
+  get unlimited(): boolean {
+    return this.settings.freeCrafting;
+  }
+
+  /**
+   * Whether a player has at least `amount` of candy or blood (always,
+   * while they're unlimited).
+   * @param p The player.
+   * @param r Which resource.
+   * @param amount How much.
+   * @returns True if they have it.
+   */
+  has(p: Player, r: Resource, amount: number): boolean {
+    return this.unlimited || p.inventory[r] >= amount;
+  }
+
+  /**
    * Takes `cost` from a player, emptying bag stacks from the last slot
-   * back, or takes nothing if they can't cover it.
+   * back, or takes nothing if they can't cover it. Candy and blood are
+   * free while they're unlimited.
    * @param p The player.
    * @param cost What it costs.
    * @returns Whether they paid.
    */
   pay(p: Player, cost: Bundle): boolean {
+    if (this.unlimited) {
+      cost = { ...cost, candy: 0, blood: 0 };
+    }
     if (!p.canPay(cost)) {
       return false;
     }

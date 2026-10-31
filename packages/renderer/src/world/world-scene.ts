@@ -94,6 +94,12 @@ export class WorldScene {
   protected _pixelOverride: number | null = null;
 
   /**
+   * What the zoom's own pixel size is multiplied by (the TV's scenic
+   * Incognito look coarsens it), 1 for none.
+   */
+  protected _pixelBoost = 1;
+
+  /**
    * Builds the scene into a container and starts drawing it.
    * @param container The element the canvas fills.
    * @param labelLayer The HTML layer name labels and health bars go in.
@@ -305,7 +311,7 @@ export class WorldScene {
    * Resizes the low-res buffer when the zoom changes the pixel scale.
    */
   private syncPixelScale(): void {
-    const scale = this._pixelOverride ?? pixelScaleFor(this._ctx.camera.top, DEFAULT_PIXEL_LIMIT);
+    const scale = this._pixelOverride ?? Math.max(1, Math.round(pixelScaleFor(this._ctx.camera.top, DEFAULT_PIXEL_LIMIT) * this._pixelBoost));
     if (scale !== this._pixelScale) {
       this._pixelScale = scale;
       this.resize();

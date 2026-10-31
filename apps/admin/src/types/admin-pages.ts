@@ -4,7 +4,7 @@ import type { LucideIcon } from 'lucide-react';
 /**
  * A page of the admin console: the main menu or one it opens.
  */
-export type AdminPageId = 'menu' | 'players' | 'gameplay' | 'spawn' | 'map' | 'catalogue' | 'tree' | 'worlds';
+export type AdminPageId = 'menu' | 'players' | 'gameplay' | 'spawn' | 'give' | 'map' | 'catalogue' | 'tree' | 'worlds';
 
 /**
  * One button on the main menu.

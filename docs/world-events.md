@@ -31,6 +31,7 @@ flowchart LR
 | `spawn-mix` | `mix` (weight per kind, in the percent points of `SPAWN_MIX`) | Adds, each by its event's weight, into `spawnMix` | `pickKind` (the blood moon's werewolves; `Werewolf` reads it to run off at moonset) |
 | `monster-power` | `scale` | Multiplies | `MonsterCore.power` (hits, arrows, potions) |
 | `monster-speed` | `scale` | Multiplies | `Walker.moveToward`, `Ghost.drift` |
+| `raid` | `share` | The highest, by its event's weight | `Shambler.raid`: that share of shamblers go for the nearest base structure (the blood moon: 0.75) |
 | `monster-hunt` | | Any | `Sight.perceive` (walkers see the nearest player anywhere), `Ghost.act` (stalks them) |
 | `blackout` | `within`, `sputter` | On start | `WorldLights.blackout`: relightable, non-`GHOSTPROOF` burning lights sputter (`LightState.dying`) and go out, each within `within` seconds |
 | `sky` | `moon`, `ambient` (linear rgb), `fog`, `fogThicken` | Heaviest wins | `SkyLighting` (moon), `LightMap.setSky`, `Fog.setTint` |

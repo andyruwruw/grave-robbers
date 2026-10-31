@@ -29,6 +29,7 @@ import {
   buildSpikedGauntlet,
   buildStick,
   buildWarhammer,
+  buildWrench,
 } from './bludgeons';
 import {
   buildShield,
@@ -82,6 +83,7 @@ const GEAR_BUILDERS: Record<GearKind | 'hammer', GearBuilder> = {
   'repeating-crossbow': buildRepeatingCrossbow,
   'musket': buildMusket,
   'shovel': buildShovel,
+  'wrench': buildWrench,
 };
 
 /**

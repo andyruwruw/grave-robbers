@@ -1,10 +1,13 @@
 // Local Imports
 import { GEAR, GEAR_KINDS } from '../gear/gear-catalog';
+import { MATERIALS, RESOURCES } from '../goods/goods';
 import { MONSTER_KINDS } from '../monsters/monster-kinds';
 import { STRUCTURE_KINDS } from '../structures/structure-catalog';
 
 // Types
 import type { GearKind } from '../gear/types/gear-def';
+import type { Material, Resource } from '../goods/goods';
+import type { ItemKey } from '../inventory/item-keys';
 import type { MonsterKind } from '../monsters/monster-kinds';
 import type { StructureKind } from '../structures/types/structures';
 
@@ -75,3 +78,30 @@ export const SPAWN_KINDS: SpawnKind[] = [
   ...GEAR_KINDS.filter((k: GearKind): boolean => !GEAR[k].infused).map((k: GearKind): SpawnKind => `gear:${k}`),
   ...STRUCTURE_KINDS.map((k: StructureKind): SpawnKind => `build:${k}`),
 ];
+
+/**
+ * What the admin's Give page hands a player: candy or blood, a material,
+ * a piece of gear, or a structure to place.
+ */
+export type GiveKind = `res:${Resource}` | ItemKey;
+
+/**
+ * Everything the Give page lists, in its order (no infused-only gear).
+ */
+export const GIVE_KINDS: GiveKind[] = [
+  ...RESOURCES.map((r: Resource): GiveKind => `res:${r}`),
+  ...MATERIALS.map((m: Material): GiveKind => `mat:${m}`),
+  ...GEAR_KINDS.filter((k: GearKind): boolean => !GEAR[k].infused).map((k: GearKind): GiveKind => `gear:${k}`),
+  ...STRUCTURE_KINDS.map((k: StructureKind): GiveKind => `build:${k}`),
+];
+
+/**
+ * Most of one thing a single give hands over.
+ */
+export const GIVE_MAX = 999;
+
+/**
+ * Most gear a single give hands over (each piece is its own bag slot, and
+ * what doesn't fit drops on the ground).
+ */
+export const GIVE_GEAR_MAX = 20;

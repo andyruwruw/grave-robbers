@@ -1,5 +1,6 @@
 // Packages
 import { GEAR_SLOTS } from '@halloween/shared/gear/gear-catalog';
+import { UNLIMITED } from '@halloween/shared/goods/goods';
 import { MAX_HP, RESPAWN_DELAY } from '@halloween/shared/players/health';
 
 // Local Imports
@@ -47,12 +48,14 @@ export class ViewSystem extends GameSystem {
   }
 
   /**
-   * What a player's phone shows of their belongings.
+   * What a player's phone shows of their belongings (candy and blood read
+   * UNLIMITED while Free crafting is on).
    * @param p The player.
    * @returns What their phone shows.
    */
   carried(p: Player): Carried {
-    return { inventory: { ...p.inventory }, gear: structuredClone(p.bag), tree: structuredClone(this._game.gameTab.treeOf(p)), research: p.research, anvil: p.anvil };
+    const inventory = this._game.bag.unlimited ? { candy: UNLIMITED, blood: UNLIMITED } : { ...p.inventory };
+    return { inventory, gear: structuredClone(p.bag), tree: structuredClone(this._game.gameTab.treeOf(p)), research: p.research, anvil: p.anvil };
   }
 
   /**

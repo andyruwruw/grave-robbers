@@ -29,7 +29,7 @@ export class RangedSystem extends GameSystem {
    * @returns True if it can fire.
    */
   hasAmmo(p: Player, weapon: WeaponStats): boolean {
-    return weapon.ammo === 'blood' ? p.inventory.blood > 0 : p.count(weapon.ammo ?? 'bolts') > 0;
+    return weapon.ammo === 'blood' ? this._game.bag.has(p, 'blood', 1) : p.count(weapon.ammo ?? 'bolts') > 0;
   }
 
   /**

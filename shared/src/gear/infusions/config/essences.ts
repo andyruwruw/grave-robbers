@@ -43,13 +43,13 @@ export const ESSENCE_PREFIX: Record<Essence, string> = {
  * infuses only the shield, at one level.
  */
 export const ESSENCE_COSTS: Record<Essence, Bundle[]> = {
-  holy: [stock({ silver: 2, 'holy-water': 6 }), stock({ silver: 4, 'holy-water': 12 })],
-  tendons: [stock({ silver: 2, 'brute-tendon': 3 }), stock({ silver: 4, 'brute-tendon': 6 })],
-  fang: [stock({ silver: 2, 'ghoul-fang': 3 }), stock({ silver: 4, 'ghoul-fang': 6 })],
-  ecto: [stock({ silver: 2, ectoplasm: 4 }), stock({ silver: 4, ectoplasm: 8 })],
-  hex: [stock({ silver: 2, 'hex-shard': 3 }), stock({ silver: 4, 'hex-shard': 6 })],
-  brimstone: [stock({ silver: 2, brimstone: 2 }), stock({ silver: 4, brimstone: 4 })],
-  silver: [stock({ silver: 4 })],
+  holy: [stock({ silver: 4, 'holy-water': 9 }), stock({ silver: 8, 'holy-water': 18 })],
+  tendons: [stock({ silver: 4, 'brute-tendon': 4 }), stock({ silver: 8, 'brute-tendon': 9 })],
+  fang: [stock({ silver: 4, 'ghoul-fang': 4 }), stock({ silver: 8, 'ghoul-fang': 9 })],
+  ecto: [stock({ silver: 4, ectoplasm: 6 }), stock({ silver: 8, ectoplasm: 12 })],
+  hex: [stock({ silver: 4, 'hex-shard': 4 }), stock({ silver: 8, 'hex-shard': 9 })],
+  brimstone: [stock({ silver: 4, brimstone: 3 }), stock({ silver: 8, brimstone: 6 })],
+  silver: [stock({ silver: 8 })],
 };
 
 /**

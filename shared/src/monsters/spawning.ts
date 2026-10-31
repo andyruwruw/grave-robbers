@@ -16,6 +16,14 @@ export const MONSTERS_PER_PLAYER = 4;
 export const SPAWN_INTERVAL = 4.5;
 
 /**
+ * Least seconds between two walking monsters spawning anywhere on the
+ * server while things are calm (no world event setting the pace), however
+ * many players there are, however big the world, and however high the
+ * world level. A blood moon's own pace ignores it.
+ */
+export const CALM_SPAWN_GAP = 6;
+
+/**
  * Most monsters out at once, however many play.
  */
 export const MAX_MONSTERS = 60;

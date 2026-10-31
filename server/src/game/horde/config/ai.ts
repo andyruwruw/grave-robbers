@@ -138,3 +138,31 @@ export const REACH_FLOOD_MS = 4;
  * one slow flood (a GC pause) doesn't throw it off.
  */
 export const REACH_TUNE_RATE = 0.3;
+
+/**
+ * Seconds a monster keeps after a player it lost sight of, following where
+ * they really are (their scent) while they stay within SCENT_RADIUS tiles,
+ * so it follows them home and chews through their door (`Shambler.scent`).
+ */
+export const SCENT_SECONDS = 25;
+
+/**
+ * Tiles within which a monster can follow a player's scent.
+ */
+export const SCENT_RADIUS = 22;
+
+/**
+ * Tiles around a raiding monster it looks for a base to raid (`raidTarget`).
+ */
+export const RAID_RADIUS = 50;
+
+/**
+ * A player this close (tiles) pulls a raiding monster off the base to
+ * fight them instead.
+ */
+export const RAID_DISTRACT = 5;
+
+/**
+ * Seconds between a raider's picks of what to go for.
+ */
+export const RAID_REPICK = 4;

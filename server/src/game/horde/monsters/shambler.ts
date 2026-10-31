@@ -7,10 +7,24 @@ import { isSolidTile } from '@halloween/shared/world/tiles';
 
 // Local Imports
 import { findPath } from '../../pathing/find-path';
-import { BUMP_GIVE_UP, SHAMBLE_PACE, SHAMBLE_REACH, SHAMBLE_WEAVE, STUMBLE_RATE, STUMBLE_SPEED, STUMBLE_TIME, ZOMBIE_REPATH } from '../config/ai';
+import {
+  BUMP_GIVE_UP,
+  RAID_DISTRACT,
+  RAID_REPICK,
+  SCENT_RADIUS,
+  SCENT_SECONDS,
+  SHAMBLE_PACE,
+  SHAMBLE_REACH,
+  SHAMBLE_WEAVE,
+  STUMBLE_RATE,
+  STUMBLE_SPEED,
+  STUMBLE_TIME,
+  ZOMBIE_REPATH,
+} from '../config/ai';
 import { LURE_CHANCE, LURE_REACH, LURE_TRIES } from '../config/heat';
 import { SPIKE_COST } from '../config/tiles';
 import { tileOf } from '../helpers/geometry';
+import { raidTarget } from '../helpers/raid-target';
 import { monsterBlocked, monsterWalkable } from '../helpers/terrain';
 import { Fighter } from './fighter';
 
@@ -42,6 +56,26 @@ export abstract class Shambler<P extends Target> extends Fighter<P> {
    * How long it has been making no headway.
    */
   bumping = 0;
+
+  /**
+   * The player it last saw, whose scent it follows for a while after.
+   */
+  scentOf: P | null = null;
+
+  /**
+   * When it loses their scent.
+   */
+  scentUntil = 0;
+
+  /**
+   * The base structure it's raiding in a blood moon, or null.
+   */
+  raidAt: Step | null = null;
+
+  /**
+   * When it next picks what to raid.
+   */
+  raidPickAt = 0;
 
   /**
    * Makes the monster from its rolls.
@@ -83,8 +117,13 @@ export abstract class Shambler<P extends Target> extends Fighter<P> {
       this.attack(p, world);
       return;
     }
+    if (p) {
+      this.scentOf = p;
+      this.scentUntil = world.time + SCENT_SECONDS;
+    }
     const scarecrow = this.nearestScarecrow(world);
-    const goal = scarecrow ?? (p ? tileOf(p) : this.remembered(world));
+    const raid = this.raid(world, p);
+    const goal = scarecrow ?? raid ?? (p ? tileOf(p) : this.scent(world, prey) ?? this.remembered(world));
     this.setHunting(goal !== null);
     if (!goal) {
       this.shamble(dt, world);
@@ -113,6 +152,10 @@ export abstract class Shambler<P extends Target> extends Fighter<P> {
     }
     this.skipReached();
     const next = this.path[0];
+    if (!next && raid) {
+      this.chew(raid, dt, world);
+      return;
+    }
     if (!next) {
       if (p) {
         this.moveToward(p.x, p.y, def.speed * this.pace * dt, world);
@@ -126,6 +169,44 @@ export abstract class Shambler<P extends Target> extends Fighter<P> {
       return;
     }
     this.moveToward(next.tx + 0.5, next.ty + 0.5, def.speed * this.pace * dt, world);
+  }
+
+  /**
+   * Where the player it lost sight of really is, while it still has their
+   * scent (SCENT_SECONDS since it last saw them, and within SCENT_RADIUS):
+   * so it follows them home and chews through the door after them.
+   * @param world The world.
+   * @param prey Players monsters may go after.
+   * @returns Their tile, or null.
+   */
+  private scent(world: World, prey: P[]): Step | null {
+    const p = this.scentOf;
+    if (!p || p.dead || world.time >= this.scentUntil || !prey.includes(p) || Math.hypot(p.x - this.x, p.y - this.y) > SCENT_RADIUS) {
+      return null;
+    }
+    return tileOf(p);
+  }
+
+  /**
+   * In a blood moon's raid, the base structure it goes for (`raidTarget`,
+   * repicked every RAID_REPICK seconds or once it's gone), unless it isn't
+   * one of the raiders (`EventModifiers.raid` of them, by id) or a player
+   * is within RAID_DISTRACT.
+   * @param world The world.
+   * @param p The player it sees, if any.
+   * @returns The tile to raid, or null.
+   */
+  private raid(world: World, p: P | null): Step | null {
+    const share = this._ctx.mods.raid;
+    if (share <= 0 || (this.id * 0.618) % 1 >= share || (p && Math.hypot(p.x - this.x, p.y - this.y) <= RAID_DISTRACT)) {
+      this.raidAt = null;
+      return null;
+    }
+    if (world.time >= this.raidPickAt || (this.raidAt && !world.structures.get(this.raidAt.ty * world.map.width + this.raidAt.tx))) {
+      this.raidPickAt = world.time + RAID_REPICK;
+      this.raidAt = raidTarget(world, this.x, this.y);
+    }
+    return this.raidAt;
   }
 
   /**

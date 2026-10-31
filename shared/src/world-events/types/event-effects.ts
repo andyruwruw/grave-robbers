@@ -20,6 +20,9 @@ export type EventSound = 'blood-moon';
  *   fast they move.
  * - `monster-hunt`: every monster knows where the nearest player is and
  *   goes for them.
+ * - `raid`: `share` of the walking monsters go for the nearest player-built
+ *   base instead, chewing through whatever stands in the way, unless a
+ *   player comes close (see `RAID_TARGETS`).
  * - `blackout`: burning built lights sputter for `sputter` seconds and go
  *   out, each at its own moment within `within` seconds.
  * - `sky`: tints the moon, the ambient darkness (linear rgb), and the fog,
@@ -36,6 +39,7 @@ export type EventEffect =
   | { on: 'monster-power'; scale: number }
   | { on: 'monster-speed'; scale: number }
   | { on: 'monster-hunt' }
+  | { on: 'raid'; share: number }
   | { on: 'blackout'; within: number; sputter: number }
   | { on: 'sky'; moon: string; ambient: [number, number, number]; fog: string; fogThicken: number }
   | { on: 'eyes'; color: string }
@@ -71,6 +75,11 @@ export interface EventModifiers {
    * Monsters go for the nearest player wherever they are.
    */
   hunt: boolean;
+
+  /**
+   * Share of walking monsters (0 to 1) that raid players' bases instead.
+   */
+  raid: number;
 
   /**
    * The sky's tint and how far it has come in, or null.

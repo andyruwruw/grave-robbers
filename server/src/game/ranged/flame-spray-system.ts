@@ -32,7 +32,7 @@ export class FlameSpraySystem extends GameSystem {
     const spray = weapon.spray!;
     const time = this.world.time;
     if (time >= p.sprayPaidUntil) {
-      if (p.inventory.blood <= 0) {
+      if (!this._game.bag.has(p, 'blood', 1)) {
         p.nextActionAt = time + weapon.cooldown;
         this.outbox.sound(p, 'error');
         return;

@@ -1,12 +1,17 @@
 // Packages
 import { GOODS, stock } from '@halloween/shared/goods/goods';
 import { MOUND_REFILL_MIN, MOUND_REFILL_SPREAD } from '@halloween/shared/loot/graves';
+import { gearWear } from '@halloween/shared/skill-tree/upgrades/gear-upgrades';
+import { isStructure, STRUCTURES } from '@halloween/shared/structures/structure-catalog';
+import { TURRETS } from '@halloween/shared/structures/turrets';
 
 // Local Imports
+import { NO_TREE } from '../../config/loot';
 import { WorldFeature } from '../world-feature';
 
 // Types
 import type { BagItem } from '@halloween/shared/inventory/bag-items';
+import type { StructureKind } from '@halloween/shared/structures/types/structures';
 import type { SpilledStash, StashView } from '../types/structures';
 
 /**
@@ -21,13 +26,16 @@ export class StructureDamage extends WorldFeature {
 
   /**
    * Damages the structure on a tile, restoring the floor if it breaks (a
-   * mound under it starts filling again, and a bone digger's hoard spills
-   * for its builder alone).
+   * mound under it starts filling again, a bone digger's hoard spills for
+   * its builder alone, and a turret spills its loaded ammo and, unless
+   * taken down by hand, the gear it was built with).
    * @param tx The tile's column.
    * @param ty The tile's row.
    * @param amount Hit points to take off.
+   * @param byHand Whether a player is taking it down to carry off (its
+   *   parts stay in the crate).
    */
-  damage(tx: number, ty: number, amount: number): void {
+  damage(tx: number, ty: number, amount: number, byHand = false): void {
     const i = ty * this.map.width + tx;
     const s = this.structures.get(i);
     if (!s) {
@@ -35,6 +43,10 @@ export class StructureDamage extends WorldFeature {
     }
     s.hp -= amount;
     if (s.hp <= 0) {
+      const kind = this.map.get(tx, ty);
+      if (isStructure(kind)) {
+        this.salvage(tx, ty, kind, s.ammo ?? 0, byHand);
+      }
       this.structures.delete(i);
       this.map.set(tx, ty, s.floor);
       if (s.floor === 'mound') {
@@ -45,6 +57,29 @@ export class StructureDamage extends WorldFeature {
       }
       if (s.stash?.some((item: BagItem | null): boolean => item !== null)) {
         this._spilledStashes.push({ x: tx + 0.5, y: ty + 0.5, keeper: s.keeper ?? '', items: s.stash.filter((item): item is BagItem => item !== null) });
+      }
+    }
+  }
+
+  /**
+   * What a broken turret leaves on its tile: its loaded ammo, back as the
+   * goods it was loaded with (whole loads only), and the gear it was built
+   * with (`StructureDef.parts`, fresh) unless it's being carried off.
+   * @param tx The tile's column.
+   * @param ty The tile's row.
+   * @param kind The structure.
+   * @param ammo Shots loaded.
+   * @param byHand Whether it's being carried off whole.
+   */
+  private salvage(tx: number, ty: number, kind: StructureKind, ammo: number, byHand: boolean): void {
+    const turret = TURRETS[kind];
+    const loads = turret?.ammo && turret.shots > 0 ? Math.floor(ammo / turret.shots) : 0;
+    if (loads > 0) {
+      this.items.addItem(tx + 0.5, ty + 0.5, stock({ [turret!.ammo!]: loads }), null);
+    }
+    if (!byHand) {
+      for (const part of STRUCTURES[kind].parts ?? []) {
+        this.items.addHeld(tx + 0.5, ty + 0.5, { kind: part, wear: gearWear(part, NO_TREE) }, null);
       }
     }
   }

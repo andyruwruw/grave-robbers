@@ -91,7 +91,10 @@ export async function spotifyQueue(): Promise<SpotifyTrack[]> {
 }
 
 /**
- * Every playable track in a playlist (up to `limit`).
+ * Every playable track in a playlist (up to `limit`), from
+ * `/playlists/{id}/items` (Spotify retired `/tracks` for development-mode
+ * apps in March 2026; each entry is now under `item`, with the old `track`
+ * still read while Spotify sends both).
  *
  * @param uri - The playlist's URI.
  * @param limit - The most tracks to read.
@@ -100,14 +103,18 @@ export async function spotifyQueue(): Promise<SpotifyTrack[]> {
 export async function playlistTracks(uri: string, limit = 500): Promise<SpotifyTrack[]> {
   const id = uri.split(':').pop();
   const tracks: SpotifyTrack[] = [];
-  let path: string | null = `/playlists/${id}/tracks?limit=100&fields=next,items(track(uri,name,type,is_local,artists(name),album(images)))`;
+  const fields = 'uri,name,type,is_local,artists(name),album(images)';
+  let path: string | null = `/playlists/${id}/items?limit=100&fields=next,items(item(${fields}),track(${fields}))`;
   while (path && tracks.length < limit) {
     const res: Response = await api(path);
     if (!res.ok) {
-      throw new Error(`Spotify wouldn't list the playlist (${res.status}).`);
+      throw new Error(res.status === 403
+        ? `Spotify wouldn't list the playlist (403). Apps in development mode can only read playlists the account owns or collaborates on.`
+        : `Spotify wouldn't list the playlist (${res.status}).`);
     }
-    const body = await res.json() as { next: string | null; items: { track: ApiTrack | null }[] };
-    for (const { track } of body.items) {
+    const body = await res.json() as { next: string | null; items: { item?: ApiTrack | null; track?: ApiTrack | boolean | null }[] };
+    for (const entry of body.items) {
+      const track = entry.item ?? (typeof entry.track === 'object' ? entry.track : null);
       if (track && !track.is_local && (track.type ?? 'track') === 'track') {
         tracks.push(toTrack(track));
       }

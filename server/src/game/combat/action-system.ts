@@ -1,5 +1,6 @@
 // Packages
 import { weaponStats } from '@halloween/shared/skill-tree/upgrades/gear-upgrades';
+import { isStructure } from '@halloween/shared/structures/structure-catalog';
 import { facingTile } from '@halloween/shared/world/targeting';
 
 // Local Imports
@@ -64,9 +65,13 @@ export class ActionSystem extends GameSystem {
     }
     const near = this._game.melee.meleeTargets(p, weapon.ranged ? hammer : weapon);
     if (this._game.jobs.jobAhead(p) && near.players.length === 0 && near.monsters.length === 0) {
-      this._game.melee.swing(p, hammer, 'hammer');
       const { tx, ty } = facingTile(p.x, p.y, p.facing);
       const tile = this.world.map.get(tx, ty);
+      if (p.bag.equipped.weapon?.kind === 'wrench' && isStructure(tile)) {
+        this._game.melee.swing(p, weapon, null);
+        return;
+      }
+      this._game.melee.swing(p, hammer, 'hammer');
       if (tile === 'tombstone' || tile === 'cross') {
         p.digUntil = p.drawnUntil;
       }

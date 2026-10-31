@@ -21,19 +21,20 @@ All stats live in `shared/src/gear/` (`GEAR` in `gear-catalog.ts`, built from `d
 |---|---|---|---|---|---|---|---|---|
 | Hammer | 2 | 0.55s | 3.6 | 1.8 | 157° | 0.25 | 1 | always have it |
 | Infused hammer | 4.5 | 0.55s | 8.2 | 1.8 | 157° | 0.25 | 2 | only by infusing the hammer ([infusions.md](infusions.md)) |
-| Spear | 1.5 | 0.55s | 2.7 | 2.7 | a line | 1.2 | 1 | 6 wood, 4 stone |
+| Spear | 1.3 | 0.55s | 2.4 | 2.4 | a line | 0.7 | 1 | 6 wood, 4 stone |
 | Stake | 1 | 0.4s | - | 1.4 | 145° | 0.6 | 1 | 3 wood |
-| Ritual knife | 4 | 0.35s | 11.4 | 1.5 | 133° | 0.5 | 1 | 2 silver, 3 bone (anvil) |
+| Ritual knife | 4 | 0.35s | 11.4 | 1.5 | 133° | 0.5 | 1 | 3 silver, 8 bone (anvil) |
 | Scythe | 2.8 | 0.8s | 3.5 | 2.4 | 271° | 1.6 | 2 | 16 wood, 6 stone, 10 blood |
-| Battle axe | 12 | 1.6s | 7.5 | 1.9 | 203° | 1.8 | 2 | 3 wood, 2 stone |
+| Battle axe | 12 | 1.6s | 7.5 | 1.9 | 203° | 1.8 | 2 | 14 wood, 8 stone, 6 blood |
 | Short sword | 3 | 0.4s | 7.5 | 1.7 | 157° | 0.8 | 1 | 5 planks, 2 iron |
-| Greatsword | 8 | 0.95s | 8.4 | 2.2 | 215° | 1.6 | 2 | 2 planks, 6 iron, 1 bloodsteel (anvil) |
-| Flail | 6 | 0.75s | 8.0 | 2.0 | 203° | 2.2 | 1 | 2 planks, 4 iron (anvil) |
-| Mourning Star | 5 | 0.8s | 6.3 | 3.2 | a line | 1.2 | 1 | 2 planks, 3 iron, 2 chain, 1 silver (anvil) |
+| Greatsword | 8 | 0.95s | 8.4 | 2.2 | 215° | 1.6 | 2 | 8 planks, 10 iron, 2 bloodsteel (anvil) |
+| Flail | 6 | 0.75s | 8.0 | 2.0 | 203° | 2.2 | 1 | 10 planks, 8 iron (anvil) |
+| Mourning Star | 5 | 0.8s | 6.3 | 3.2 | a line | 1.2 | 1 | 8 planks, 6 iron, 2 chain, 1 silver (anvil) |
 | Warhammer | 14 | 1.8s | 7.8 | 1.8 | 169° | 3.2 | 1 | 20 wood, 10 stone, 10 blood |
 | Holy Quarterstaff | 3 | 0.45s | 6.7 | 2.4 | 240° | 2.0 | 2 | 8 planks |
 | Cursed Glaive | 5.5 | 0.75s | 7.3 | 2.8 | 157° | 1.4 | 2 | 10 planks, 5 iron |
-| Spiked gauntlet | 2.6 | 0.22s | 11.8 | 1.2 | 120° | 0.6 | 2 | 2 iron, 3 bone (anvil) |
+| Spiked gauntlet | 2.6 | 0.22s | 11.8 | 1.2 | 120° | 0.6 | 2 | 6 iron, 8 bone (anvil) |
+| Wrench | 1.5 | 0.5s | 3.0 | 1.4 | 145° | 0.8 | 1 | 6 wood, 4 stone |
 
 ### Tricks and upgrades
 
@@ -52,17 +53,18 @@ All stats live in `shared/src/gear/` (`GEAR` in `gear-catalog.ts`, built from `d
 | Warhammer | Slowest and heaviest (0.8s windup, you slow down); x1.5 to brutes and shoves them (`bruteBane`) | +20% damage |
 | Holy Quarterstaff | Held across the body in both hands; a 3-hit combo (top end down, bottom end up, a one-handed twirl that hits 30% harder); turns aside 15% of hits from the front; 20% chance to stun for 1s (not brutes) | Parry: 10% more turned aside |
 | Cursed Glaive | Alternates a wide sweep (like the scythe) and a long stab (`line`, +0.3 reach); the tip (past 60% of reach) hits 40% harder | +15% wider sweep |
+| Wrench | A tool: its swing at a damaged structure mends it (see [building.md](building.md#repairing)) instead of knocking it down | Steady hands: mends 10% more a swing |
 | Spiked gauntlet | Two-handed fists: left jab, right punch, left uppercut (+15%); wounds bleed 1 damage a second for 2s. Every 6 landed hits charge (`charge`, a glow on the fists) the next swing into a super uppercut (`SUPER_COMBO`): it launches you into the air and hits 4x as hard, knocks 2.5x as far, and stuns (not brutes) | Bleeds 50% faster |
 
 ## Ranged
 
 | Weapon | Dmg | Cooldown | Range | Ammo | Cost |
 |---|---|---|---|---|---|
-| Bow | 4.5, up to 9 drawn | 0.45s | 7 | Arrows | 2 wood |
+| Bow | 3.5, up to 7 drawn | 0.45s | 7 | Arrows | 4 wood |
 | CrossBones | 10 | 1.4s reload | 7.5 | Bolts | 2 wood, 3 planks |
-| Rattlebones | 5 | 0.2s in a burst, 1s reload | 7 | Bolts | 5 planks, 4 iron, 1 chain (anvil) |
-| Nightmare blunderbuss | 3 per pellet | 1.1s | 5 | 1 blood | 3 planks, 2 iron, 1 cursed core (anvil) |
-| Blood Lust Musket | 20 | 1.8s | 10 | 1 blood | 4 planks, 3 iron, 2 cursed cores (anvil) |
+| Rattlebones | 5 | 0.2s in a burst, 1s reload | 7 | Bolts | 8 planks, 8 iron, 2 chain (anvil) |
+| Nightmare blunderbuss | 3 per pellet | 1.1s | 5 | 1 blood | 6 planks, 6 iron, 1 cursed core (anvil) |
+| Blood Lust Musket | 20 | 1.8s | 10 | 1 blood | 8 planks, 8 iron, 2 cursed cores (anvil) |
 
 | Weapon | Trick | Each upgrade |
 |---|---|---|
@@ -120,16 +122,16 @@ Some zombies carry junk, hit 1 harder for it, and drop it when they die. At high
 | Item | Effect | Cost |
 |---|---|---|
 | Torch | Hand light, radius 3.5 (`build:torch` level widens it). Taken from a stack of torches; put away returns it to the stack. Not beside the infused hammer. The Brimstone Torch infusion reaches 60% farther and stays its own item. | 1 wood |
-| Shield | Held up with Block: hits from the front x0.12 (3% less per level). Only beside a one-handed weapon. The Mirror Shield infusion (4 silver) sends shots back. | 2 wood |
+| Shield | Held up with Block: hits from the front x0.12 (3% less per level). Only beside a one-handed weapon. The Mirror Shield infusion (8 silver) sends shots back. | 5 wood |
 | (empty) | A small lantern, radius 1.5, too dim to keep vampires off | - |
 
 ## Armor
 
 | Armor | Every hit x | Speed | Knockback | Special | Cost | Unlock |
 |---|---|---|---|---|---|---|
-| Wood armor | 0.85 | 100% | normal | Cheap | 2 wood | start |
-| Bone armor | 0.72 | 95% | normal | Thorns: 1.5 back at melee attackers | 6 bone, 1 wood | after Wood armor |
-| Stone armor | 0.5 | 60% | none | Can't be knocked back | 4 stone | after Wood armor |
-| Iron plate | 0.6 | 90% | half | | 6 iron, 2 chain (anvil) | after Stone armor |
+| Wood armor | 0.85 | 100% | normal | Cheap | 4 wood | start |
+| Bone armor | 0.72 | 95% | normal | Thorns: 1.5 back at melee attackers | 8 bone, 2 wood | after Wood armor |
+| Stone armor | 0.5 | 60% | none | Can't be knocked back | 10 stone | after Wood armor |
+| Iron plate | 0.6 | 90% | half | | 12 iron, 4 chain (anvil) | after Stone armor |
 
 Each upgrade takes 0.05 more off every hit. Armor never wears out.

@@ -10,6 +10,7 @@ import AdminMenu from './admin-menu';
 import CatalogPanel from './catalog-panel';
 import CheatsCard from './cheats-card';
 import FollowPanel from './follow-panel';
+import GivePage from './give-page';
 import ManipulateCard from './manipulate-card';
 import MapPage from './map-page';
 import TreeViewer from './tree-viewer';
@@ -148,7 +149,8 @@ interface AdminPageBodyProps {
  * What an admin page holds below its header: the main menu (with the
  * server stats at the bottom); Players (the roster, Follow, the TV's game
  * controllers); Gameplay (Manipulate, then Cheats); Spawn (pick a thing,
- * then click the map or Random Location); Map (New Map and Map Editor
+ * then click the map or Random Location); Give (hand a player goods,
+ * gear, or buildables); Map (New Map and Map Editor
  * tabs); Worlds (the world slots and the playing world's characters); and
  * the Item Catalogue and Knowledge Tree dialogs' contents.
  *
@@ -236,6 +238,13 @@ function AdminPageBody({
           selected={spawnPick}
           onSelect={onSpawnPick}
           onSpawn={(kind: SpawnKind): void => send({ t: 'spawn', kind })} />
+      );
+    case 'give':
+      return (
+        <GivePage
+          roster={roster}
+          follow={follow}
+          send={send} />
       );
     case 'map':
       return (

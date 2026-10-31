@@ -10,6 +10,12 @@ export type Resource = 'candy' | 'blood';
 export const RESOURCES: Resource[] = ['candy', 'blood'];
 
 /**
+ * What a phone is told it carries of candy and blood while Free crafting is
+ * on (spending them then costs nothing); shown as infinite.
+ */
+export const UNLIMITED = 999999;
+
+/**
  * Carried amount of each counter.
  */
 export type Inventory = Record<Resource, number>;

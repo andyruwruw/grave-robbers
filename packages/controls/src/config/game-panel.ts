@@ -26,7 +26,7 @@ import type { GameSwitch, Spawn } from '../types/game-panel';
 export const SWITCHES: GameSwitch[] = [
   { key: 'aggressive', label: 'Aggressive monsters', hint: 'Off: zombies and vampires only wander', icon: Swords, shortcut: 'A' },
   { key: 'allUnlocks', label: 'All unlocks', hint: 'Every recipe and skill tree node is open to everyone', icon: Unlock, shortcut: 'U' },
-  { key: 'freeCrafting', label: 'Free crafting', hint: 'Crafting and infusing cost nothing and need no anvil', icon: Hammer, shortcut: 'F' },
+  { key: 'freeCrafting', label: 'Free crafting', hint: 'Crafting and infusing cost nothing and need no anvil; unlimited candy and blood', icon: Hammer, shortcut: 'F' },
   { key: 'spawning', label: 'Natural spawning', hint: 'Off: no monsters walk in, no blood moons, nothing grows back; only what you spawn', icon: Sprout },
   { key: 'testPlayer', label: 'Test player', hint: 'A bot that gathers, builds, and fights', icon: Bot, shortcut: 'T' },
   { key: 'lightsOff', label: 'Lights off', hint: 'Puts out every light on the map', icon: LightbulbOff, shortcut: 'L' },
