@@ -169,7 +169,7 @@ export class GhoulAvatar extends ChargingMonsterAvatar {
       const swing = Math.sin(at) * run;
       const lift = Math.max(0, Math.cos(at)) * run;
       const rest = limb.front ? [0.95 + swing * 0.4, -0.3 - lift * 0.5] : [-1.35 + swing * 0.4, 0.7 + lift * 0.3];
-      const coiled = limb.front ? [0.6, -1.1] : [-1.05, 1.4];
+      const coiled = limb.front ? [1.1, -1.9] : [-1.05, 1.4];
       const flung = limb.front ? [1.4, -0.2] : [-0.1, 0.3];
       limb.upper.rotation.z = mix(mix(rest[0], coiled[0], crouch), flung[0], stretch);
       limb.lower.rotation.z = mix(mix(rest[1], coiled[1], crouch), flung[1], stretch);
