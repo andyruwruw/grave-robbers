@@ -9,12 +9,12 @@ import type { MonsterKind } from '@halloween/shared/monsters/monster-kinds';
 /**
  * Radians of stride per second for each kind while it moves.
  */
-export const GAIT: Record<MonsterKind, number> = { zombie: 8, vampire: 18, ghost: 8, brute: 3.2, skeleton: 9, witch: 6, ghoul: 8.5, demon: 5 };
+export const GAIT: Record<MonsterKind, number> = { zombie: 8, vampire: 18, ghost: 8, brute: 3.2, skeleton: 9, witch: 6, ghoul: 8.5, demon: 5, bloater: 5, necromancer: 5, werewolf: 11 };
 
 /**
  * Fastest each kind turns its body, in radians per second.
  */
-export const TURN_RATE: Record<MonsterKind, number> = { zombie: 1.8, vampire: 9, ghost: 3, brute: 1.3, skeleton: 5, witch: 3, ghoul: 8, demon: 6 };
+export const TURN_RATE: Record<MonsterKind, number> = { zombie: 1.8, vampire: 9, ghost: 3, brute: 1.3, skeleton: 5, witch: 3, ghoul: 8, demon: 6, bloater: 1.4, necromancer: 3, werewolf: 7 };
 
 /**
  * The faint streak a melee attack leaves: pool size per source, how long
@@ -36,7 +36,7 @@ export const TRAIL_STEPS = 4;
  * How long after the windup a melee attack keeps drawing its streak, per
  * kind (a ghoul's pounce and a demon's lunge carry it through the leap).
  */
-export const SWOOSH_TIME: Record<MonsterKind, number> = { zombie: 0.18, vampire: 0.16, ghost: 0, brute: 0, skeleton: 0, witch: 0, ghoul: GHOUL_LEAP_TIME, demon: DEMON_LUNGE_TIME };
+export const SWOOSH_TIME: Record<MonsterKind, number> = { zombie: 0.18, vampire: 0.16, ghost: 0, brute: 0, skeleton: 0, witch: 0, ghoul: GHOUL_LEAP_TIME, demon: DEMON_LUNGE_TIME, bloater: 0, necromancer: 0.18, werewolf: 0.16 };
 
 /**
  * Overall scale relative to a tile (players are 1.3).
@@ -131,6 +131,19 @@ export const ARM_HALF = -0.9;
  * Arm pitch hanging.
  */
 export const ARM_DOWN = -1.35;
+
+/**
+ * Arm pitch of a zombie's weapon arm, whatever its mood: raised a little
+ * below level, so the weapon stands up ready to swing instead of
+ * dragging.
+ */
+export const ARM_ARMED = -0.35;
+
+/**
+ * Tilt (radians, back from straight up) of a carried weapon in a monster's
+ * fist, relative to the arm (`ArmedMonsterAvatar.mountHeld`).
+ */
+export const HELD_TILT = 0.75;
 
 /**
  * Shortest an idle mood lasts, in seconds.

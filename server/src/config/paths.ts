@@ -2,10 +2,17 @@
 import { fileURLToPath } from 'node:url';
 
 /**
- * Where the world is saved; `WORLD_SAVE` overrides it (e.g. for a second
- * server that shouldn't touch the main save).
+ * Where world slots, their players, and backups are saved; `SAVE_DIR`
+ * overrides it (e.g. for a second server that shouldn't touch the main
+ * saves).
  */
-export const WORLD_SAVE_PATH = process.env.WORLD_SAVE ?? fileURLToPath(new URL('../../data/world.json', import.meta.url));
+export const SAVE_DIR = process.env.SAVE_DIR ?? fileURLToPath(new URL('../../data/saves/', import.meta.url));
+
+/**
+ * The single-file world save from before world slots; `WORLD_SAVE`
+ * overrides it. Read once, into the first slot, when there are no slots.
+ */
+export const LEGACY_WORLD_SAVE = process.env.WORLD_SAVE ?? fileURLToPath(new URL('../../data/world.json', import.meta.url));
 
 /**
  * Where presets live (`PRESET_DIR` overrides, for tests).

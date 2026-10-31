@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'node:url';
 
 // Types
-import type { UserConfig } from 'vite';
+import type { UserConfigFnObject } from 'vite';
 
 /**
  * The game server the dev servers proxy to (`GAME_PORT`, 3021 by default).
@@ -52,9 +52,14 @@ function quietLogger(): ReturnType<typeof createLogger> {
 
 /**
  * One app's Vite config: served under `base` (its route in production) on
- * `port`, with the game server proxied and the shared packages aliased.
+ * its port, with the game server proxied and the shared packages aliased.
+ * `__PHONE_PORT__` is the phone app's dev port while serving (the TV's join
+ * QR points there) and null in a build, where every app shares one port.
+ *
+ * @param options - The app's route and which app it is.
+ * @returns The Vite config.
  */
-export function appConfig({ base, app }: { base: string; app: keyof typeof APP_PORTS }): UserConfig {
+export function appConfig({ base, app }: { base: string; app: keyof typeof APP_PORTS }): UserConfigFnObject {
   const port = APP_PORTS[app];
   const others = base === '/'
     ? Object.fromEntries((['tv', 'play', 'admin'] as const).map((app) => [`^/${app}(/|$)`, {
@@ -62,8 +67,9 @@ export function appConfig({ base, app }: { base: string; app: keyof typeof APP_P
       rewrite: (path: string): string => (path === `/${app}` ? `/${app}/` : path),
     }]))
     : {};
-  return defineConfig({
+  return defineConfig(({ command }) => ({
     base,
+    define: { __PHONE_PORT__: JSON.stringify(command === 'serve' ? APP_PORTS.mobile : null) },
     customLogger: quietLogger(),
     plugins: [react()],
     resolve: {
@@ -83,5 +89,5 @@ export function appConfig({ base, app }: { base: string; app: keyof typeof APP_P
         '/media': GAME_SERVER_HTTP,
       },
     },
-  });
+  }));
 }

@@ -8,8 +8,9 @@ import type { ModeResult } from './input-mode';
 
 /**
  * Walking while building: the mouse picks the spot (sent at most every
- * `SEND_MS`), LB, RB, or the rotate binding turns it, the attack binding,
- * A, or right click places it, and B or Esc goes back to the bag.
+ * `SEND_MS`), LB, RB, or the rotate binding turns it, the D-pad's left and
+ * right or the look binding change a wall's look, the attack binding, A,
+ * or right click places it, and B or Esc goes back to the bag.
  */
 export class BuildMode extends WalkMode {
   /**
@@ -35,6 +36,11 @@ export class BuildMode extends WalkMode {
     }
     if (pad.tap(PAD.lb) || pad.tap(PAD.rb) || ctx.tappedAction('rotate')) {
       s.send({ t: 'turn', dir: pad.tap(PAD.lb) ? -1 : 1 });
+    }
+    if (pad.tap(PAD.left)) {
+      s.cycleStyle(-1);
+    } else if (pad.tap(PAD.right) || ctx.tappedAction('look')) {
+      s.cycleStyle(1);
     }
     if (ctx.tappedAction('attack') || pad.tap(PAD.a) || k.taps.has('Mouse2')) {
       s.send({ t: 'build-place' });

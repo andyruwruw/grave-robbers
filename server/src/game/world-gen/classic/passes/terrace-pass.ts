@@ -1,6 +1,3 @@
-// Packages
-import { MAP_HEIGHT, MAP_WIDTH } from '@halloween/shared/world/dimensions';
-
 // Local Imports
 import { DIRS, HOLLOW_RADIUS, SHELF, TERRACE_CORE_SCALE, TERRACE_RADIUS } from '../../config/classic';
 import { ClassicPass } from '../classic-pass';
@@ -39,7 +36,7 @@ export class TerracePass extends ClassicPass {
     };
     const center = (): Point => {
       for (let tries = 0; ; tries++) {
-        const c: Point = [6 + this.rand() * (MAP_WIDTH - 12), 5 + this.rand() * (MAP_HEIGHT - 10)];
+        const c: Point = [6 + this.rand() * (this.map.width - 12), 5 + this.rand() * (this.map.height - 10)];
         if (tries > 50 || (free(Math.floor(c[0]), Math.floor(c[1])) && this.map.level(Math.floor(c[0]), Math.floor(c[1])) === 0)) {
           return c;
         }
@@ -58,8 +55,16 @@ export class TerracePass extends ClassicPass {
       blob(cx, cy, (HOLLOW_RADIUS[0] + this.rand() * (HOLLOW_RADIUS[1] - HOLLOW_RADIUS[0])) * this.gen.pitSize, 0, -1);
     }
     this.shelve(free);
-    for (let ty = 1; ty < MAP_HEIGHT - 1; ty++) {
-      for (let tx = 1; tx < MAP_WIDTH - 1; tx++) {
+    this.stairsOnPaths();
+  }
+
+  /**
+   * Turns every path or cobble tile at the foot of a level change, with
+   * path or cobble a level up beside it, into stairs.
+   */
+  stairsOnPaths(): void {
+    for (let ty = 1; ty < this.map.height - 1; ty++) {
+      for (let tx = 1; tx < this.map.width - 1; tx++) {
         const tile = this.map.get(tx, ty);
         if (tile !== 'path' && tile !== 'cobble') {
           continue;
@@ -81,13 +86,13 @@ export class TerracePass extends ClassicPass {
    * block covering it supports, repeated until nothing changes.
    * @param free Whether a tile may change level.
    */
-  private shelve(free: (tx: number, ty: number) => boolean): void {
+  shelve(free: (tx: number, ty: number) => boolean): void {
     for (let changed = true; changed;) {
       changed = false;
-      const up = new Int8Array(MAP_WIDTH * MAP_HEIGHT);
-      const down = new Int8Array(MAP_WIDTH * MAP_HEIGHT);
-      for (let wy = 0; wy + SHELF <= MAP_HEIGHT; wy++) {
-        for (let wx = 0; wx + SHELF <= MAP_WIDTH; wx++) {
+      const up = new Int8Array(this.map.size);
+      const down = new Int8Array(this.map.size);
+      for (let wy = 0; wy + SHELF <= this.map.height; wy++) {
+        for (let wx = 0; wx + SHELF <= this.map.width; wx++) {
           let lo = Infinity;
           let hi = -Infinity;
           for (let y = wy; y < wy + SHELF; y++) {
@@ -98,16 +103,16 @@ export class TerracePass extends ClassicPass {
           }
           for (let y = wy; y < wy + SHELF; y++) {
             for (let x = wx; x < wx + SHELF; x++) {
-              const i = y * MAP_WIDTH + x;
+              const i = y * this.map.width + x;
               up[i] = Math.max(up[i], lo);
               down[i] = Math.min(down[i], hi);
             }
           }
         }
       }
-      for (let ty = 1; ty < MAP_HEIGHT - 1; ty++) {
-        for (let tx = 1; tx < MAP_WIDTH - 1; tx++) {
-          const i = ty * MAP_WIDTH + tx;
+      for (let ty = 1; ty < this.map.height - 1; ty++) {
+        for (let tx = 1; tx < this.map.width - 1; tx++) {
+          const i = ty * this.map.width + tx;
           const level = this.map.level(tx, ty);
           const fixed = level > 0 ? Math.min(level, up[i]) : Math.max(level, down[i]);
           if (fixed !== level && free(tx, ty)) {

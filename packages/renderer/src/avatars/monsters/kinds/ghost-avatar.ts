@@ -46,7 +46,7 @@ export class GhostAvatar extends MonsterAvatar {
    * two faces (calm and mad), and four wisps below.
    */
   protected build(): void {
-    const { box } = this._parts;
+    const { box, eye } = this._parts;
     const material = new MeshBasicMaterial({ color: GHOST_BODY, transparent: true, opacity: GHOST_OPACITY, depthWrite: false });
     this._ghostMaterial = material;
     this._parts.materials.push(material);
@@ -72,8 +72,8 @@ export class GhostAvatar extends MonsterAvatar {
       this._madFace,
     );
     this._calmFace.add(
-      box([0.02, 0.1, 0.07], [0.205, 0.58, -0.08], GHOST_FACE, true),
-      box([0.02, 0.1, 0.07], [0.205, 0.58, 0.08], GHOST_FACE, true),
+      eye([0.02, 0.1, 0.07], [0.205, 0.58, -0.08], GHOST_FACE),
+      eye([0.02, 0.1, 0.07], [0.205, 0.58, 0.08], GHOST_FACE),
       box([0.02, 0.07, 0.1], [0.205, 0.44, 0], GHOST_FACE, true),
     );
     /**
@@ -89,8 +89,8 @@ export class GhostAvatar extends MonsterAvatar {
     this._madFace.add(
       brow(-1),
       brow(1),
-      box([0.02, 0.06, 0.06], [0.206, 0.58, -0.08], GHOST_MAD, true),
-      box([0.02, 0.06, 0.06], [0.206, 0.58, 0.08], GHOST_MAD, true),
+      eye([0.02, 0.06, 0.06], [0.206, 0.58, -0.08], GHOST_MAD),
+      eye([0.02, 0.06, 0.06], [0.206, 0.58, 0.08], GHOST_MAD),
       box([0.02, 0.035, 0.2], [0.205, 0.45, 0], GHOST_FACE, true),
       box([0.02, 0.04, 0.03], [0.206, 0.43, -0.07], GHOST_MAD, true),
       box([0.02, 0.04, 0.03], [0.206, 0.43, 0], GHOST_MAD, true),

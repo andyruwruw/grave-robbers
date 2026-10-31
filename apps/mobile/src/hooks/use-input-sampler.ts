@@ -1,5 +1,10 @@
 // Packages
-import React, { useEffect, useRef } from 'react';
+import React, {
+  useEffect,
+  useRef,
+} from 'react';
+
+// Local Imports
 import { INPUT_SEND_INTERVAL } from '@halloween/ui/config/network';
 
 /**
@@ -11,25 +16,49 @@ import { INPUT_SEND_INTERVAL } from '@halloween/ui/config/network';
  * @param padId - The held TV controller's id, if any.
  * @returns The latest vector, for the joystick to write.
  */
-export function useInputSampler(onInput: (x: number, y: number) => void, padId: string | undefined): React.RefObject<{ x: number; y: number }> {
-  useEffect(() => {
-    latest.current = { x: 0, y: 0 };
-  }, [padId]);
-  const latest = useRef({ x: 0, y: 0 });
+export function useInputSampler(onInput: (
+  x: number,
+  y: number,
+) => void, padId: string | undefined): React.RefObject<{ x: number; y: number }> {
+  useEffect(
+    () => {
+      latest.current = {
+        x: 0,
+        y: 0,
+      };
+    },
+    [padId],
+  );
+  const latest = useRef({
+    x: 0,
+    y: 0,
+  });
   const onInputRef = useRef(onInput);
   onInputRef.current = onInput;
 
-  useEffect(() => {
-    let sent = { x: 0, y: 0 };
-    const id = setInterval((): void => {
-      const v = latest.current;
-      if (v.x !== sent.x || v.y !== sent.y) {
-        onInputRef.current(v.x, v.y);
-        sent = v;
-      }
-    }, INPUT_SEND_INTERVAL);
-    return () => clearInterval(id);
-  }, []);
+  useEffect(
+    () => {
+      let sent = {
+        x: 0,
+        y: 0,
+      };
+      const id = setInterval(
+        (): void => {
+          const v = latest.current;
+          if (v.x !== sent.x || v.y !== sent.y) {
+            onInputRef.current(
+              v.x,
+              v.y,
+            );
+            sent = v;
+          }
+        },
+        INPUT_SEND_INTERVAL,
+      );
+      return () => clearInterval(id);
+    },
+    [],
+  );
 
   return latest;
 }

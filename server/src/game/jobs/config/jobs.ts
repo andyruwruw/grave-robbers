@@ -12,21 +12,12 @@ export const HAMMER_JOBS = new Set<string>(['pumpkin', 'chest', 'tombstone', 'cr
 export const STONE_STRUCTURES: ReadonlySet<Tile> = new Set<Tile>(['stone-wall', 'furnace', 'altar', 'bloodforge', 'bone-wall', 'cauldron']);
 
 /**
- * Most wood a chest holds (a random amount from 1).
+ * Swings it takes to break down a structure (it goes back to the bag).
  */
-export const CHEST_WOOD = 3;
+export const BREAK_HITS = 3;
 
 /**
- * Most candy a chest holds (a random amount from 1).
+ * Seconds without a swing before a structure being broken down is whole
+ * again.
  */
-export const CHEST_CANDY = 5;
-
-/**
- * Most bolts a chest holds, when it holds any (a random amount from 1).
- */
-export const CHEST_BOLTS = 9;
-
-/**
- * Chance a chest holds bolts at all.
- */
-export const CHEST_BOLT_CHANCE = 0.5;
+export const BREAK_RESET_SECONDS = 2;

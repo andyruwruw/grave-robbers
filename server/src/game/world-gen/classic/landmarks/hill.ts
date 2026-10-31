@@ -20,15 +20,17 @@ export class Hill extends Landmark {
   }
 
   /**
-   * A hill a level up with lamp posts on its corners, stairs up the side
-   * facing the center and the opposite side, and a watchtower on top.
+   * A hill a level above the ground it's on, with lamp posts on its
+   * corners, stairs up the side facing the center and the opposite side,
+   * and a watchtower on top.
    * @param r The footprint.
    * @returns Its entrance.
    */
   private hill(r: Rect): Point {
+    const ground = this.map.level(r.x, r.y);
     for (let ty = r.y; ty < r.y + r.h; ty++) {
       for (let tx = r.x; tx < r.x + r.w; tx++) {
-        this.map.setLevel(tx, ty, 1);
+        this.map.setLevel(tx, ty, ground + 1);
       }
     }
     for (const [px, py] of this.perimeter(r)) {
@@ -40,7 +42,7 @@ export class Hill extends Landmark {
     for (const [sx, sy] of [door, this.oppositeSide(r, door)]) {
       for (const [dx, dy] of sy === r.y || sy === r.y + r.h - 1 ? [[0, 0], [1, 0]] : [[0, 0], [0, 1]]) {
         this.map.set(sx + dx, sy + dy, 'stairs');
-        this.map.setLevel(sx + dx, sy + dy, 0);
+        this.map.setLevel(sx + dx, sy + dy, ground);
       }
     }
     this.tower({ x: r.x + Math.floor((r.w - TOWER_SIZE) / 2), y: r.y + Math.floor((r.h - TOWER_SIZE) / 2), w: TOWER_SIZE, h: TOWER_SIZE });

@@ -70,10 +70,11 @@ export interface TvMusic {
  * Music tab ask of the music.
  *
  * @param incognito - Whether the TV is showing just the now-playing screen (it silences the game).
+ * @param incognitoMode - Whether incognito is turned on (it only shows while nobody is playing).
  * @param setIncognito - Turns incognito on or off.
  * @returns The music's state and controls.
  */
-export function useTvMusic(incognito: boolean, setIncognito: (on: boolean) => void): TvMusic {
+export function useTvMusic(incognito: boolean, incognitoMode: boolean, setIncognito: (on: boolean) => void): TvMusic {
   const [audio, setAudio] = useState<AudioSettings>(loadAudio);
   const [musicStatus, setMusicStatus] = useState<MusicStatus>(IDLE_MUSIC);
   const [musicHere, setMusicHere] = useState(true);
@@ -171,7 +172,7 @@ export function useTvMusic(incognito: boolean, setIncognito: (on: boolean) => vo
     onClaimMusic: musicHere ? undefined : (): void => send({ t: 'claim-music' }),
     onRemove: (index: number, id: string): void => music.current!.remove(index, id),
     onMove: (index: number, id: string, delta: -1 | 1): void => music.current!.move(index, id, delta),
-    incognito,
+    incognito: incognitoMode,
     onIncognito: (on: boolean): void => {
       setIncognito(on);
       if (on) {

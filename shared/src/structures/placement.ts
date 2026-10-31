@@ -6,9 +6,11 @@ import type { Tile } from '../world/tiles';
 import type { StructureKind } from './types/structures';
 
 /**
- * Structures a player places facing a way, kept as the tile's turn.
+ * Structures a player places facing a way, kept as the tile's turn: belts
+ * (the way they carry) and walls (the way they face, and their look, see
+ * `WALL_STYLES`).
  */
-export const TURNED: ReadonlySet<StructureKind> = new Set<StructureKind>(['belt']);
+export const TURNED: ReadonlySet<StructureKind> = new Set<StructureKind>(['belt', 'sorter', 'wood-wall', 'stone-wall', 'bone-wall']);
 
 /**
  * Structures that raise the ground: a platform's deck stands a level up,

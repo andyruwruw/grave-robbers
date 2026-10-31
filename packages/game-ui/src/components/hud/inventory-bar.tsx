@@ -17,6 +17,12 @@ interface InventoryBarProps {
    * What the player carries.
    */
   inventory: Inventory;
+
+  /**
+   * Each icon's size in pixels, and the counts' text size class.
+   */
+  iconSize?: number;
+  textClassName?: string;
 }
 
 /**
@@ -26,17 +32,17 @@ interface InventoryBarProps {
  * @param {InventoryBarProps} props - Component props.
  * @returns {React.JSX.Element} The rendered bar.
  */
-function InventoryBar({ inventory }: InventoryBarProps): React.JSX.Element {
+function InventoryBar({ inventory, iconSize = 22, textClassName = 'text-sm' }: InventoryBarProps): React.JSX.Element {
   return (
     <div className='flex items-center gap-sm'>
       {RESOURCES.map((r: Resource) => (
         <span
           key={r}
           aria-label={`${GOODS_LABELS[r]}: ${inventory[r]}`}
-          className='flex items-center gap-1.5 font-medium text-sm text-foreground'>
+          className={`flex items-center gap-1.5 font-medium text-foreground ${textClassName}`}>
           <ItemIcon
             item={`res:${r}`}
-            size={22} />
+            size={iconSize} />
           {inventory[r]}
         </span>
       ))}

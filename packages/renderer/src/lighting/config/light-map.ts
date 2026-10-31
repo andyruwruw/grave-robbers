@@ -34,11 +34,6 @@ export const LIGHT_RANGE = 4;
 export const AMBIENT = [0.12, 0.14, 0.24];
 
 /**
- * Ambient darkness under a blood moon.
- */
-export const BLOOD_AMBIENT = [0.26, 0.09, 0.12];
-
-/**
  * Ambient light in broad daylight (the Game tab's daytime).
  */
 export const DAY_AMBIENT = [2.2, 2.15, 1.95];

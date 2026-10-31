@@ -2,6 +2,7 @@
 import { damageTo } from '@halloween/shared/gear/damage-to';
 
 // Local Imports
+import { FLAME_BURN_SECONDS } from './config/flame';
 import { TurretFire } from './turret-fire';
 
 // Types
@@ -30,7 +31,7 @@ export class SweepTurretFire extends TurretFire {
     for (const m of monsters) {
       const d = Math.hypot(m.x - x, m.y - y);
       if (d <= def.range && this.inReach(m, x, y, angle, def)) {
-        this.horde.hit(m.id, damageTo(m.kind, stats, damage), x, y, this.world, def.knockback, def.burn ? { bleed: def.burn } : {});
+        this.horde.hit(m.id, damageTo(m.kind, stats, damage), x, y, this.world, def.knockback, def.burn ? { burn: { rate: def.burn, seconds: FLAME_BURN_SECONDS } } : {});
       }
     }
   }

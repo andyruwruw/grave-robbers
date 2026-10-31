@@ -24,6 +24,16 @@ function after(from: NodeId, level: number, or?: NodeId): Unlock {
 }
 
 /**
+ * A material that opens with the node it hangs from (made there, or only
+ * useful once it's open), and can't be upgraded.
+ * @param from The node it hangs from.
+ * @returns Its unlock.
+ */
+function madeBy(from: NodeId): Unlock {
+  return { by: 'upgrade', from, level: 0 };
+}
+
+/**
  * Every node, in the order the phone lists them (a node always after the
  * one it grows from).
  */
@@ -45,6 +55,7 @@ export const TREE: TreeNode[] = [
   { id: 'mat:arrows', branch: 'weapons', unlock: START },
   { id: 'gear:bow', branch: 'weapons', unlock: START },
   { id: 'gear:crossbow', branch: 'weapons', unlock: after('gear:bow', 1) },
+  { id: 'mat:bolts', branch: 'weapons', unlock: madeBy('gear:crossbow'), fixed: true },
   { id: 'gear:repeating-crossbow', branch: 'weapons', unlock: after('gear:crossbow', 1) },
   { id: 'gear:blood-gun', branch: 'weapons', unlock: after('gear:crossbow', 1) },
   { id: 'gear:musket', branch: 'weapons', unlock: after('gear:blood-gun', 1) },
@@ -78,20 +89,30 @@ export const TREE: TreeNode[] = [
   { id: 'build:stash', branch: 'tables', unlock: START },
   { id: 'build:coffin', branch: 'tables', unlock: BLUEPRINT },
   { id: 'build:sawmill', branch: 'processing', unlock: after('build:research-table', 1) },
+  { id: 'mat:planks', branch: 'processing', unlock: madeBy('build:sawmill'), fixed: true },
   { id: 'build:furnace', branch: 'processing', unlock: after('build:research-table', 2) },
+  { id: 'mat:iron', branch: 'processing', unlock: madeBy('build:furnace'), fixed: true },
   { id: 'build:digger', branch: 'processing', unlock: after('build:sawmill', 1) },
   { id: 'build:sifter', branch: 'processing', unlock: after('build:furnace', 1) },
+  { id: 'mat:silver', branch: 'processing', unlock: madeBy('build:sifter'), fixed: true },
+  { id: 'mat:holy-water', branch: 'processing', unlock: madeBy('mat:silver'), fixed: true },
   { id: 'build:belt', branch: 'processing', unlock: after('build:sawmill', 1) },
+  { id: 'build:sorter', branch: 'processing', unlock: after('build:belt', 1) },
   { id: 'build:anvil', branch: 'tables', unlock: after('build:furnace', 1) },
+  { id: 'mat:chain', branch: 'tables', unlock: madeBy('build:anvil'), fixed: true },
+  { id: 'mat:cursed-core', branch: 'tables', unlock: madeBy('build:anvil'), fixed: true },
+  { id: 'build:quarry', branch: 'processing', unlock: after('build:furnace', 2) },
   { id: 'build:effigy', branch: 'occult', unlock: START },
   { id: 'build:cauldron', branch: 'occult', unlock: after('build:effigy', 1) },
+  { id: 'mat:tonic', branch: 'occult', unlock: madeBy('build:cauldron'), fixed: true },
   { id: 'build:soul-cage', branch: 'occult', unlock: after('build:cauldron', 1) },
   { id: 'build:oven', branch: 'occult', unlock: after('build:cauldron', 1) },
+  { id: 'mat:watering-can', branch: 'occult', unlock: madeBy('build:oven'), fixed: true },
   { id: 'build:altar', branch: 'occult', unlock: after('build:effigy', 1) },
   { id: 'build:bloodforge', branch: 'occult', unlock: after('build:altar', 1) },
+  { id: 'mat:bloodsteel', branch: 'occult', unlock: madeBy('build:bloodforge'), fixed: true },
   { id: 'build:blood-fountain', branch: 'occult', unlock: after('build:altar', 2) },
   { id: 'build:obelisk', branch: 'occult', unlock: after('build:effigy', 2) },
-  { id: 'build:mirror', branch: 'occult', unlock: after('build:obelisk', 1) },
   { id: 'build:bell', branch: 'occult', unlock: after('build:sifter', 1) },
   { id: 'build:sentry', branch: 'occult', unlock: after('gear:blood-gun', 1) },
 ];

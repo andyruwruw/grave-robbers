@@ -69,6 +69,16 @@ export class PostEffects {
   private _day = 0;
 
   /**
+   * Color fringe shift from the style, before a blood moon adds to it.
+   */
+  private _aberration = 0;
+
+  /**
+   * Extra color fringe shift from world events.
+   */
+  private _eventAberration = 0;
+
+  /**
    * Builds the pass chain.
    * @param renderer The TV's renderer.
    * @param scene The world scene.
@@ -108,7 +118,17 @@ export class PostEffects {
     this._focus = style.focus;
     this._grade.uniforms.focus.value = this._focus * (1 - this._day);
     this._grade.uniforms.saturation.value = 1 + style.vibrance * MAX_SATURATION_BOOST;
-    this._grade.uniforms.aberration.value = style.aberration * MAX_ABERRATION;
+    this._aberration = style.aberration * MAX_ABERRATION;
+    this.setEventAberration(this._eventAberration);
+  }
+
+  /**
+   * World events fringe the colors more, on top of the Aberration setting.
+   * @param add Extra shift, in screen uv.
+   */
+  setEventAberration(add: number): void {
+    this._eventAberration = add;
+    this._grade.uniforms.aberration.value = this._aberration + add;
   }
 
   /**

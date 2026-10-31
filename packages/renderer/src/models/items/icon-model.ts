@@ -6,9 +6,11 @@ import { MAP_HEIGHT, MAP_WIDTH } from '@halloween/shared/world/dimensions';
 import { WorldMap } from '@halloween/shared/world/world-map';
 
 // Local Imports
+import { createMonsterAvatar } from '../../avatars/monsters/create-monster-avatar';
 import { buildTile } from '../../graveyard/graveyard-builder';
 import { toWorld } from '../../space/world-coords';
 import { buildGearModel } from '../gear/gear-model';
+import { parseGearIconKey } from '../gear/helpers/gear-icon-key';
 import { buildLantern } from '../gear/tools';
 import { iconBox } from './icon-box';
 import { materialModel } from './material-models';
@@ -16,9 +18,10 @@ import { resourceModel } from './resource-models';
 import { uiModel } from './ui-models';
 
 // Types
-import type { GearKind } from '@halloween/shared/gear/types/gear-def';
 import type { Material, Resource } from '@halloween/shared/goods/goods';
+import type { MonsterKind } from '@halloween/shared/monsters/monster-kinds';
 import type { StructureKind } from '@halloween/shared/structures/types/structures';
+import type { Tile } from '@halloween/shared/world/tiles';
 import type { IconKey, UiIcon } from '../../types/icons';
 
 /**
@@ -44,12 +47,25 @@ export function buildIconModel(key: IconKey): Group {
     group.rotation.y = 0.5;
     return group;
   }
-  if (key.startsWith('build:')) {
-    const kind = key.slice(6) as StructureKind;
+  if (key.startsWith('monster:')) {
+    const avatar = createMonsterAvatar({
+      id: 0, kind: key.slice(8) as MonsterKind, x: 0, y: 0, facing: 0, moving: false, lifted: false, held: null, armor: null,
+      hurts: 0, health: 1, attacks: 0, stumbles: 0, hunting: false, draining: false, blinks: 0, swipes: 0, status: 0,
+    });
+    avatar.group.position.set(0, 0, 0);
+    avatar.group.rotation.y = -Math.PI / 2 + 0.4;
+    group.add(avatar.group);
+    return group;
+  }
+  if (key.startsWith('build:') || key.startsWith('tile:') || key.startsWith('style:')) {
+    const [, kind, style] = key.split(':') as [string, StructureKind | Tile, string | undefined];
     const map = WorldMap.filled('grass');
     const tx = Math.floor(MAP_WIDTH / 2);
     const ty = Math.floor(MAP_HEIGHT / 2);
     map.set(tx, ty, kind);
+    if (style !== undefined) {
+      map.setRamp(tx, ty, 2, Number(style));
+    }
     if (kind === 'steps') {
       map.set(tx, ty - 1, 'platform');
     }
@@ -60,8 +76,8 @@ export function buildIconModel(key: IconKey): Group {
     group.add(tile);
     return group;
   }
-  const kind = key.startsWith('gear:') ? key.slice(5) as GearKind : key as 'hammer' | 'lantern';
-  const parts = kind === 'lantern' ? buildLantern(iconBox.box) : buildGearModel(kind, iconBox.box).parts;
+  const { kind, infusion } = parseGearIconKey(key);
+  const parts = kind === 'lantern' ? buildLantern(iconBox.box) : buildGearModel(kind, iconBox.box, infusion).parts;
   const holder = new Group();
   holder.add(...parts);
   if (kind === 'shield') {

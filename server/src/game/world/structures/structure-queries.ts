@@ -63,6 +63,32 @@ export class StructureQueries extends WorldFeature {
   }
 
   /**
+   * Whether the structure on a tile is glowing (an awake altar, a working
+   * station).
+   * @param tx The tile's column.
+   * @param ty The tile's row.
+   * @returns Whether it glows.
+   */
+  awake(tx: number, ty: number): boolean {
+    return (this.structures.get(ty * this.map.width + tx)?.fuel ?? 0) > 0;
+  }
+
+  /**
+   * The highest level among awake (glowing) altars whose middle is within
+   * `radius` of a point.
+   * @param x The point (tiles across).
+   * @param y The point (tiles down).
+   * @param radius How far (tiles).
+   * @returns The level, or null with no awake altar that close.
+   */
+  awakeAltarNear(x: number, y: number, radius: number): number | null {
+    const levels = this.structuresOf('altar')
+      .filter(({ tx, ty }): boolean => this.awake(tx, ty) && Math.hypot(tx + 0.5 - x, ty + 0.5 - y) <= radius)
+      .map(({ tx, ty }): number => this.level(tx, ty));
+    return levels.length > 0 ? Math.max(...levels) : null;
+  }
+
+  /**
    * Whether the middle of a structure of this kind is within `radius` of
    * (x, y).
    * @param kind The kind of structure.

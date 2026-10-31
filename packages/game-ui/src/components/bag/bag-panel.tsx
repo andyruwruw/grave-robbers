@@ -2,11 +2,12 @@
 import React, { useState } from 'react';
 import { wearsOut } from '@halloween/shared/gear/gear-catalog';
 import { isGearItem } from '@halloween/shared/inventory/bag-items';
-import { itemKey, itemLabel } from '@halloween/shared/inventory/item-keys';
+import { itemKey } from '@halloween/shared/inventory/item-keys';
 import { gearWear } from '@halloween/shared/skill-tree/upgrades/gear-upgrades';
 import { useHold } from '@halloween/ui/hooks/use-hold';
 
 // Local Imports
+import { bagItemIcon, bagItemLabel } from '../../helpers/gear-icons';
 import { useBagPicker } from '../../hooks/use-bag-picker';
 import ItemDetails from '../item-details/item-details';
 import BagHintBar from './bag-hint-bar';
@@ -93,9 +94,9 @@ function BagPanel({
   const slot = (where: SlotWhere, item: BagItem | null, fallback: IconKey | null, style?: React.CSSProperties): React.JSX.Element => (
     <BagSlot
       key={String(where)}
-      icon={item ? itemKey(item) : fallback}
+      icon={item ? bagItemIcon(item) : fallback}
       filled={!!item}
-      label={item ? itemLabel(itemKey(item)) : 'Empty'}
+      label={item ? bagItemLabel(item) : 'Empty'}
       count={item && !isGearItem(item) ? item.count : null}
       wear={item && isGearItem(item) && wearsOut(item.kind) ? item.wear / gearWear(item.kind, tree) : null}
       tone={tone(where, item)}

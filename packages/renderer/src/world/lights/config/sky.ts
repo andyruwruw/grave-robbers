@@ -7,16 +7,6 @@ import { Color } from 'three';
 export const MOON = new Color('#9fb4ff');
 
 /**
- * Moonlight color under a blood moon.
- */
-export const BLOOD_MOON = new Color('#ff7a66');
-
-/**
- * How fast (per second) the scene shifts between normal and blood moon.
- */
-export const BLOOD_MOON_FADE = 0.12;
-
-/**
  * Sunlight for the Game tab's daytime.
  */
 export const SUN = new Color('#fff0d4');

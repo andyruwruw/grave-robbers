@@ -13,6 +13,7 @@ import {
   STEEL,
   WRAP,
 } from './config/palette';
+import { headOf } from './helpers/head-of';
 
 // Types
 import type { Mesh } from 'three';
@@ -25,19 +26,25 @@ import type { BoxFactory, GearModel } from '../../types/models';
  */
 export const buildBattleAxe = (box: BoxFactory): GearModel => {
   const tip = box([0.045, 0.38, 0.06], [0.2, -0.62, 0], EDGE);
+  const haft = box([0.055, 0.78, 0.055], [0, -0.36, 0], HANDLE);
+  const head = [
+    box([0.1, 0.2, 0.08], [0, -0.62, 0], IRON),
+    box([0.14, 0.3, 0.05], [0.1, -0.62, 0], IRON),
+    box([0.11, 0.26, 0.05], [-0.09, -0.62, 0], IRON),
+    box([0.035, 0.3, 0.055], [-0.16, -0.62, 0], EDGE),
+    tip,
+  ];
   return {
     parts: [
       box([0.06, 0.1, 0.06], [0, 0, 0], GRIP),
-      box([0.055, 0.78, 0.055], [0, -0.36, 0], HANDLE),
-      box([0.1, 0.2, 0.08], [0, -0.62, 0], IRON),
-      box([0.14, 0.3, 0.05], [0.1, -0.62, 0], IRON),
-      box([0.11, 0.26, 0.05], [-0.09, -0.62, 0], IRON),
-      box([0.035, 0.3, 0.055], [-0.16, -0.62, 0], EDGE),
+      haft,
       box([0.03, 0.09, 0.03], [0, -0.78, 0], EDGE),
-      tip,
+      ...head,
     ],
     tip,
     flame: null,
+    head: headOf(head, 1, 0),
+    haft,
   };
 };
 
@@ -62,20 +69,26 @@ export const buildScythe = (box: BoxFactory): GearModel => {
     mesh.rotation.z = rz;
     return mesh;
   };
+  const haft = box([0.045, 1.1, 0.045], [0, -0.4, 0], HANDLE);
+  const head = [
+    box([0.22, 0.085, 0.03], [-0.1, -0.94, 0], BLADE),
+    curve([0.19, 0.07, 0.03], [-0.28, -0.9, 0], BLADE, -0.28),
+    curve([0.15, 0.055, 0.03], [-0.42, -0.83, 0], BLADE, -0.6),
+    curve([0.34, 0.02, 0.034], [-0.22, -0.885, 0], EDGE, -0.18),
+    tip,
+  ];
   return {
     parts: [
       box([0.06, 0.1, 0.06], [0, 0, 0], GRIP),
-      box([0.045, 1.1, 0.045], [0, -0.4, 0], HANDLE),
+      haft,
       box([0.12, 0.035, 0.035], [0.05, -0.34, 0], GRIP),
       box([0.075, 0.08, 0.075], [0, -0.92, 0], IRON),
-      box([0.22, 0.085, 0.03], [-0.1, -0.94, 0], BLADE),
-      curve([0.19, 0.07, 0.03], [-0.28, -0.9, 0], BLADE, -0.28),
-      curve([0.15, 0.055, 0.03], [-0.42, -0.83, 0], BLADE, -0.6),
-      curve([0.34, 0.02, 0.034], [-0.22, -0.885, 0], EDGE, -0.18),
-      tip,
+      ...head,
     ],
     tip,
     flame: null,
+    head: headOf(head),
+    haft,
   };
 };
 
@@ -86,16 +99,22 @@ export const buildScythe = (box: BoxFactory): GearModel => {
  */
 export const buildSpear = (box: BoxFactory): GearModel => {
   const tip = box([0.045, 0.18, 0.035], [0, -0.95, 0], EDGE);
+  const haft = box([0.04, 1, 0.04], [0, -0.32, 0], HANDLE);
+  const head = [
+    box([0.08, 0.05, 0.045], [0, -0.84, 0], IRON),
+    box([0.02, 0.06, 0.02], [0, -1.06, 0], EDGE),
+    tip,
+  ];
   return {
     parts: [
-      box([0.04, 1, 0.04], [0, -0.32, 0], HANDLE),
+      haft,
       box([0.055, 0.07, 0.055], [0, -0.68, 0], WRAP),
-      box([0.08, 0.05, 0.045], [0, -0.84, 0], IRON),
-      box([0.02, 0.06, 0.02], [0, -1.06, 0], EDGE),
-      tip,
+      ...head,
     ],
     tip,
     flame: null,
+    head: headOf(head),
+    haft,
   };
 };
 
@@ -138,20 +157,26 @@ export const buildRitualKnife = (box: BoxFactory): GearModel => {
     mesh.rotation.z = rz;
     return mesh;
   };
+  const haft = box([0.045, 0.16, 0.045], [0, 0.01, 0], BONE);
+  const head = [
+    box([0.06, 0.14, 0.018], [0.005, -0.16, 0], SILVER),
+    curve([0.055, 0.12, 0.018], [0.03, -0.27, 0], SILVER, 0.3),
+    curve([0.018, 0.24, 0.02], [0.05, -0.23, 0], EDGE, 0.2),
+    tip,
+  ];
   return {
     parts: [
       box([0.05, 0.05, 0.05], [0, 0.09, 0], BONE_DARK),
-      box([0.045, 0.16, 0.045], [0, 0.01, 0], BONE),
+      haft,
       box([0.055, 0.03, 0.055], [0, 0.05, 0], WRAP),
       box([0.055, 0.03, 0.055], [0, -0.02, 0], WRAP),
       box([0.12, 0.025, 0.06], [0, -0.08, 0], BLADE),
-      box([0.06, 0.14, 0.018], [0.005, -0.16, 0], SILVER),
-      curve([0.055, 0.12, 0.018], [0.03, -0.27, 0], SILVER, 0.3),
-      curve([0.018, 0.24, 0.02], [0.05, -0.23, 0], EDGE, 0.2),
-      tip,
+      ...head,
     ],
     tip,
     flame: null,
+    head: headOf(head),
+    haft,
   };
 };
 
@@ -162,17 +187,23 @@ export const buildRitualKnife = (box: BoxFactory): GearModel => {
  */
 export const buildShortSword = (box: BoxFactory): GearModel => {
   const tip = box([0.035, 0.08, 0.026], [0, -0.58, 0], EDGE);
+  const haft = box([0.045, 0.13, 0.045], [0, 0.01, 0], GRIP);
+  const head = [
+    box([0.065, 0.42, 0.024], [0, -0.3, 0], STEEL),
+    box([0.016, 0.36, 0.03], [0, -0.28, 0], BLADE),
+    tip,
+  ];
   return {
     parts: [
       box([0.055, 0.05, 0.055], [0, 0.09, 0], IRON),
-      box([0.045, 0.13, 0.045], [0, 0.01, 0], GRIP),
+      haft,
       box([0.17, 0.035, 0.05], [0, -0.07, 0], BRASS),
-      box([0.065, 0.42, 0.024], [0, -0.3, 0], STEEL),
-      box([0.016, 0.36, 0.03], [0, -0.28, 0], BLADE),
-      tip,
+      ...head,
     ],
     tip,
     flame: null,
+    head: headOf(head),
+    haft,
   };
 };
 
@@ -183,18 +214,24 @@ export const buildShortSword = (box: BoxFactory): GearModel => {
  */
 export const buildGreatsword = (box: BoxFactory): GearModel => {
   const tip = box([0.05, 0.1, 0.03], [0, -1.02, 0], EDGE);
+  const haft = box([0.05, 0.26, 0.05], [0, 0.02, 0], GRIP);
+  const head = [
+    box([0.09, 0.82, 0.028], [0, -0.56, 0], STEEL),
+    box([0.02, 0.74, 0.034], [0, -0.53, 0], BLADE),
+    tip,
+  ];
   return {
     parts: [
       box([0.06, 0.06, 0.06], [0, 0.17, 0], IRON),
-      box([0.05, 0.26, 0.05], [0, 0.02, 0], GRIP),
+      haft,
       box([0.06, 0.04, 0.06], [0, -0.06, 0], WRAP),
       box([0.28, 0.045, 0.06], [0, -0.13, 0], IRON),
-      box([0.09, 0.82, 0.028], [0, -0.56, 0], STEEL),
-      box([0.02, 0.74, 0.034], [0, -0.53, 0], BLADE),
-      tip,
+      ...head,
     ],
     tip,
     flame: null,
+    head: headOf(head),
+    haft,
   };
 };
 
@@ -205,17 +242,23 @@ export const buildGreatsword = (box: BoxFactory): GearModel => {
  */
 export const buildGlaive = (box: BoxFactory): GearModel => {
   const tip = box([0.035, 0.08, 0.03], [0.07, -1.18, 0], EDGE);
+  const haft = box([0.045, 1.05, 0.045], [0, -0.32, 0], HANDLE);
+  const head = [
+    box([0.13, 0.3, 0.028], [0.04, -1.0, 0], STEEL),
+    box([0.03, 0.32, 0.034], [0.11, -1.0, 0], EDGE),
+    tip,
+  ];
   return {
     parts: [
-      box([0.045, 1.05, 0.045], [0, -0.32, 0], HANDLE),
+      haft,
       box([0.06, 0.07, 0.06], [0, -0.06, 0], WRAP),
       box([0.065, 0.06, 0.06], [0, -0.85, 0], IRON),
-      box([0.13, 0.3, 0.028], [0.04, -1.0, 0], STEEL),
-      box([0.03, 0.32, 0.034], [0.11, -1.0, 0], EDGE),
       box([0.09, 0.03, 0.03], [-0.06, -0.9, 0], IRON),
-      tip,
+      ...head,
     ],
     tip,
     flame: null,
+    head: headOf(head),
+    haft,
   };
 };

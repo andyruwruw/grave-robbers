@@ -1,8 +1,10 @@
 // Types
 import type { RecipeId } from '@halloween/shared/crafting/recipes';
 import type { GearSlot } from '@halloween/shared/gear/types/gear-def';
+import type { Essence } from '@halloween/shared/gear/types/infusion';
 import type { ClientMessage } from '@halloween/shared/protocol/messages/client-message';
 import type { NodeId } from '@halloween/shared/skill-tree/types/skill-tree';
+import type { SortKey, SortSide } from '@halloween/shared/structures/sorting';
 
 /**
  * Typed wrappers around a controller's `send`, one per thing a player does.
@@ -92,6 +94,16 @@ export class PlayerCommands {
   readonly craft = (recipe: RecipeId, count: number): void => this._send({ t: 'craft', recipe, count });
 
   /**
+   * Infuses a piece of gear at an anvil with the next level of an
+   * essence's path.
+   *
+   * @param from - An equipped slot, a bag index, or 'hammer' for the hammer
+   * everyone has (which makes an infused hammer).
+   * @param essence - The path's essence.
+   */
+  readonly infuse = (from: GearSlot | number | 'hammer', essence: Essence): void => this._send({ t: 'infuse', from, essence });
+
+  /**
    * Upgrades a skill tree node.
    *
    * @param node - The node.
@@ -116,6 +128,18 @@ export class PlayerCommands {
   readonly buildPlace = (): void => this._send({ t: 'build-place' });
 
   /**
+   * Turns what's being built a quarter turn left (-1) or right (1).
+   * @param dir Which way.
+   */
+  readonly turn = (dir: -1 | 1): void => this._send({ t: 'turn', dir });
+
+  /**
+   * Picks the look the wall being built goes down in.
+   * @param style The look (see `WALL_STYLES`).
+   */
+  readonly buildStyle = (style: number): void => this._send({ t: 'build-style', style });
+
+  /**
    * Claims a TV controller.
    *
    * @param id - The controller's id.
@@ -131,6 +155,49 @@ export class PlayerCommands {
    * Leaves the game for good.
    */
   readonly leave = (): void => this._send({ t: 'leave' });
+
+  /**
+   * Asks for a code that moves this character to another device.
+   */
+  readonly transferCode = (): void => this._send({ t: 'transfer-code' });
+
+  /**
+   * USE on the facing tile (opens or works it, never hurts it).
+   */
+  readonly use = (): void => this._send({ t: 'use' });
+
+  /**
+   * Closes the open digger, station, or sorter panel.
+   */
+  readonly useClose = (): void => this._send({ t: 'use-close' });
+
+  /**
+   * Feeds the open station from the bag.
+   *
+   * @param all - As many batches as fit, instead of one.
+   */
+  readonly useFeed = (all: boolean): void => this._send({ t: 'use-feed', all });
+
+  /**
+   * Takes what the open bone digger dug up.
+   */
+  readonly useCollect = (): void => this._send({ t: 'use-collect' });
+
+  /**
+   * Tells the open belt sorter what to send out one side.
+   *
+   * @param side - The side.
+   * @param item - What goes that way, or null for nothing.
+   */
+  readonly useRoute = (side: SortSide, item: SortKey | null): void => this._send({ t: 'use-route', side, item });
+
+  /**
+   * Closes the open digger, station, or sorter panel, then panics.
+   */
+  readonly usePanic = (): void => {
+    this._send({ t: 'use-close' });
+    this._send({ t: 'panic' });
+  };
 
   /**
    * Moves an item between the bag and the open storage chest.

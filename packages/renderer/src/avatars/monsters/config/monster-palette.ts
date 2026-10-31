@@ -29,6 +29,11 @@ export const ARMOR_DARK = '#4e535b';
 export const ARMOR_RUST = '#7a4a2c';
 
 /**
+ * The green glow on a monster a necromancer wards, and its strength.
+ */
+export const WARD_GLOW = { color: '#3aff7a', amount: 0.35 };
+
+/**
  * The pale streak a melee attack leaves.
  */
 export const SWOOSH = '#d8d2c4';

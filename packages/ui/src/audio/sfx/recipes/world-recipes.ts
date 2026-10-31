@@ -60,6 +60,13 @@ export const WORLD_RECIPES: Record<WorldSfx, SfxRecipe> = {
     s.noise({ filter: 'bandpass', from: 500, to: 1900, q: 1.5, dur: 0.32, gain: 0.8, attack: 0.08 });
     s.tone({ type: 'sine', from: 300, to: 520, dur: 0.22, gain: 0.07 });
   },
+  'fountain-catch': (s) => {
+    s.noise({ filter: 'lowpass', from: 1800, to: 300, dur: 0.35, gain: 0.55 });
+    s.tone({ type: 'sine', from: 180, to: 55, dur: 0.5, gain: 0.32 });
+    s.noise({ filter: 'bandpass', from: 450, to: 900, q: 4, dur: 0.12, gain: 0.45, at: 0.14 });
+    s.noise({ filter: 'bandpass', from: 380, to: 760, q: 4, dur: 0.12, gain: 0.35, at: 0.3 });
+    s.tone({ type: 'triangle', from: 220, to: 207, dur: 0.7, gain: 0.07, at: 0.12, vibrato: [5, 6] });
+  },
   'snuff': (s) => s.noise({ filter: 'highpass', from: 2200, to: 6000, dur: 0.45, gain: 0.22, attack: 0.04 }),
   'error': (s) => {
     s.tone({ from: 150, dur: 0.09, gain: 0.14 });

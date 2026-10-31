@@ -10,8 +10,8 @@ import type { StateMessage } from '../types/state';
  * watched players, for a display on a huge world.
  * @param state The full state.
  * @param centers The watched players.
- * @param width The map's width, to place lights.
- * @returns The state with only nearby monsters, shots, puddles, items and lights.
+ * @param width The map's width, to place lights and fountains.
+ * @returns The state with only nearby monsters, shots, puddles, items, lights and fountain victims.
  */
 export function nearInterest(state: StateMessage, centers: PlayerState[], width: number): StateMessage {
   const near = (x: number, y: number): boolean => centers.some((c): boolean => Math.abs(c.x - x) < INTEREST_RADIUS && Math.abs(c.y - y) < INTEREST_RADIUS);
@@ -22,5 +22,6 @@ export function nearInterest(state: StateMessage, centers: PlayerState[], width:
     puddles: state.puddles.filter((p): boolean => near(p.x, p.y)),
     items: state.items.filter((i): boolean => near(i.x, i.y)),
     lights: state.lights.filter((l): boolean => near(l.i % width, Math.floor(l.i / width))),
+    victims: state.victims?.filter((v): boolean => near(v.i % width, Math.floor(v.i / width))),
   };
 }

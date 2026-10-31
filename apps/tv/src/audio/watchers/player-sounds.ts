@@ -1,5 +1,6 @@
 // Packages
 import { GEAR } from '@halloween/shared/gear/gear-catalog';
+import { variantOf } from '@halloween/shared/gear/infusions/helpers/infusion-paths';
 
 // Local Imports
 import { EntityWatcher } from './entity-watcher';
@@ -9,7 +10,8 @@ import type { StateMessage } from '../../types/sound';
 
 /**
  * Sounds for players: swings and shots (with the morning star's crack as it
- * lands), getting hurt, and respawning.
+ * lands; a Hellmouth's spray roars from its own event instead), getting
+ * hurt, and respawning.
  */
 export class PlayerSounds extends EntityWatcher<string> {
   /**
@@ -23,7 +25,8 @@ export class PlayerSounds extends EntityWatcher<string> {
       live.add(p.id);
       const seen = this._seen.get(p.id);
       if (seen) {
-        if (p.swings > seen.swings) {
+        const spray = !p.drawn && p.gear.weapon !== null && variantOf(p.gear.weapon, p.gearInfusion.weapon)?.twist.spray;
+        if (p.swings > seen.swings && !spray) {
           const gun = !p.drawn && (p.gear.weapon === 'musket' || p.gear.weapon === 'blood-gun');
           this._stage.play(gun ? 'gunshot' : !p.drawn && p.gear.weapon && GEAR[p.gear.weapon].weapon?.ranged ? 'shoot' : 'swing', p.x, gun ? 1 : 0.5, (gun && p.gear.weapon === 'musket' ? 0.8 : 1) * (0.92 + Math.random() * 0.16));
           if (!p.drawn && p.gear.weapon === 'morning-star') {

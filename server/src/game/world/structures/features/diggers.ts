@@ -1,17 +1,14 @@
 // Packages
-import { stock } from '@halloween/shared/goods/goods';
-import {
-  DIGGER_BONES,
-  DIGGER_CANDY,
-  DIGGER_CANDY_CHANCE,
-  DIGGER_FLOORS,
-} from '@halloween/shared/structures/automation';
+import { GOODS, stock } from '@halloween/shared/goods/goods';
+import { DIGGER_CAPACITY, DIGGER_FLOORS } from '@halloween/shared/structures/automation';
 import { diggerSeconds } from '@halloween/shared/skill-tree/upgrades/structure-upgrades';
 
 // Local Imports
+import { rollGrave } from '../../../helpers/loot-rolls';
 import { TickingFeature } from './ticking-feature';
 
 // Types
+import type { Bundle, Goods } from '@halloween/shared/goods/goods';
 import type { WorldSite } from '../../types/site';
 import type { DugGrave, StructureState } from '../../types/structures';
 import type { StationOutput } from '../station-output';
@@ -45,7 +42,7 @@ export class Diggers extends TickingFeature {
    * @param dt Seconds since the last step.
    */
   tick(tx: number, ty: number, s: StructureState, dt: number): void {
-    if (!DIGGER_FLOORS.has(s.floor)) {
+    if (!DIGGER_FLOORS.has(s.floor) || held(s) >= DIGGER_CAPACITY) {
       return;
     }
     s.progress = (s.progress ?? 0) + dt;
@@ -53,9 +50,8 @@ export class Diggers extends TickingFeature {
       return;
     }
     s.progress = 0;
-    const roll = ([min, max]: [number, number]): number => min + Math.floor(Math.random() * (max - min + 1));
     this._dug.push({ tx, ty, tile: s.floor === 'cross' ? 'cross' : 'tombstone' });
-    this._output.deliver(tx, ty, stock({ bone: roll(DIGGER_BONES), candy: Math.random() < DIGGER_CANDY_CHANCE ? roll(DIGGER_CANDY) : 0 }));
+    this._output.deliver(tx, ty, rollGrave(), (left: Bundle): Bundle => keep(s, left));
   }
 
   /**
@@ -67,4 +63,30 @@ export class Diggers extends TickingFeature {
     this._dug = [];
     return dug;
   }
+}
+
+/**
+ * How many goods a bone digger is holding.
+ * @param s The digger's state.
+ * @returns The count.
+ */
+function held(s: StructureState): number {
+  return GOODS.reduce((sum: number, g: Goods): number => sum + (s.hoard?.[g] ?? 0), 0);
+}
+
+/**
+ * Stores what a bone digger dug in its hoard, up to DIGGER_CAPACITY.
+ * @param s The digger's state.
+ * @param left What it dug that nothing beside it took.
+ * @returns What didn't fit.
+ */
+function keep(s: StructureState, left: Bundle): Bundle {
+  const rest = stock(left);
+  s.hoard ??= {};
+  for (const g of GOODS) {
+    const moved = Math.min(rest[g], Math.max(0, DIGGER_CAPACITY - held(s)));
+    s.hoard[g] = (s.hoard[g] ?? 0) + moved;
+    rest[g] -= moved;
+  }
+  return rest;
 }

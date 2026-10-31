@@ -92,7 +92,7 @@ export class Predictor {
       this.facing = Math.atan2(steer.y, steer.x);
     }
     if (aim.x !== 0 || aim.y !== 0) {
-      this.facing = Math.round(Math.atan2(aim.y, aim.x) / (Math.PI / 4)) * (Math.PI / 4);
+      this.facing = Math.atan2(aim.y, aim.x);
     }
     this._history.push({ t: now, x: this.x, y: this.y });
     while (this._history.length > 2 && this._history[0].t < now - HISTORY_KEEP) {

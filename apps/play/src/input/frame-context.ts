@@ -84,6 +84,11 @@ export interface FrameContext {
   aim: { x: number; y: number };
 
   /**
+   * The ground point under the mouse while it aims, for USE, or null.
+   */
+  useAt: { x: number; y: number } | null;
+
+  /**
    * The direction held in a menu, if any.
    */
   navDir: NavDir | null;
@@ -158,6 +163,7 @@ export function buildFrameContext(
     held,
     move: { x: 0, y: 0 },
     aim: { x: 0, y: 0 },
+    useAt: null,
     navDir: null,
     navAt: 0,
     sentAt: 0,

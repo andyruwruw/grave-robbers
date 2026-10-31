@@ -1,7 +1,12 @@
+// Packages
+import { MIN_LEVEL } from '@halloween/shared/world/dimensions';
+
 // Local Imports
 import { PUMPKIN_COUNT } from '../world-gen/config/classic';
-import { WORLD_SAVE_VERSION } from '../storage/config/save';
-import { CHEST_TARGET } from './config/growth';
+import { ChunkTracker } from '../storage/chunk-tracker';
+import { CHUNK_SIZE, WORLD_SAVE_VERSION } from '../storage/config/save';
+import { TILE_PALETTE } from '../storage/helpers/chunk-codec';
+import { CHEST_TARGET, ROCK_TARGET } from './config/growth';
 import { MapEditor } from './editor/map-editor';
 import { Planter } from './growth/planter';
 import { Regrowth } from './growth/regrowth';
@@ -28,7 +33,7 @@ import { openMap, restoreSave, seedPresetStructures } from './world-setup';
 import type { MapGenSettings } from '@halloween/shared/map-gen/settings';
 import type { MapView } from '@halloween/shared/protocol/tv-tools';
 import type { WorldMap } from '@halloween/shared/world/world-map';
-import type { MapPreset, WorldSave } from '../storage/types/save';
+import type { LoadedWorld, MapPreset, WorldSave } from '../storage/types/save';
 import type { GrownSpot, Occupant } from './types/growth';
 import type { WorldSite } from './types/site';
 
@@ -62,6 +67,11 @@ export class World {
    * Started from a test map (the sandbox): natural spawning starts off.
    */
   readonly quiet: boolean;
+
+  /**
+   * Which chunks of the map changed since the last save.
+   */
+  readonly chunks: ChunkTracker;
 
   /**
    * The world's game clock; only World moves it.
@@ -160,14 +170,14 @@ export class World {
   private readonly _planter: Planter;
 
   /**
-   * Loads a save, or starts fresh: from a preset's map if given (and it
-   * fits), else a newly generated one.
-   * @param save The save to load, or null.
+   * Loads a saved world, or starts fresh: from a preset's map if given
+   * (and it fits), else a newly generated one.
+   * @param loaded The saved world to load, or null.
    * @param preset The preset to start from when there's no save.
    * @param gen The generator knobs, for a generated map.
    */
-  constructor(save: WorldSave | null, preset: MapPreset | null = null, gen?: MapGenSettings) {
-    const opened = openMap(save, preset, gen);
+  constructor(loaded: LoadedWorld | null, preset: MapPreset | null = null, gen?: MapGenSettings) {
+    const opened = openMap(loaded, preset, gen);
     this.seed = opened.seed;
     this.map = opened.map;
     this.view = opened.view;
@@ -197,9 +207,12 @@ export class World {
     this._planter = new Planter(site);
     this.growth = new Regrowth(site, this._planter, {
       tree: opened.save?.treeTarget ?? countTiles(this.map, 'tree', 'stump'),
-      pumpkin: perArea(this.map, PUMPKIN_COUNT),
-      chest: perArea(this.map, CHEST_TARGET),
+      hedge: opened.save?.hedgeTarget ?? countTiles(this.map, 'hedge'),
+      pumpkin: opened.save?.pumpkinTarget ?? perArea(this.map, PUMPKIN_COUNT),
+      chest: opened.save?.chestTarget ?? perArea(this.map, CHEST_TARGET),
+      rock: opened.save?.rockTarget ?? ROCK_TARGET,
     });
+    this.chunks = new ChunkTracker(this.map, opened.save !== null && !loaded?.rewrite);
   }
 
   /**
@@ -211,17 +224,29 @@ export class World {
   }
 
   /**
-   * Everything about the world that is written to disk.
+   * Storage chests belts took something out of since the last call, so
+   * whoever has one open sees it change.
+   * @returns Their tile indexes.
+   */
+  takeTouchedStashes(): number[] {
+    return this._conveyor.takeTouchedStashes();
+  }
+
+  /**
+   * Everything about the world that is written to `world.json` (the
+   * terrain goes in chunk files; `Game.save` adds the settings and the
+   * world level).
    * @returns The save.
    */
-  save(): WorldSave {
+  save(): Omit<WorldSave, 'settings' | 'worldLevel'> {
     return {
       version: WORLD_SAVE_VERSION,
       seed: this.seed,
-      tiles: this.map.encode(),
       width: this.map.width,
-      levels: this.map.encodeLevels(),
-      ramps: this.map.encodeRamps(),
+      height: this.map.height,
+      palette: TILE_PALETTE,
+      chunkSize: CHUNK_SIZE,
+      minLevel: MIN_LEVEL,
       blends: this.editor.blendAreas(),
       view: this.view,
       quiet: this.quiet,
@@ -230,6 +255,10 @@ export class World {
       regrow: [...this._timers.regrow],
       mounds: [...this._timers.mounds],
       treeTarget: this.growth.targets.tree,
+      hedgeTarget: this.growth.targets.hedge,
+      pumpkinTarget: this.growth.targets.pumpkin,
+      chestTarget: this.growth.targets.chest,
+      rockTarget: this.growth.targets.rock,
       items: this.items.itemStates(),
       structures: this.structures.saveEntries(),
     };

@@ -1,6 +1,28 @@
+<img src="./docs/media/fight.jpg" />
+
 # Grave Robbers
 
-A top-down, pixelated, voxel horror party game. A TV (or any big screen) shows the graveyard, everyone plays on their phone, which becomes a controller.
+*Candy is power. The dark is hungry.*
+
+A spooky top-down survival party game for Halloween nights. Up to 8 players rob graves, chop and mine, craft weapons, and build walls, lamps, and traps in a graveyard that's always dark. The horde comes for anyone outside the light: zombies, vampires, ghosts, werewolves, necromancers, and more, worse under a blood moon. Candy from graves and blood from monsters buy skill tree upgrades. Die and you drop half of both, and your bag spills where you fell.
+
+<img src="./docs/media/tv.jpg" />
+
+## Join away!
+
+- **One screen is the window.** A TV (or any big screen) shows the whole graveyard from above, in pixelated voxels.
+- **Every phone is a controller.** Scan the QR code on the TV, pick a name and a color, and you rise from the grave. No app, no account, no lobby.
+- **Drop in, drop out.** There are no rounds. Join mid-night, put your phone down, come back tomorrow: your character waits where you left them.
+
+The rest of this page covers sound, music, saves, and running a server. The game itself is explained in [docs/overview.md](docs/overview.md).
+
+<img src="./docs/media/blood.jpg" />
+
+<img src="./docs/media/base.jpg" />
+
+<img src="./docs/media/knowledge.jpg" />
+
+<img src="./docs/media/automation.jpg" />
 
 # Sound and music
 
@@ -16,7 +38,7 @@ Synthesized in code, so they work out of the box. The TV plays world sounds pann
 
 Drop `<name>.mp3` into `server/media/sfx/` to replace that sound. Getting hit has its own sound (`hurt`: a crunchy thud and a pained grunt), on the TV and on the hurt player's phone.
 
-Names: `swing`, `chop`, `mine`, `hit`, `hurt`, `monster-hit`, `bite`, `build`, `break`, `pickup`, `drop`, `refuel`, `snuff`, `error`, `death`, `respawn`, `monster-death`, `blood-moon`, `zombie-groan`, `vampire-hiss`, `ghost-moan`, `equip`, `craft`, `shadow-step`, `ghoul-hiss`, `ghoul-screech`, `shoot`, `splat`, `drink`.
+Names: `swing`, `chop`, `mine`, `hit`, `hurt`, `monster-hit`, `bite`, `build`, `break`, `pickup`, `drop`, `refuel`, `snuff`, `error`, `death`, `respawn`, `monster-death`, `blood-moon`, `zombie-groan`, `vampire-hiss`, `ghost-moan`, `equip`, `craft`, `shadow-step`, `ghoul-hiss`, `ghoul-screech`, `shoot`, `splat`, `drink`, `fountain-catch`.
 
 ## Music
 
@@ -71,14 +93,14 @@ The tile you're about to act on is outlined in your color on the TV.
 
 ## World, saves, and resets
 
-- The world (map and terrain levels, structures, fuel, piles, stump timers) is saved to `server/data/world.json` every 30 seconds, after a reset, and on shutdown. It is gitignored.
-- Players are not saved. After a server restart, phones land back on the join form with their name prefilled.
+- The world and every character are saved under `server/data/saves/` (gitignored) every 30 seconds, after a reset, and on shutdown, with hourly backups. Each world slot is a folder; the admin's **Worlds** page makes and switches them. See [docs/architecture.md](docs/architecture.md#persistence).
+- Characters come back after a restart where they stood, with everything they had: phones reconnect on their own. A name belongs to its character; another device needs the transfer code from the phone's move button.
 - To start a new world:
   - pick a map in the TV sidebar's **Game** tab (hover the top-right corner of the TV and click the chevron to open the sidebar), tick **Replace this world**, and press **New world**, or
-  - run `npm run dev:fresh`, which deletes the save before starting, or
-  - stop the server and delete `server/data/world.json`.
+  - run `npm run dev:fresh`, which deletes every save (all slots, characters, and backups) before starting, or
+  - stop the server and delete `server/data/saves/`.
 - New worlds start on the **King of the Hill** map preset (`server/presets/king-of-the-hill.json`: a generated map, hand-edited: a lumpy, wooded hill with a higher crown on the middle right, the pit's stairs moved to its top right corner, rocks in the walled courtyard, a round well plaza, and extra graves), unless the Game tab picks **Random map**. `WORLD_PRESET` picks another preset file by name; any `.json` dropped into `server/presets/` shows up in the Game tab's list.
-- A save from an older version of the game is ignored and replaced with a new world.
+- Saves from older versions of the game still load: anything missing gets its default, anything that no longer exists is dropped, and the server logs what it fixed. Only a file that isn't readable at all is set aside as `*.unreadable-<time>` (never deleted).
 
 ## Setup
 
@@ -108,7 +130,7 @@ This starts:
 Then:
 
 1. On the TV machine, open **http://localhost:5181/tv**.
-2. Scan the small QR code in the bottom left of the TV with a phone: white squares on a dark glow, which phone cameras read fine (hovering it with the mouse brightens it and shows the URL; it stays up during Incognito). The QR swaps `localhost` for this computer's LAN address, so it points at something like `http://192.168.1.20:5181/`.
+2. Scan the small QR code in the bottom left of the TV with a phone: white squares on a dark glow, which phone cameras read fine (hovering it with the mouse brightens it and shows the URL; it stays up during Incognito). The QR swaps `localhost` for this computer's LAN address and always points at the phone app, so it reads something like `http://192.168.1.20:5181/` in dev even if the TV was opened on its own port (5182; the dev servers pass it in as `__PHONE_PORT__`, see `apps/vite.base.ts`).
 3. Pick a name and color, then turn the phone sideways.
 
 #### Phones can't connect?
@@ -124,10 +146,10 @@ npm run build   # builds every app into apps/<name>/dist
 npm start       # server on :3021 also serves the built apps
 ```
 
-Open **http://localhost:3021/tv** on the TV; phones use the QR as before. Set `PORT` to change the port (the dev servers proxy to 3021 unless `GAME_PORT` says otherwise; `APPS_PORT` moves their 5181 to 5184) and `WORLD_SAVE` to use a different save file, e.g. to run a second server alongside `npm run dev`:
+Open **http://localhost:3021/tv** on the TV; phones use the QR as before. Set `PORT` to change the port (the dev servers proxy to 3021 unless `GAME_PORT` says otherwise; `APPS_PORT` moves their 5181 to 5184) and `SAVE_DIR` to use a different save folder, e.g. to run a second server alongside `npm run dev`:
 
 ```sh
-PORT=3031 WORLD_SAVE=/tmp/test-world.json npm start
+PORT=3031 SAVE_DIR=/tmp/test-saves npm start
 ```
 
 ## Testing

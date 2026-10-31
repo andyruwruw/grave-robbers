@@ -46,11 +46,13 @@ export class ActionSystem extends GameSystem {
    * crossbow takes aim first (see `takeAim`), and a repeating crossbow
    * reloads after its burst. A weapon that feeds on health takes it only
    * when the swing lands on something (see `strike`), and won't swing on
-   * the wielder's last.
+   * the wielder's last. The Hellmouth sprays flame while held (see
+   * `FlameSpraySystem`), and a glaive that throws its stab throws it (see
+   * `GlaiveSystem`); nothing happens while it's out.
    * @param p The player.
    */
   private act(p: Player): void {
-    if (p.blocking || p.reloadUntil !== null) {
+    if (p.blocking || p.reloadUntil !== null || p.thrown) {
       return;
     }
     const weapon = p.weapon();
@@ -68,6 +70,10 @@ export class ActionSystem extends GameSystem {
       if (tile === 'tombstone' || tile === 'cross') {
         p.digUntil = p.drawnUntil;
       }
+      return;
+    }
+    if (weapon.spray) {
+      this._game.ranged.spray.pulse(p, weapon);
       return;
     }
     if (weapon.ranged) {
@@ -94,6 +100,10 @@ export class ActionSystem extends GameSystem {
     if (weapon.hpCost && p.hp <= weapon.hpCost) {
       p.nextActionAt = this.world.time + weapon.cooldown;
       this.outbox.sound(p, 'error');
+      return;
+    }
+    if (this._game.shots.glaives.throwsNext(p, weapon)) {
+      this._game.shots.glaives.throw(p, weapon);
       return;
     }
     this._game.melee.swing(p, weapon, null);

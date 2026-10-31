@@ -31,6 +31,7 @@ interface GroundPose {
  */
 export const GROUND_POSE: Record<GearKind, GroundPose> = {
   'hammer': { rx: 0, rz: Math.PI / 2, offset: [-0.3, 0.05, 0], scale: 0.85 },
+  'infused-hammer': { rx: 0, rz: Math.PI / 2, offset: [-0.34, 0.08, 0], scale: 0.75 },
   'wood-armor': { rx: 0, rz: 0, offset: [0, -0.28, 0], scale: 0.8 },
   'bone-armor': { rx: 0, rz: 0, offset: [0, -0.28, 0], scale: 0.8 },
   'stone-armor': { rx: 0, rz: 0, offset: [0, -0.3, 0], scale: 0.8 },

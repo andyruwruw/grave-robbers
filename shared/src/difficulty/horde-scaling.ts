@@ -30,24 +30,46 @@ export function spawnSpeedup(level: number): number {
 }
 
 /**
- * Relative chance of each kind from the trickle spawner: vampires grow
- * more common, and new kinds start turning up past a level each:
- * skeletons after 1, ghouls after 3, brutes after 3, witches after 5,
- * demons (rare) after 9.
+ * The trickle spawner's mix at set world levels, in percent of spawns
+ * (ghosts come on their own clock). Between two levels it blends in a
+ * straight line; past the last it holds.
+ */
+export const SPAWN_MIX: { level: number; mix: Partial<Record<MonsterKind, number>> }[] = [
+  { level: 0, mix: { zombie: 60, vampire: 15, skeleton: 25 } },
+  { level: 4, mix: { zombie: 50, vampire: 15, skeleton: 20, brute: 5, ghoul: 10 } },
+  { level: 8, mix: { zombie: 49, vampire: 10, skeleton: 13, brute: 5, ghoul: 15, witch: 5, bloater: 3 } },
+  { level: 10, mix: { zombie: 45, vampire: 10, skeleton: 12, brute: 5, ghoul: 15, witch: 8, demon: 1, bloater: 4 } },
+  { level: 15, mix: { zombie: 42, vampire: 10, skeleton: 10, brute: 5, ghoul: 15, witch: 10, demon: 3, bloater: 4, necromancer: 1 } },
+  { level: 20, mix: { zombie: 40, vampire: 10, skeleton: 8, brute: 5, ghoul: 15, witch: 10, demon: 4, bloater: 5, necromancer: 3 } },
+];
+
+/**
+ * Relative chance of each kind from the trickle spawner: SPAWN_MIX blended
+ * between the set levels either side of this one, plus what world events
+ * add (a blood moon's werewolves, see `EventModifiers.spawnMix`).
  *
  * @param level The world level.
+ * @param extra Weight world events add to some kinds.
  * @returns Each kind's relative weight.
  */
-export function spawnWeights(level: number): Record<MonsterKind, number> {
+export function spawnWeights(level: number, extra: Partial<Record<MonsterKind, number>> = {}): Record<MonsterKind, number> {
+  const next = SPAWN_MIX.findIndex((m: { level: number }): boolean => m.level > level);
+  const hi = SPAWN_MIX[next < 0 ? SPAWN_MIX.length - 1 : next];
+  const lo = SPAWN_MIX[next < 0 ? SPAWN_MIX.length - 1 : Math.max(0, next - 1)];
+  const t = hi.level > lo.level ? clamp((level - lo.level) / (hi.level - lo.level), 0, 1) : 0;
+  const share = (k: MonsterKind): number => (lo.mix[k] ?? 0) + ((hi.mix[k] ?? 0) - (lo.mix[k] ?? 0)) * t + (extra[k] ?? 0);
   return {
-    zombie: 0.55,
-    vampire: 0.3 * (1 + level * 0.04),
+    zombie: share('zombie'),
+    vampire: share('vampire'),
     ghost: 0,
-    brute: clamp((level - 3) * 0.025, 0, 0.4),
-    skeleton: clamp((level - 1) * 0.03, 0, 0.3),
-    ghoul: clamp((level - 3) * 0.03, 0, 0.3),
-    witch: clamp((level - 5) * 0.02, 0, 0.2),
-    demon: clamp((level - 9) * 0.01, 0, 0.08),
+    brute: share('brute'),
+    skeleton: share('skeleton'),
+    ghoul: share('ghoul'),
+    witch: share('witch'),
+    demon: share('demon'),
+    bloater: share('bloater'),
+    necromancer: share('necromancer'),
+    werewolf: share('werewolf'),
   };
 }
 
@@ -59,6 +81,17 @@ export function spawnWeights(level: number): Record<MonsterKind, number> {
  */
 export function armedChance(level: number): number {
   return clamp(0.12 + level * 0.02, 0, 0.5);
+}
+
+/**
+ * Share of armed zombies and brutes whose weapon is a real, craftable one
+ * (see ZOMBIE_WEAPON_TIERS) rather than junk.
+ *
+ * @param level The world level.
+ * @returns The share, 0 to 0.4.
+ */
+export function craftedShare(level: number): number {
+  return clamp((level - 7) * 0.03, 0, 0.4);
 }
 
 /**

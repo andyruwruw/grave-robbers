@@ -97,3 +97,44 @@ export const STUMBLE_TIME = 0.3;
  * A ghost drains a light from this close to its center.
  */
 export const GHOST_HOVER = 0.5;
+
+/**
+ * Most tiles a chasing monster's path search looks at when its goal can be
+ * reached (it ends on the closest tile it found), and when the goal is
+ * known to be out of reach (just enough to walk toward it).
+ */
+export const CHASE_BUDGET = 1500;
+export const LOST_BUDGET = 200;
+
+/**
+ * Seconds a chasing monster waits before searching again when its last
+ * path didn't reach its goal (give or take a fifth).
+ */
+export const FAILED_REPATH = 2.5;
+
+/**
+ * Seconds a goal's reach flood stays good (see `ReachMap`), how many new
+ * floods a tick may make, and how many it keeps.
+ */
+export const REACH_TTL = 1;
+export const REACH_FLOODS_PER_TICK = 1;
+export const REACH_CACHE = 16;
+
+/**
+ * How far from the goal a reach flood spreads (tiles each way): it starts
+ * at the most and tunes itself between the two so a flood takes about
+ * REACH_FLOOD_MS, shrinking on a slow server or rough ground.
+ */
+export const REACH_RADIUS_MIN = 16;
+export const REACH_RADIUS_MAX = 40;
+
+/**
+ * Milliseconds a reach flood aims to take (a tick is about 33).
+ */
+export const REACH_FLOOD_MS = 4;
+
+/**
+ * How much of the gap to its ideal radius each flood closes (0 to 1), so
+ * one slow flood (a GC pause) doesn't throw it off.
+ */
+export const REACH_TUNE_RATE = 0.3;

@@ -56,7 +56,7 @@ function scratch(size: number): void {
  * reachable.
  */
 export function findPath(opts: SearchOptions): Step[] | null {
-  const { from, to, cost, open, score, accept, width, height, within } = opts;
+  const { from, to, cost, open, score, accept, width, height, within, budget = Infinity } = opts;
   scratch(width * height);
   const minX = within === undefined ? 0 : Math.max(0, from.tx - within);
   const minY = within === undefined ? 0 : Math.max(0, from.ty - within);
@@ -72,13 +72,15 @@ export function findPath(opts: SearchOptions): Step[] | null {
   heap.push(start, to ? octile(from.tx, from.ty, to.tx, to.ty) : 0);
   let best = -1;
   let bestScore = Infinity;
+  let looked = 0;
 
-  while (heap.size > 0) {
+  while (heap.size > 0 && looked < budget) {
     const i = heap.pop();
     if (closedIn[i] === search) {
       continue;
     }
     closedIn[i] = search;
+    looked++;
     const x = i % width;
     const y = (i - x) / width;
     if (i === goal || (accept && i !== start && accept(x, y))) {

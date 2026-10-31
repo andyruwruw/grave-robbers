@@ -9,13 +9,13 @@ import type { MusicStatus } from '@halloween/shared/audio/music-status';
 export type ControlTab = 'overview' | 'music' | 'game';
 
 /**
- * One tab button.
+ * One tab button, for a tab bar whose tabs are `K`.
  */
-export interface ControlTabInfo {
+export interface TabInfo<K extends string> {
   /**
    * The tab it opens.
    */
-  key: ControlTab;
+  key: K;
 
   /**
    * Its name on the button.
@@ -27,6 +27,11 @@ export interface ControlTabInfo {
    */
   icon: LucideIcon;
 }
+
+/**
+ * One of the control panel's tab buttons.
+ */
+export type ControlTabInfo = TabInfo<ControlTab>;
 
 /**
  * Everything the Music tab works: the music choices, what's playing, and

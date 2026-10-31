@@ -2,8 +2,10 @@
 import { toWorld } from '../../space/world-coords';
 import { ScenePart } from '../scene-part';
 import {
+  GLAIVE_SPIN,
   POTION_ARC,
   SHOT_HEIGHT,
+  SHOT_MESHES,
   SHOT_POOL,
   SHOT_SPEEDS,
 } from './config/projectiles';
@@ -14,8 +16,10 @@ import type { ShotSlot } from '../../types/effects';
 import type { WorldContext } from '../world-context';
 
 /**
- * Shots in flight (bolts, gobs of blood, ectoplasm, arrows, and potions),
- * drawn from a pool of SHOT_POOL slots and carried forward between ticks.
+ * Shots in flight (bolts, gobs of blood, ectoplasm, arrows, and potions,
+ * and the infused weapons' thrown glaives, fire and spirit arrows, and
+ * ghost bullets), drawn from a pool of SHOT_POOL slots and carried
+ * forward between ticks.
  */
 export class Projectiles extends ScenePart {
   /**
@@ -42,7 +46,7 @@ export class Projectiles extends ScenePart {
     for (let i = 0; i < SHOT_POOL; i++) {
       const slot = ctx.shotMaterials.buildSlot();
       this._slots.push(slot);
-      this.scene.add(slot.bolt, slot.gob, slot.ecto, slot.arrow, slot.potion);
+      this.scene.add(...Object.values(slot));
     }
   }
 
@@ -57,25 +61,26 @@ export class Projectiles extends ScenePart {
 
   /**
    * Draws each shot (a bolt's pale streak, a wobbling gob of blood, a
-   * ghost's pulsing ball of ectoplasm, a skeleton's arrow, or a witch's
-   * tumbling potion on its arc), carried forward from where the last tick
-   * put it so it flies smoothly between ticks.
+   * ghost's pulsing ball of ectoplasm, a skeleton's arrow, a witch's
+   * tumbling potion on its arc, a spinning glaive, a fire arrow's
+   * flickering tail, or a ghost bullet's wavering wisp), carried forward
+   * from where the last tick put it so it flies smoothly between ticks.
    * @param time Clock seconds.
    */
   update(time: number): void {
     const since = Math.min(time - this._shotsAt, 0.1);
-    this._slots.forEach(({ bolt, gob, ecto, arrow, potion }, i: number): void => {
+    this._slots.forEach((slot: ShotSlot, i: number): void => {
+      const { gob, ecto, potion } = slot;
       const shot = this._shots[i];
-      bolt.visible = shot?.kind === 'bolt' && !this._ctx.monstersHidden;
-      gob.visible = shot?.kind === 'blood' && !this._ctx.monstersHidden;
-      ecto.visible = shot?.kind === 'ecto' && !this._ctx.monstersHidden;
-      arrow.visible = shot?.kind === 'arrow' && !this._ctx.monstersHidden;
-      potion.visible = shot?.kind === 'potion' && !this._ctx.monstersHidden;
+      const drawn = shot && !this._ctx.monstersHidden ? SHOT_MESHES[shot.kind] : null;
+      for (const key of Object.keys(slot) as (keyof ShotSlot)[]) {
+        slot[key].visible = drawn === key;
+      }
       if (!shot) {
         return;
       }
       const ahead = SHOT_SPEEDS[shot.kind] * since;
-      const mesh = { blood: gob, ecto, bolt, arrow, potion }[shot.kind];
+      const mesh = slot[SHOT_MESHES[shot.kind]];
       const x = shot.x + Math.cos(shot.angle) * ahead;
       const y = shot.y + Math.sin(shot.angle) * ahead;
       const { x: wx, z } = toWorld(x, y);
@@ -91,6 +96,17 @@ export class Projectiles extends ScenePart {
         ecto.scale.setScalar(1 + Math.sin(time * 12 + shot.id) * 0.18);
         ecto.rotation.set(time * 3, time * 2 + shot.id, 0);
         ecto.position.y += Math.sin(time * 6 + shot.id) * 0.05;
+      } else if (shot.kind === 'glaive') {
+        slot.glaive.rotation.y = time * GLAIVE_SPIN + shot.id;
+      } else if (shot.kind === 'fire-arrow') {
+        const [, , tail, ember] = slot.fireArrow.children;
+        tail.scale.set(1 + Math.sin(time * 31 + shot.id) * 0.25, 1 + Math.sin(time * 23) * 0.3, 1);
+        ember.scale.setScalar(0.6 + Math.sin(time * 27 + shot.id * 2) * 0.2);
+        ember.position.y = Math.sin(time * 19 + shot.id) * 0.03;
+      } else if (shot.kind === 'ghost-bullet') {
+        const wisp = slot.ghostBullet.children[2];
+        wisp.position.z = Math.sin(time * 14 + shot.id) * 0.04;
+        slot.ghostBullet.children[1].rotation.set(time * 3, time * 2 + shot.id, 0);
       }
     });
   }

@@ -29,7 +29,7 @@ export const MAX_CRAFT = 99;
  */
 export const RECIPES: RecipeId[] = [
   ...MAT_RECIPE_IDS,
-  ...GEAR_KINDS.filter((k: GearKind): boolean => !GEAR[k].junk && !GEAR[k].innate).map((k: GearKind): RecipeId => `gear:${k}`),
+  ...GEAR_KINDS.filter((k: GearKind): boolean => !GEAR[k].junk && !GEAR[k].innate && !GEAR[k].infused).map((k: GearKind): RecipeId => `gear:${k}`),
   ...STRUCTURE_KINDS.filter((k: StructureKind): boolean => !STRUCTURES[k].wild).map((k: StructureKind): RecipeId => `build:${k}`),
 ];
 
@@ -45,6 +45,17 @@ export function recipeCost(id: RecipeId): Bundle {
   }
   const [kind, what] = id.split(':') as ['gear', GearKind] | ['build', StructureKind];
   return kind === 'gear' ? GEAR[what].cost : STRUCTURES[what].cost;
+}
+
+/**
+ * The gear a recipe builds in, one kind per piece (see
+ * `StructureDef.parts`); none for most.
+ *
+ * @param id The recipe.
+ * @returns The parts.
+ */
+export function recipeParts(id: RecipeId): GearKind[] {
+  return id.startsWith('build:') ? STRUCTURES[id.slice(6) as StructureKind].parts ?? [] : [];
 }
 
 /**
@@ -71,7 +82,20 @@ export function needsAnvil(id: RecipeId): boolean {
  */
 export function craftCost(id: RecipeId, anvil: number | null): Bundle {
   const cost = recipeCost(id);
-  if (!needsAnvil(id) || !anvil) {
+  return needsAnvil(id) ? anvilCost(cost, anvil) : cost;
+}
+
+/**
+ * A cost paid beside an anvil of `anvil` level (null: no anvil in reach):
+ * every good drops ANVIL_DISCOUNT_PER_LEVEL a level, rounded up. Used for
+ * anvil recipes and infusions.
+ *
+ * @param cost The cost before the discount.
+ * @param anvil The level of the best anvil in reach, or null for none.
+ * @returns The cost after the discount (`cost` itself with no discount).
+ */
+export function anvilCost(cost: Bundle, anvil: number | null): Bundle {
+  if (!anvil) {
     return cost;
   }
   const keep = Math.max(0, 1 - ANVIL_DISCOUNT_PER_LEVEL * anvil);

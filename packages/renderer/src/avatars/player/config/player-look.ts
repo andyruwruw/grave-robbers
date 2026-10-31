@@ -73,7 +73,13 @@ export const CHARGE_GLOW = '#ffb347';
 export const HEALTH_FILL = '#e5484d';
 
 /**
- * The health bar's wounded (healable) part.
+ * The health bar's fresh-wound part (not healable yet), hatched with
+ * WOUND_STRIPE.
  */
-export const WOUND_FILL = '#6e6e76';
+export const WOUND_FILL = '#8a2430';
+
+/**
+ * The dark hatching across the health bar's fresh-wound part.
+ */
+export const WOUND_STRIPE = '#2a0a10';
 

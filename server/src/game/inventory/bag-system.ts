@@ -1,10 +1,11 @@
 // Packages
-import { GEAR, twoHanded } from '@halloween/shared/gear/gear-catalog';
+import { GEAR } from '@halloween/shared/gear/gear-catalog';
 import { MATERIALS, MATERIAL_STACK, RESOURCES } from '@halloween/shared/goods/goods';
 import { BUILD_STACK, isBuildItem, isGearItem, isMaterialItem } from '@halloween/shared/inventory/bag-items';
 
 // Local Imports
 import { GameSystem } from '../core/game-system';
+import { handsClash } from './helpers/hands-clash';
 
 // Types
 import type { Bundle, Goods } from '@halloween/shared/goods/goods';
@@ -37,7 +38,8 @@ export class BagSystem extends GameSystem {
   /**
    * Puts a bag item away: gear in its slot if that's empty (unless `equip`
    * is false), otherwise the first free bag slot; structures onto stacks of
-   * the same kind (up to BUILD_STACK), then free slots.
+   * the same kind (up to BUILD_STACK), then free slots. A plain torch goes
+   * back on the torch stack; an infused one stays its own item.
    * @param p The player.
    * @param item The item.
    * @param equip Whether gear may go straight into its empty slot.
@@ -45,7 +47,7 @@ export class BagSystem extends GameSystem {
    */
   store(p: Player, item: BagItem, equip = true): BagItem | null {
     this.outbox.inventoryChanged.add(p.token);
-    if (isGearItem(item) && item.kind === 'torch') {
+    if (isGearItem(item) && item.kind === 'torch' && !item.infusion) {
       item = { build: 'torch', count: 1 };
     }
     if (isMaterialItem(item)) {
@@ -68,8 +70,8 @@ export class BagSystem extends GameSystem {
     }
     if (isGearItem(item)) {
       const slot = GEAR[item.kind].slot;
-      const clash = (slot === 'offhand' && item.kind === 'shield' && twoHanded(p.bag.equipped.weapon?.kind))
-        || (slot === 'weapon' && twoHanded(item.kind) && p.bag.equipped.offhand?.kind === 'shield');
+      const clash = slot !== 'armor'
+        && handsClash(slot === 'weapon' ? item.kind : p.bag.equipped.weapon?.kind, slot === 'offhand' ? item.kind : p.bag.equipped.offhand?.kind);
       if (equip && !p.bag.equipped[slot] && !clash && item.kind !== 'stake') {
         p.bag.equipped[slot] = item;
         return null;

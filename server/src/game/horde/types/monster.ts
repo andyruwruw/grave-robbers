@@ -40,6 +40,26 @@ export interface MonsterTraits {
 }
 
 /**
+ * A bloater that died, waiting to burst (see `Bursts`).
+ */
+export interface Burst {
+  /**
+   * Where (tiles).
+   */
+  x: number;
+
+  /**
+   * Where (tiles).
+   */
+  y: number;
+
+  /**
+   * How hard it hits (its `power`).
+   */
+  power: number;
+}
+
+/**
  * Everything a monster is made with.
  */
 export interface MonsterInit {

@@ -22,15 +22,19 @@ export type Inventory = Record<Resource, number>;
  * from the bag to heal. Ectoplasm is what's left of a ghost. Chain and
  * cursed cores are parts forged at an anvil for late gear. Pumpkins come
  * from smashing them, for a witch's oven. A blood watering can, carried in
- * the bag, waters pumpkin seeds with blood.
+ * the bag, waters pumpkin seeds with blood. Holy water (silver and blood),
+ * brute tendons, ghoul fangs, hex shards (from witches), and brimstone
+ * (from demons) are essences, spent with silver to infuse weapons at an
+ * anvil.
  */
 export type Material = 'wood' | 'planks' | 'stone' | 'iron' | 'bolts' | 'arrows' | 'bone' | 'silver' | 'bloodsteel' | 'tonic'
-  | 'ectoplasm' | 'chain' | 'cursed-core' | 'pumpkin' | 'watering-can';
+  | 'ectoplasm' | 'chain' | 'cursed-core' | 'pumpkin' | 'watering-can'
+  | 'holy-water' | 'brute-tendon' | 'ghoul-fang' | 'hex-shard' | 'brimstone';
 
 /**
  * Every material, in display order.
  */
-export const MATERIALS: Material[] = ['wood', 'planks', 'stone', 'iron', 'bolts', 'arrows', 'bone', 'silver', 'bloodsteel', 'tonic', 'ectoplasm', 'chain', 'cursed-core', 'pumpkin', 'watering-can'];
+export const MATERIALS: Material[] = ['wood', 'planks', 'stone', 'iron', 'bolts', 'arrows', 'bone', 'silver', 'bloodsteel', 'tonic', 'ectoplasm', 'chain', 'cursed-core', 'pumpkin', 'watering-can', 'holy-water', 'brute-tendon', 'ghoul-fang', 'hex-shard', 'brimstone'];
 
 /**
  * Anything a pile on the ground or a cost is counted in.
@@ -54,7 +58,7 @@ export type Bundle = Record<Goods, number>;
  * @returns A bundle with those amounts and 0 of everything else.
  */
 export function stock(some: Partial<Bundle> = {}): Bundle {
-  return { wood: 0, planks: 0, stone: 0, iron: 0, bolts: 0, arrows: 0, bone: 0, silver: 0, bloodsteel: 0, tonic: 0, ectoplasm: 0, chain: 0, 'cursed-core': 0, pumpkin: 0, 'watering-can': 0, candy: 0, blood: 0, ...some };
+  return { wood: 0, planks: 0, stone: 0, iron: 0, bolts: 0, arrows: 0, bone: 0, silver: 0, bloodsteel: 0, tonic: 0, ectoplasm: 0, chain: 0, 'cursed-core': 0, pumpkin: 0, 'watering-can': 0, 'holy-water': 0, 'brute-tendon': 0, 'ghoul-fang': 0, 'hex-shard': 0, brimstone: 0, candy: 0, blood: 0, ...some };
 }
 
 /**

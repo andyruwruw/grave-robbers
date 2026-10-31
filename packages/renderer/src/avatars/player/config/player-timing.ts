@@ -57,6 +57,12 @@ export const STRIKE_END = STRIKE_DELAY / SWING_TIME;
 export const IMPACT_END = 0.62;
 
 /**
+ * How long after a lash ends (in swing lengths past phase 1) the morning
+ * star takes to wind back into its resting coil.
+ */
+export const COIL_IN = 0.8;
+
+/**
  * How high a charged gauntlet's super uppercut launches the player.
  */
 export const SUPER_HOP = 1.2;
@@ -125,3 +131,14 @@ export const TRAIL_SIZE = 0.22;
  * How many bits fill the gap between frames so the streak stays solid.
  */
 export const TRAIL_STEPS = 6;
+
+/**
+ * How long after its last pulse the Hellmouth still counts as spraying,
+ * in seconds (its pulses come every `spray.bloodEvery`, 0.5s).
+ */
+export const SPRAY_HOLD = 0.6;
+
+/**
+ * How long the arm takes to settle after a spray stops, in seconds.
+ */
+export const SPRAY_EASE = 0.25;

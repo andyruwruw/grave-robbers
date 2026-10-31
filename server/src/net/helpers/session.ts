@@ -15,4 +15,4 @@ export function isTv(session: Session): boolean {
  * Press counters for a pad nobody has pressed yet.
  * @returns Every counter at zero.
  */
-export const emptyPresses = (): PadPresses => ({ panic: 0, bag: 0, craft: 0, tree: 0, turnLeft: 0, turnRight: 0 });
+export const emptyPresses = (): PadPresses => ({ use: 0, panic: 0, bag: 0, craft: 0, tree: 0, turnLeft: 0, turnRight: 0 });

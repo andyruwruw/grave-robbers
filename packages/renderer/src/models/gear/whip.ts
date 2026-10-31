@@ -11,10 +11,11 @@ import {
   WHIP_LEATHER,
 } from './config/palette';
 import { WHIP_SEGMENT, WHIP_SEGMENTS } from './config/whip';
+import { headOf } from './helpers/head-of';
 
 // Types
 import type { Mesh } from 'three';
-import type { BoxFactory } from '../../types/models';
+import type { BoxFactory, GearModel } from '../../types/models';
 
 /**
  * The morning star: a leather whip on a short wooden handle, ending in a
@@ -22,11 +23,13 @@ import type { BoxFactory } from '../../types/models';
  * about z) so the avatar can coil and crack it. Laid out straight down -y
  * from the hand.
  * @param box Makes each box.
- * @returns The whip's root, its joints in order, and the spiked ball.
+ * @returns The whip's root, its joints in order, the spiked ball (its iron
+ * core as `tip`, every box of it as `ball`), and the handle.
  */
-export function buildWhip(box: BoxFactory): { root: Group; joints: Group[]; tip: Mesh } {
+export function buildWhip(box: BoxFactory): { root: Group; joints: Group[]; tip: Mesh; ball: Mesh[]; haft: Mesh } {
   const root = new Group();
-  root.add(box([0.06, 0.1, 0.06], [0, 0, 0], GRIP), box([0.055, 0.2, 0.055], [0, -0.13, 0], WHIP_LEATHER), box([0.07, 0.03, 0.07], [0, -0.23, 0], IRON), box([0.08, 0.03, 0.08], [0, 0.06, 0], IRON));
+  const haft = box([0.055, 0.2, 0.055], [0, -0.13, 0], WHIP_LEATHER);
+  root.add(box([0.06, 0.1, 0.06], [0, 0, 0], GRIP), haft, box([0.07, 0.03, 0.07], [0, -0.23, 0], IRON), box([0.08, 0.03, 0.08], [0, 0.06, 0], IRON));
   const joints: Group[] = [];
   let parent: Group = root;
   let at = -0.25;
@@ -45,12 +48,25 @@ export function buildWhip(box: BoxFactory): { root: Group; joints: Group[]; tip:
     at = -WHIP_SEGMENT;
   }
   const tip = box([0.13, 0.13, 0.13], [0, -0.08, 0], IRON);
-  parent.add(
+  const ball = [
     tip,
     box([0.035, 0.035, 0.22], [0, -0.08, 0], EDGE),
     box([0.22, 0.035, 0.035], [0, -0.08, 0], EDGE),
     box([0.035, 0.22, 0.035], [0, -0.08, 0], EDGE),
     box([0.16, 0.03, 0.16], [0, -0.08, 0], WHIP_CHAIN_DARK),
-  );
-  return { root, joints, tip };
+  ];
+  parent.add(...ball);
+  return { root, joints, tip, ball, haft };
 }
+
+/**
+ * The morning star as a model to hold: the whip (see `buildWhip`) left
+ * straight, with its joints for the avatar to bend and the ball as its
+ * head (in the last joint's space).
+ * @param box Makes each box.
+ * @returns The model.
+ */
+export const buildWhipModel = (box: BoxFactory): GearModel => {
+  const whip = buildWhip(box);
+  return { parts: [whip.root], tip: whip.tip, flame: null, joints: whip.joints, head: headOf(whip.ball), haft: whip.haft };
+};

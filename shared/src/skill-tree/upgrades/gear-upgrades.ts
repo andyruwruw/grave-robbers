@@ -1,33 +1,59 @@
 // Local Imports
 import { GEAR } from '../../gear/gear-catalog';
+import { applyInfusion } from '../../gear/infusions/helpers/apply-infusion';
 import { WEAPON_PERKS } from '../../gear/perks/weapon-perks';
 import { STEADY_SUPPLY } from '../../gear/ranged-rules';
 import { levelOf } from '../progress';
 
 // Types
 import type { GearKind } from '../../gear/types/gear-def';
+import type { Infusion } from '../../gear/types/infusion';
 import type { WeaponStats } from '../../gear/types/weapon-stats';
+import type { GearItem } from '../../inventory/bag-items';
 import type { TreeState } from '../types/skill-tree';
 
 /**
  * A weapon's stats at a level, each upgrade adding its perk (see
- * `WEAPON_PERKS`). A bow or crossbow also spares its ammo now and then, by
- * the arrows' level (Steady supply). No weapon at all is the hammer.
+ * `WEAPON_PERKS`), then its infusion: the essence's package and the
+ * variant's twist (see `applyInfusion`). A flamethrower made from a
+ * pellet gun (Hellmouth) sprays harder in step with the pellets its perk
+ * added (each one on top of the blunderbuss's 5 adds a fifth). A bow or crossbow
+ * also spares its ammo now and then, by the arrows' level (Steady
+ * supply). No weapon at
+ * all is the hammer; the infused hammer levels and perks with the hammer.
  *
  * @param kind The weapon, or null for none.
  * @param tree The player's progress.
+ * @param infusion The item's infusion, if any.
  * @returns The upgraded stats (a new object).
  */
-export function weaponStats(kind: GearKind | null, tree: TreeState): WeaponStats {
+export function weaponStats(kind: GearKind | null, tree: TreeState, infusion?: Infusion | null): WeaponStats {
   kind ??= 'hammer';
   const base = GEAR[kind].weapon!;
-  const level = levelOf(`gear:${kind}`, tree);
+  const node = kind === 'infused-hammer' ? 'hammer' : kind;
+  const level = levelOf(`gear:${node}`, tree);
   const stats = { ...base };
-  WEAPON_PERKS[kind]?.apply(stats, base, level);
+  WEAPON_PERKS[node]?.apply(stats, base, level);
   if (base.ammo === 'arrows' || base.ammo === 'bolts') {
     stats.thrift = STEADY_SUPPLY * levelOf('mat:arrows', tree);
   }
+  applyInfusion(stats, kind, infusion);
+  if (stats.spray && base.pellets && stats.pellets) {
+    stats.spray = { ...stats.spray, rate: Math.round(((stats.spray.rate * stats.pellets) / base.pellets) * 100) / 100 };
+  }
   return stats;
+}
+
+/**
+ * The stats of a piece of gear in hand, with its kind's upgrades and its
+ * own infusion (the hammer's with none).
+ *
+ * @param item The weapon, or null for none.
+ * @param tree The player's progress.
+ * @returns Its stats (a new object).
+ */
+export function itemStats(item: Pick<GearItem, 'kind' | 'infusion'> | null | undefined, tree: TreeState): WeaponStats {
+  return weaponStats(item?.kind ?? null, tree, item?.infusion);
 }
 
 /**

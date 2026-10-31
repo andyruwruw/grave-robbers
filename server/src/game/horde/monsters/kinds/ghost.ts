@@ -1,10 +1,13 @@
 // Packages
 import { GHOST_FORGET, GHOST_KEEP, GHOST_KNOCKBACK, GHOST_SCARE_TIME, GHOST_SHOT_COOLDOWN, GHOST_SHOT_DAMAGE, GHOST_SHOT_RANGE, GHOST_SHOT_REACH, GHOST_SHOT_SPEED, GHOST_SNUFF_TIME } from '@halloween/shared/monsters/kinds/ghost';
 import { MONSTERS } from '@halloween/shared/monsters/monster-stats';
+import { MONSTER_RADIUS } from '@halloween/shared/monsters/movement';
+import { moveWithCollision } from '@halloween/shared/world/collision';
 
 // Local Imports
 import { GHOST_HOVER, WANDER_RANGE } from '../../config/ai';
 import { distance } from '../../helpers/geometry';
+import { monsterBlocked } from '../../helpers/terrain';
 import { Monster } from '../monster';
 
 // Types
@@ -17,7 +20,8 @@ import type { MonsterInit } from '../../types/monster';
 /**
  * A ghost: no body, meanders through walls to snuff burning lights unless
  * a player is standing in them, hangs around players it notices and
- * spits ectoplasm at them, and flees bells.
+ * spits ectoplasm at them, and flees bells and incense (pushed out to
+ * the edge like a bell does).
  */
 export class Ghost<P extends Target> extends Monster<P> {
   /**
@@ -90,25 +94,18 @@ export class Ghost<P extends Target> extends Monster<P> {
    */
   protected adjustKnockback(knockback: number, effects: HitEffects<P>): number {
     this.hunting = true;
-    return knockback * GHOST_KNOCKBACK;
+    return knockback * (effects.ghostKnock ?? GHOST_KNOCKBACK);
   }
 
   /**
-   * Drifts along a knockback through anything but a fence, kept on the
-   * map.
+   * Drifts along a knockback, stopped by terrain and walls like anything
+   * else (but never over a chasm's edge).
    * @param dt Seconds since the last tick.
    * @param world The world.
    * @returns True: a ghost is never lost to a knockback.
    */
   protected stepKnockback(dt: number, world: World): boolean {
-    const x = Math.min(world.map.width - 0.5, Math.max(0.5, this.x + this.knock.x * dt));
-    const y = Math.min(world.map.height - 0.5, Math.max(0.5, this.y + this.knock.y * dt));
-    if (world.map.get(Math.floor(x), Math.floor(y)) === 'fence') {
-      this.knock.until = 0;
-    } else {
-      this.x = x;
-      this.y = y;
-    }
+    Object.assign(this, moveWithCollision(monsterBlocked(world, this), this.x, this.y, this.knock.x * dt, this.knock.y * dt, MONSTER_RADIUS));
     return true;
   }
 
@@ -127,7 +124,7 @@ export class Ghost<P extends Target> extends Monster<P> {
       const d = distance(this, p);
       return d < GHOST_SHOT_RANGE && (!best || d < best.d) ? { p, d } : best;
     }, null);
-    const sight = this.hunting ? GHOST_FORGET : MONSTERS.ghost.sight;
+    const sight = this._ctx.mods.hunt ? Infinity : this.hunting ? GHOST_FORGET : MONSTERS.ghost.sight;
     const quarry = prey.reduce<{ p: P; d: number } | null>((best, p) => {
       const d = distance(this, p);
       return d < sight && (!best || d < best.d) ? { p, d } : best;
@@ -136,7 +133,7 @@ export class Ghost<P extends Target> extends Monster<P> {
     if (target && world.time >= this.nextAttackAt) {
       this.shootAt(target.p, world);
     }
-    const bells = world.lights.bells();
+    const bells = [...world.lights.bells(), ...this._ctx.incense];
     if (this.fleeBells(bells, world)) {
       return;
     }
@@ -277,8 +274,9 @@ export class Ghost<P extends Target> extends Monster<P> {
   }
 
   /**
-   * Ghost movement: straight through anything, kept on the map (drift only
-   * runs inside the horde's step, so the map is the one its grids fit).
+   * Ghost movement: straight toward a point, sliding along whatever terrain
+   * or walls are in the way like a walker (drift only runs inside the
+   * horde's step, so the map is the one its grids fit).
    * @param x Where to (tiles).
    * @param y Where to (tiles).
    * @param step How far (tiles).
@@ -291,10 +289,9 @@ export class Ghost<P extends Target> extends Monster<P> {
     if (d < 1e-4) {
       return;
     }
-    const s = Math.min(step, d);
+    const s = Math.min(step * this._ctx.mods.monsterSpeed * this.slowFactor(world.time), d);
     this.facing = Math.atan2(dy, dx);
     this.moving = true;
-    this.x = Math.min(world.map.width - 0.5, Math.max(0.5, this.x + (dx / d) * s));
-    this.y = Math.min(world.map.height - 0.5, Math.max(0.5, this.y + (dy / d) * s));
+    Object.assign(this, moveWithCollision(monsterBlocked(world, this), this.x, this.y, (dx / d) * s, (dy / d) * s, MONSTER_RADIUS));
   }
 }

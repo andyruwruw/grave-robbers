@@ -2,8 +2,11 @@
 import { MAP_HEIGHT, MAP_WIDTH } from '@halloween/shared/world/dimensions';
 
 // Local Imports
-import { CENTER_X, CENTER_Y, CRYPT } from '../../config/classic';
+import { CRYPT } from '../../config/classic';
 import { ClassicPass } from '../classic-pass';
+
+// Types
+import type { Rect } from '../../types/geometry';
 
 /**
  * The fence around the map and the crypt at its middle.
@@ -25,15 +28,18 @@ export class CryptPass extends ClassicPass {
   /**
    * The crypt, with a 2-wide doorway on every side, in a one-tile cobbled
    * courtyard. Each doorway lines up with a main path.
+   * @param at The crypt's walls (the middle of a classic map by default).
    */
-  crypt(): void {
-    this.fill({ x: CRYPT.x - 1, y: CRYPT.y - 1, w: CRYPT.w + 2, h: CRYPT.h + 2 }, 'cobble');
-    this.reserved.push({ x: CRYPT.x - 2, y: CRYPT.y - 2, w: CRYPT.w + 4, h: CRYPT.h + 4 });
-    for (let ty = CRYPT.y; ty < CRYPT.y + CRYPT.h; ty++) {
-      for (let tx = CRYPT.x; tx < CRYPT.x + CRYPT.w; tx++) {
-        const wall = tx === CRYPT.x || tx === CRYPT.x + CRYPT.w - 1 || ty === CRYPT.y || ty === CRYPT.y + CRYPT.h - 1;
-        const horizontalWall = ty === CRYPT.y || ty === CRYPT.y + CRYPT.h - 1;
-        const door = horizontalWall ? tx === CENTER_X - 1 || tx === CENTER_X : ty === CENTER_Y - 1 || ty === CENTER_Y;
+  crypt(at: Rect = CRYPT): void {
+    const cx = at.x + Math.floor(at.w / 2);
+    const cy = at.y + Math.floor(at.h / 2);
+    this.fill({ x: at.x - 1, y: at.y - 1, w: at.w + 2, h: at.h + 2 }, 'cobble');
+    this.reserved.push({ x: at.x - 2, y: at.y - 2, w: at.w + 4, h: at.h + 4 });
+    for (let ty = at.y; ty < at.y + at.h; ty++) {
+      for (let tx = at.x; tx < at.x + at.w; tx++) {
+        const wall = tx === at.x || tx === at.x + at.w - 1 || ty === at.y || ty === at.y + at.h - 1;
+        const horizontalWall = ty === at.y || ty === at.y + at.h - 1;
+        const door = horizontalWall ? tx === cx - 1 || tx === cx : ty === cy - 1 || ty === cy;
         this.map.set(tx, ty, wall && !door ? 'crypt' : 'flagstone');
       }
     }

@@ -1,11 +1,12 @@
 // Packages
-import { GEAR, GEAR_SLOTS, twoHanded } from '@halloween/shared/gear/gear-catalog';
+import { GEAR, GEAR_SLOTS } from '@halloween/shared/gear/gear-catalog';
 import { MATERIAL_STACK } from '@halloween/shared/goods/goods';
 import { BUILD_STACK, isBuildItem, isGearItem } from '@halloween/shared/inventory/bag-items';
 import { itemKey } from '@halloween/shared/inventory/item-keys';
 
 // Local Imports
 import { GameSystem } from '../core/game-system';
+import { handsClash } from './helpers/hands-clash';
 
 // Types
 import type { GearSlot } from '@halloween/shared/gear/types/gear-def';
@@ -14,7 +15,8 @@ import type { Player } from '../players/player';
 
 /**
  * What a player holds and wears: equipping, the torch in hand, moving
- * items between slots, and keeping a shield away from two-handed weapons.
+ * items between slots, and keeping a shield away from two-handed weapons
+ * (and a torch away from the infused hammer).
  */
 export class HandsSystem extends GameSystem {
   /**
@@ -75,13 +77,13 @@ export class HandsSystem extends GameSystem {
 
   /**
    * A torch out of the hand goes back on a stack of torches: there's one
-   * torch item, held or placed.
+   * torch item, held or placed. An infused torch stays its own item.
    * @param p The player.
    */
   private stackTorches(p: Player): void {
     for (let i = 0; i < p.bag.bag.length; i++) {
       const item = p.bag.bag[i];
-      if (item && isGearItem(item) && item.kind === 'torch') {
+      if (item && isGearItem(item) && item.kind === 'torch' && !item.infusion) {
         p.bag.bag[i] = null;
         const left = this._game.bag.store(p, { build: 'torch', count: 1 });
         if (left) {
@@ -180,14 +182,14 @@ export class HandsSystem extends GameSystem {
   }
 
   /**
-   * A shield and a two-handed weapon can't be held together: whichever
-   * of them wasn't just put in hand goes back into the bag (or at the
-   * player's feet if the bag is full).
+   * A shield and a two-handed weapon (or a torch and the infused hammer)
+   * can't be held together: whichever of them wasn't just put in hand goes
+   * back into the bag (or at the player's feet if the bag is full).
    * @param p The player.
    * @param kept The hand that was just filled.
    */
   settleHands(p: Player, kept: 'weapon' | 'offhand'): void {
-    if (p.bag.equipped.offhand?.kind !== 'shield' || !twoHanded(p.bag.equipped.weapon?.kind)) {
+    if (!handsClash(p.bag.equipped.weapon?.kind, p.bag.equipped.offhand?.kind)) {
       return;
     }
     const other = kept === 'weapon' ? 'offhand' : 'weapon';

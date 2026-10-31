@@ -40,7 +40,7 @@ export const DEBRIS_CHUNK = 0.22;
 /**
  * How long each thing takes to grow in (seconds).
  */
-export const GROW_TIME: Record<GrownTile, number> = { tree: 2.6, pumpkin: 1.6, chest: 1.4, tombstone: 1.8, cross: 1.8 };
+export const GROW_TIME: Record<GrownTile, number> = { tree: 2.6, hedge: 2, pumpkin: 1.6, chest: 1.4, tombstone: 1.8, cross: 1.8 };
 
 /**
  * How long a dug-up gravestone takes to shudder down into the ground

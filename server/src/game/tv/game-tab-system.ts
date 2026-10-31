@@ -1,3 +1,6 @@
+// Packages
+import { clampDifficulty, difficultyOf } from '@halloween/shared/difficulty/difficulty';
+
 // Local Imports
 import { GameSystem } from '../core/game-system';
 
@@ -19,7 +22,7 @@ export class GameTabSystem extends GameSystem {
     if (typeof next.aggressive === 'boolean') {
       this.settings.aggressive = next.aggressive;
     }
-    for (const key of ['lightsOff', 'daytime', 'tvDrag', 'tvLight'] as const) {
+    for (const key of ['lightsOff', 'daytime', 'tvDrag', 'tvLight', 'threads'] as const) {
       if (typeof next[key] === 'boolean') {
         this.settings[key] = next[key];
       }
@@ -35,6 +38,10 @@ export class GameTabSystem extends GameSystem {
         }
       }
     }
+    if (typeof next.difficulty === 'number') {
+      this.settings.difficulty = clampDifficulty(next.difficulty);
+    }
+    this.horde.setDealt(difficultyOf(this.settings.difficulty).dealt);
     if (typeof next.levelBoost === 'number' && Number.isFinite(next.levelBoost)) {
       this._game.levels.applyBoost(next.levelBoost);
     }

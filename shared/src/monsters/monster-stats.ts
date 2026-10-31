@@ -4,10 +4,12 @@ import type { MonsterKind } from './monster-kinds';
 /**
  * How a monster's attack lands once its windup ends: a melee hitbox in
  * front of it, an arrow, a lobbed potion, a pounce (a fixed leap), a lunge
- * (a dash just past its target, see DEMON_LUNGE), or a ghost's ectoplasm
- * (ghosts keep their own timing).
+ * (a dash just past its target, see DEMON_LUNGE), a ghost's ectoplasm
+ * (ghosts keep their own timing), a bloater's burst (see BLOATER_BURST),
+ * or a necromancer raising the dead (see NECRO_RAISE). A werewolf claws
+ * (melee) and pounces on its own clock (see WEREWOLF_LEAP).
  */
-export type AttackStyle = 'melee' | 'arrow' | 'potion' | 'pounce' | 'lunge' | 'ecto';
+export type AttackStyle = 'melee' | 'arrow' | 'potion' | 'pounce' | 'lunge' | 'ecto' | 'burst' | 'raise';
 
 /**
  * How each kind's attack lands.
@@ -21,6 +23,9 @@ export const ATTACK_STYLE: Record<MonsterKind, AttackStyle> = {
   witch: 'potion',
   ghoul: 'pounce',
   demon: 'lunge',
+  bloater: 'burst',
+  necromancer: 'raise',
+  werewolf: 'melee',
 };
 
 /**
@@ -71,6 +76,13 @@ export interface MonsterDef {
   range?: number;
 
   /**
+   * For a melee fighter, how far it lunges in over its windup: it starts
+   * the swing this much further out than `reach` and steps in while
+   * winding up (stopping once within `reach`).
+   */
+  lunge?: number;
+
+  /**
    * How close a shooter lets a player get before backing away.
    */
   keep?: number;
@@ -112,14 +124,17 @@ export interface MonsterDef {
  * Every monster kind's stats.
  */
 export const MONSTERS: Record<MonsterKind, MonsterDef> = {
-  zombie: { label: 'Zombie', hp: 10, speed: 1.6, damage: 2, cooldown: 0.9, windup: 0.35, arc: 1.2, reach: 1.1, sight: 7, memory: 6 },
-  vampire: { label: 'Vampire', hp: 18, speed: 4.8, damage: 3, cooldown: 0.7, windup: 0.25, arc: 1, reach: 0.85, sight: 14, memory: 6 },
+  zombie: { label: 'Zombie', hp: 10, speed: 1.6, damage: 2, cooldown: 0.9, windup: 0.35, arc: 1.2, reach: 1.2, lunge: 0.8, sight: 7, memory: 6 },
+  vampire: { label: 'Vampire', hp: 18, speed: 6.2, damage: 3, cooldown: 0.7, windup: 0.25, arc: 1, reach: 0.85, sight: 14, memory: 6 },
   ghost: { label: 'Ghost', hp: 8, speed: 1.3, damage: 0, cooldown: 0, windup: 0, arc: 0, reach: 0, sight: 6, memory: 0 },
   brute: { label: 'Brute', hp: 30, speed: 1.15, damage: 3.5, cooldown: 1.3, windup: 0.65, arc: 1.1, reach: 1, sight: 7, memory: 8, knockback: 2.4 },
   skeleton: { label: 'Skeleton', hp: 9, speed: 1.9, damage: 2, cooldown: 1.8, windup: 0.7, arc: 0, reach: 0.85, range: 6.5, keep: 3, sight: 9, memory: 6 },
   witch: { label: 'Witch', hp: 14, speed: 1.8, damage: 1.5, cooldown: 2.6, windup: 0.9, arc: 0, reach: 0.85, range: 6, keep: 4.5, sight: 8, memory: 8 },
   ghoul: { label: 'Ghoul', hp: 8, speed: 4.4, damage: 3.5, cooldown: 2, windup: 0.5, arc: 0, reach: 0.7, range: 3.6, lock: 0.3, sight: 9, memory: 6 },
   demon: { label: 'Demon', hp: 22, speed: 2.6, damage: 6.5, cooldown: 1.4, windup: 0.45, arc: 1, reach: 0.95, range: 3.6, lock: 0.12, sight: 12, memory: 10 },
+  bloater: { label: 'Bloater', hp: 16, speed: 1.1, damage: 5, cooldown: 2, windup: 0.9, arc: 0, reach: 1.3, sight: 7, memory: 8, knockback: 2.2 },
+  necromancer: { label: 'Necromancer', hp: 40, speed: 1.7, damage: 2, cooldown: 5, windup: 1.2, arc: 0, reach: 0.85, range: 7, keep: 5, sight: 10, memory: 10 },
+  werewolf: { label: 'Werewolf', hp: 45, speed: 6, damage: 3.5, cooldown: 0.8, windup: 0.3, arc: 1.2, reach: 1.05, range: 5.5, lock: 0.18, sight: 16, memory: 14, knockback: 1.6 },
 };
 
 /**

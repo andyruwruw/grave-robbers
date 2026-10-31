@@ -25,6 +25,7 @@ import {
   VIAL_GLASS,
   WRAP,
 } from './config/palette';
+import { headOf } from './helpers/head-of';
 
 // Types
 import type { Mesh } from 'three';
@@ -37,18 +38,24 @@ import type { BoxFactory, GearModel } from '../../types/models';
  */
 export const buildCrossbow = (box: BoxFactory): GearModel => {
   const tip = box([0.03, 0.05, 0.03], [0, -0.56, 0], EDGE);
+  const haft = box([0.06, 0.5, 0.07], [0, -0.2, 0], HANDLE);
+  const head = [
+    box([0.05, 0.05, 0.5], [0, -0.4, 0], DARK_WOOD),
+    box([0.04, 0.08, 0.04], [0, -0.36, -0.25], DARK_WOOD),
+    box([0.04, 0.08, 0.04], [0, -0.36, 0.25], DARK_WOOD),
+  ];
   return {
     parts: [
-      box([0.06, 0.5, 0.07], [0, -0.2, 0], HANDLE),
-      box([0.05, 0.05, 0.5], [0, -0.4, 0], DARK_WOOD),
-      box([0.04, 0.08, 0.04], [0, -0.36, -0.25], DARK_WOOD),
-      box([0.04, 0.08, 0.04], [0, -0.36, 0.25], DARK_WOOD),
+      haft,
+      ...head,
       box([0.012, 0.012, 0.46], [0, -0.32, 0], STRING),
       box([0.02, 0.28, 0.02], [0.04, -0.4, 0], BOLT),
       tip,
     ],
     tip,
     flame: null,
+    head: headOf(head),
+    haft,
   };
 };
 
@@ -59,24 +66,30 @@ export const buildCrossbow = (box: BoxFactory): GearModel => {
  */
 export const buildBloodGun = (box: BoxFactory): GearModel => {
   const tip = box([0.13, 0.05, 0.13], [0, -0.57, 0], BLOODSTEEL);
+  const haft = box([0.07, 0.16, 0.09], [0, 0.08, 0], BONE);
+  const head = [
+    box([0.065, 0.42, 0.065], [0, -0.3, 0], BLOODSTEEL),
+    box([0.075, 0.03, 0.075], [0, -0.17, 0], BLOODSTEEL_DARK),
+    box([0.075, 0.03, 0.075], [0, -0.38, 0], BLOODSTEEL_DARK),
+    box([0.095, 0.05, 0.095], [0, -0.52, 0], BLOODSTEEL),
+    box([0.09, 0.005, 0.09], [0, -0.597, 0], BORE),
+    tip,
+  ];
   return {
     parts: [
       box([0.08, 0.06, 0.1], [0, 0.17, 0], BONE_DARK),
-      box([0.07, 0.16, 0.09], [0, 0.08, 0], BONE),
+      haft,
       box([0.06, 0.12, 0.07], [0, -0.05, 0], DARK_WOOD),
       box([0.04, 0.06, 0.03], [-0.05, -0.04, 0], IRON),
-      box([0.065, 0.42, 0.065], [0, -0.3, 0], BLOODSTEEL),
-      box([0.075, 0.03, 0.075], [0, -0.17, 0], BLOODSTEEL_DARK),
-      box([0.075, 0.03, 0.075], [0, -0.38, 0], BLOODSTEEL_DARK),
-      box([0.095, 0.05, 0.095], [0, -0.52, 0], BLOODSTEEL),
-      box([0.09, 0.005, 0.09], [0, -0.597, 0], BORE),
       box([0.05, 0.02, 0.05], [0.06, -0.08, 0], VIAL_GLASS),
       box([0.04, 0.1, 0.04], [0.06, -0.14, 0], VIAL_BLOOD, true),
       box([0.05, 0.02, 0.05], [0.06, -0.2, 0], VIAL_GLASS),
-      tip,
+      ...head,
     ],
     tip,
     flame: null,
+    head: headOf(head),
+    haft,
   };
 };
 
@@ -97,17 +110,20 @@ export const buildBow = (box: BoxFactory): GearModel => {
     mesh.rotation.x = -0.35 * side;
     return mesh;
   };
+  const haft = box([0.05, 0.1, 0.06], [0, -0.1, 0], WRAP);
+  const head = [limb(-1), limb(1)];
   return {
     parts: [
-      box([0.05, 0.1, 0.06], [0, -0.1, 0], WRAP),
-      limb(-1),
-      limb(1),
+      haft,
+      ...head,
       box([0.01, 0.01, 0.56], [0, 0.04, 0], STRING),
       box([0.02, 0.38, 0.02], [0, -0.13, 0], BOLT),
       tip,
     ],
     tip,
     flame: null,
+    head: headOf(head),
+    haft,
   };
 };
 
@@ -127,12 +143,16 @@ export const buildRepeatingCrossbow = (box: BoxFactory): GearModel => {
     drum.add(stave, nock);
   }
   drum.add(box([0.06, 0.24, 0.06], [0, 0, 0], BAND));
+  const haft = box([0.06, 0.62, 0.07], [0, -0.24, 0], DARK_WOOD);
+  const head = [
+    box([0.05, 0.05, 0.54], [0, -0.52, 0], IRON),
+    box([0.04, 0.09, 0.04], [0, -0.48, -0.27], DARK_WOOD),
+    box([0.04, 0.09, 0.04], [0, -0.48, 0.27], DARK_WOOD),
+  ];
   return {
     parts: [
-      box([0.06, 0.62, 0.07], [0, -0.24, 0], DARK_WOOD),
-      box([0.05, 0.05, 0.54], [0, -0.52, 0], IRON),
-      box([0.04, 0.09, 0.04], [0, -0.48, -0.27], DARK_WOOD),
-      box([0.04, 0.09, 0.04], [0, -0.48, 0.27], DARK_WOOD),
+      haft,
+      ...head,
       box([0.012, 0.012, 0.5], [0, -0.44, 0], STRING),
       box([0.09, 0.2, 0.1], [0.07, -0.1, 0], HANDLE),
       box([0.1, 0.03, 0.11], [0.07, 0, 0], BAND),
@@ -144,6 +164,8 @@ export const buildRepeatingCrossbow = (box: BoxFactory): GearModel => {
     tip,
     flame: null,
     spinner: drum,
+    head: headOf(head),
+    haft,
   };
 };
 
@@ -156,22 +178,28 @@ export const buildMusket = (box: BoxFactory): GearModel => {
   const tip = box([0.05, 0.04, 0.05], [0.03, -1.08, 0], MUSKET_IRON);
   const butt = box([0.1, 0.2, 0.08], [-0.02, 0.2, 0], MUSKET_WOOD_DARK);
   butt.rotation.z = 0.25;
+  const haft = box([0.06, 0.62, 0.06], [0.005, -0.36, 0], MUSKET_WOOD);
+  const head = [
+    box([0.034, 0.95, 0.034], [0.035, -0.6, 0], MUSKET_IRON),
+    box([0.03, 0.005, 0.03], [0.035, -1.1, 0], BORE),
+    tip,
+  ];
   return {
     parts: [
       butt,
       box([0.07, 0.2, 0.07], [0, 0.04, 0], MUSKET_WOOD),
-      box([0.06, 0.62, 0.06], [0.005, -0.36, 0], MUSKET_WOOD),
-      box([0.034, 0.95, 0.034], [0.035, -0.6, 0], MUSKET_IRON),
+      haft,
       box([0.012, 0.7, 0.012], [-0.02, -0.5, 0], MUSKET_ROD),
       box([0.05, 0.028, 0.05], [0.025, -0.3, 0], MUSKET_BAND),
       box([0.05, 0.028, 0.05], [0.025, -0.62, 0], MUSKET_BAND),
       box([0.03, 0.06, 0.025], [0.06, -0.06, 0], MUSKET_IRON),
       box([0.02, 0.04, 0.02], [0.08, -0.02, 0], MUSKET_IRON),
       box([0.05, 0.015, 0.04], [-0.03, -0.1, 0], MUSKET_BAND),
-      box([0.03, 0.005, 0.03], [0.035, -1.1, 0], BORE),
-      tip,
+      ...head,
     ],
     tip,
     flame: null,
+    head: headOf(head),
+    haft,
   };
 };

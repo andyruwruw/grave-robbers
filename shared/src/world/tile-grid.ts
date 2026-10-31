@@ -1,6 +1,12 @@
 // Local Imports
 import { MAP_HEIGHT, MAP_WIDTH, MAX_LEVEL, MIN_LEVEL } from './dimensions';
-import { KEEPS_TURN, RAMP_DIRS } from './ramps';
+import {
+  KEEPS_TURN,
+  RAMP_DIRS,
+  turnCode,
+  turnDir,
+  turnStyle,
+} from './ramps';
 import { CHAR_BY_TILE } from './tile-codec';
 import { isSolidTile } from './tiles';
 
@@ -33,6 +39,17 @@ export abstract class TileGrid {
    * Indexes of the tiles changed since the last `takeChanges`.
    */
   protected _changed = new Set<number>();
+
+  /**
+   * Who hears about every tile change as it happens (see `listen`).
+   */
+  private _listeners: ((i: number, tile: Tile) => void)[] = [];
+
+  /**
+   * Who hears about every write to a tile, its level, or its turn (see
+   * `watch`).
+   */
+  private _watchers: ((i: number) => void)[] = [];
 
   /**
    * Tiles across.
@@ -99,7 +116,7 @@ export abstract class TileGrid {
    * @returns The encoded turns.
    */
   encodeRamps(): string {
-    return this._ramps.join('');
+    return Array.from(this._ramps, (code: number): string => code.toString(36)).join('');
   }
 
   /**
@@ -109,10 +126,11 @@ export abstract class TileGrid {
    * @param ty Tile row.
    * @param dir An index into RAMP_DIRS, or null to clear the turn.
    */
-  setRamp(tx: number, ty: number, dir: number | null): void {
+  setRamp(tx: number, ty: number, dir: number | null, style = 0): void {
     if (tx >= 0 && ty >= 0 && tx < this.width && ty < this.height) {
-      this._ramps[ty * this.width + tx] = dir === null ? 0 : dir + 1;
+      this._ramps[ty * this.width + tx] = turnCode(dir, style);
       this._changed.add(ty * this.width + tx);
+      this.touched(ty * this.width + tx);
     }
   }
 
@@ -155,6 +173,7 @@ export abstract class TileGrid {
   setLevel(tx: number, ty: number, level: number): void {
     if (tx >= 0 && ty >= 0 && tx < this.width && ty < this.height) {
       this._levels[ty * this.width + tx] = Math.max(MIN_LEVEL, Math.min(MAX_LEVEL, level));
+      this.touched(ty * this.width + tx);
     }
   }
 
@@ -165,8 +184,19 @@ export abstract class TileGrid {
    * @returns The direction from RAMP_DIRS, or null when not turned.
    */
   turnOf(tx: number, ty: number): [number, number] | null {
-    const turned = this.inBounds(tx, ty) ? this._ramps[ty * this.width + tx] : 0;
-    return turned > 0 ? RAMP_DIRS[turned - 1] : null;
+    const dir = turnDir(this.inBounds(tx, ty) ? this._ramps[ty * this.width + tx] : 0);
+    return dir === null ? null : RAMP_DIRS[dir];
+  }
+
+  /**
+   * Which look a tile was built with (a wall's cosmetic variant, see
+   * `WALL_STYLES`), 0 for the plain one.
+   * @param tx Tile column.
+   * @param ty Tile row.
+   * @returns Its look.
+   */
+  styleOf(tx: number, ty: number): number {
+    return turnStyle(this.inBounds(tx, ty) ? this._ramps[ty * this.width + tx] : 0);
   }
 
   /**
@@ -197,9 +227,13 @@ export abstract class TileGrid {
     if (this._tiles[i] !== tile) {
       this._tiles[i] = tile;
       this._changed.add(i);
+      for (const listener of this._listeners) {
+        listener(i, tile);
+      }
       if (!KEEPS_TURN.has(tile)) {
         this._ramps[i] = 0;
       }
+      this.touched(i);
     }
   }
 
@@ -212,7 +246,65 @@ export abstract class TileGrid {
       this.set(i % this.width, Math.floor(i / this.width), tile);
       if (turn !== undefined) {
         this._ramps[i] = turn;
+        this.touched(i);
       }
+    }
+  }
+
+  /**
+   * Calls `listener` with every tile change from now on, as it happens, so
+   * something can keep its own index of the map up to date instead of
+   * scanning it.
+   * @param listener Called with the tile's index and its new tile.
+   */
+  listen(listener: (i: number, tile: Tile) => void): void {
+    this._listeners.push(listener);
+  }
+
+  /**
+   * Calls `watcher` with the index of every tile written from now on, its
+   * tile, level, or turn, so a save can write only what changed.
+   * @param watcher Called with the tile's index.
+   */
+  watch(watcher: (i: number) => void): void {
+    this._watchers.push(watcher);
+  }
+
+  /**
+   * The tile at an index.
+   * @param i The tile's index.
+   * @returns Its tile.
+   */
+  tileAt(i: number): Tile {
+    return this._tiles[i];
+  }
+
+  /**
+   * The terrain level at an index.
+   * @param i The tile's index.
+   * @returns Its level.
+   */
+  levelAt(i: number): number {
+    return this._levels[i];
+  }
+
+  /**
+   * The stored turn at an index: 0 for none, else 1 + an index into
+   * RAMP_DIRS.
+   * @param i The tile's index.
+   * @returns Its turn code.
+   */
+  rampAt(i: number): number {
+    return this._ramps[i];
+  }
+
+  /**
+   * Tells the watchers a tile was written.
+   * @param i The tile's index.
+   */
+  private touched(i: number): void {
+    for (const watcher of this._watchers) {
+      watcher(i);
     }
   }
 

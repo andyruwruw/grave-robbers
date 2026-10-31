@@ -13,12 +13,12 @@ export const TRAPS: ReadonlySet<StructureKind> = new Set<StructureKind>(['spikes
 /**
  * Damage a second each trap does to whoever stands in it.
  */
-export const TRAP_DAMAGE: Partial<Record<StructureKind, number>> = { 'spikes': 1, 'iron-spikes': 2, 'barbed-wire': 0.25, 'blood-fountain': 0.5 };
+export const TRAP_DAMAGE: Partial<Record<StructureKind, number>> = { 'spikes': 1, 'iron-spikes': 2, 'barbed-wire': 0.25, 'blood-fountain': 0.25 };
 
 /**
  * Blood a blood fountain pumps out per damage it drains.
  */
-export const FOUNTAIN_BLOOD = 1;
+export const FOUNTAIN_BLOOD = 0.4;
 
 /**
  * Whether a tile is a ground trap.

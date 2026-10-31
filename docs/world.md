@@ -7,10 +7,12 @@ The map is a tile grid with a fixed terrain level per tile. It's server-mutable:
 | Size (`MapGenSettings.size`) | Tiles | Edge |
 |---|---|---|
 | Classic (default) | 56x34 (`MAP_WIDTH`, `MAP_HEIGHT`) | A fence; off-map reads as `fence` |
-| Huge | 256x256 (`HUGE_SIZE`) | A ring of chasm; off-map reads as `chasm` |
+| Huge | 256x256 (`HUGE_SIZE`), one whole landscape | A ring of chasm; off-map reads as `chasm` |
 
 - `WorldMap` carries its own `width`, `height`, and `edge`; nothing assumes the classic size. `WorldMap.decode` takes the width, and the `world` message, saves, and presets carry it.
-- The TV's Regenerate Map card picks the size (Classic or Huge) next to the random map knobs.
+- The TV's Regenerate Map card picks the size (Classic or Huge) next to the random map knobs. Switches for the huge-only sites (`hugeOnly` in `MAP_STRUCTURES`) show only for Huge.
+- **Generating popup:** a random huge world takes a moment, so `MapHandler.reset` first sends displays `generating`, then starts generating `GENERATING_LEAD_MS` (60) later (`server/src/net/config/world.ts`) so the message gets out first. The TV, admin, and /play show `GeneratingScreen` (`packages/game-ui`, its lines in `config/generating.ts`) until the `world` message. Further resets are ignored until it's done. Classic maps and presets are quick and skip it.
+- **Background threads:** with the `threads` setting on (the default; the Background threads switch on the TV's Game tab and the admin's Gameplay page), `MapHandler.reset` generates a huge world on a worker thread instead (`world-gen/threads/generate-huge-off-thread.ts` runs `huge-gen-worker.ts`), so the game keeps ticking. The worker sends the map back encoded as a nameless `MapPreset`, which `Game.reset` starts the world from (about 30 ms on the game's thread instead of the whole generation). If the worker fails, it generates on the game's thread as before. Off, generation runs on the game's thread and the game freezes for it.
 - A huge world is meant for players spread out over it: monsters spawn around each player ([monsters.md](monsters.md#spawning-and-pacing)), each screen gets only what's near the players it shows ([architecture.md](architecture.md#huge-worlds)), and the TV splits its screen ([tv.md](tv.md#split-screen)).
 
 ## Terrain levels
@@ -83,19 +85,38 @@ flowchart TD
 
 ### Huge worlds
 
-`world-gen/generate-huge-world.ts` `generateHugeWorld`, about 180 ms. Each step is a `GenPass` in `world-gen/huge/`.
+`world-gen/generate-huge-world.ts` `generateHugeWorld`, about 0.7 s. One landscape, not stitched-together maps. Each step is a `GenPass` in `world-gen/huge/`, reusing the classic passes where they fit.
 
 ```mermaid
 flowchart TD
-  A[DistrictPass: lay out 3x3 district cells] --> B[WildsPass: forest noise, lone trees, rocks, pumpkins, graves]
-  B --> C[ChasmPass: chasm ring around the edge, crevasses through the wilds, sinkholes]
-  C --> S[DistrictPass.stamp: classic graveyards from generateWorld, fences taken down, nudged in their cells]
-  S --> D[RoadPass: winding 2-wide roads along a minimum spanning tree of the districts, bridging chasms]
-  D --> E[SealPass: unreachable wild ground falls into chasm, unreachable district ground becomes trees]
+  A[SitePass: the hub at the middle, then sites scattered at least SITE_SPACING apart] --> B[HeightPass: one height field for the whole map, cut into levels -1 to 2, a flat pad under each site, shelved]
+  B --> C[ChasmPass: chasm ring around the edge, crevasses and sinkholes kept off the sites]
+  C --> H[HubPass: crypt, four cobbled arms with two spawns each, lamps, grave plots]
+  H --> D[RoadPass: 2-wide roads routed between sites by A*, winding, climbing one level at a time, bridging chasm]
+  D --> S[SiteBuildPass: each site's landmark, with a path to the road]
+  S --> L[LampPass on the road ends, TerracePass.stairsOnPaths, WildsPass: woods, burial grounds, rocks, pumpkins]
+  L --> G[StairsPass: tidy, connect in spread-out batches until everything is reachable there and back, extras, the rest becomes trees]
 ```
 
-- Only the middle district keeps its spawn.
-- Knobs are constants in `world-gen/config/huge.ts`: `DISTRICT_GRID`, `DISTRICT_EDGE`, `RING_MIN`, `RING_WOBBLE`, `CREVASSE_WIDTH`, `CREVASSE_CLEARANCE`, `SINKHOLES`, `FOREST_FROM`, `LONE_*`, `ROAD_REACH`.
+**Sites** (`SITE_KINDS`, `SiteKind` in `world-gen/types/sites.ts`, about 40 a world):
+
+| Site | Landmark | Off when |
+|---|---|---|
+| Hub (always one, at the middle) | Crypt, cobbled arms, the 8 spawns (`HubPass`) | Never |
+| Chapel | `Chapel` | `chapel` is off |
+| Well plaza | `WellPlaza` | `well` is off |
+| Watchtower hill | `Hill` (its pad is never above the ground, so the tower fits under `MAX_LEVEL`) | `tower` is off |
+| Mausoleums | `Mausoleums` | `mausoleums` is off |
+| Graveyard | `Graveyard`: two to four hedged plots (`PlotPass.plot`) | `plots` is off |
+| Crypt | `LoneCrypt`: a crypt with no spawns, statues or lamps on its corners | `crypts` is off |
+| Ruins | `Ruins`: two to four broken stone houses, sometimes a chest or rubble inside | `ruins` is off |
+| Stone circle | `StoneCircle`: a ring of statues around a lamp | `stones` is off |
+| Pumpkin patch | `PumpkinPatch`: hedged rows of pumpkins between furrows | `patches` is off |
+
+- **Terrain:** two octaves of noise (`LAND_SCALE`, `HILL_SCALE`) cut at shares of the map: `mountains` x `mountainSize` raises `HIGH_SHARE` each, `peaks` raises `PEAK_SHARE` of that again, `pits` x `pitSize` sinks `LOW_SHARE` each (together at most `GROUND_LEFT`). Each pad eases back to the land over `PAD_BLEND` tiles, then `TerracePass.shelve` keeps every level change a broad shelf.
+- **Roads:** a minimum spanning tree of the sites plus loops (`ROAD_LOOPS` within `ROAD_LOOP_REACH`), each routed eight ways by `helpers/route.ts` with costs for wandering, climbing, bridging, trespassing, and a discount for following a road already laid (`ROAD_*`). They stop `ROAD_STOP` of the way into a site's pad; the landmark paths out to meet them. Lamp posts mark each road's last `LAMP_STRETCH` tiles into a site.
+- **Wilds** (`WildsPass`, off every pad): thick woods where `FOREST_SCALE` noise passes `FOREST_FROM`, lone trees, rocks (`ROCKS_HIGH` times more on raised ground), graves (`GRAVEFIELD_BOOST` times more in burial grounds), and pumpkins (`PUMPKINS_ROADSIDE` times more beside roads), each times its knob.
+- `StairsPass.connect` adds flights at least `CONNECT_SPREAD` apart per round (`CONNECT_ROUNDS` at most); anything still unreachable becomes trees.
 - `perArea` (`world/helpers/tiles.ts`) scales the pumpkin and chest targets to the map's area.
 
 ## Presets
@@ -121,14 +142,17 @@ The map keeps itself stocked toward fixed targets, so a server left alone never 
 | What | How |
 |---|---|
 | Trees | Rise beside other trees (mostly toward the middle) every ~12s, up to as many as the map started with (stumps count) |
+| Hedges | Each time a tree grows, a hedge rises beside other hedges too, up to as many as the map started with (`hedgeTarget` in the save) |
 | Stumps | Rot away after 2 to 4 minutes |
 | Pumpkins | Swell up beside paths every ~40s, up to 10 |
 | Chests | Surface beside graves and hedges every ~60s, up to 3 |
-| Rocks | Top up to 20 |
+| Rocks | Top up to 20 (`ROCK_TARGET`) |
 | Graves | A dug grave leaves an open mound; a new gravestone rises 3 to 5 minutes later |
 
 - Nothing grows on a spawn, a person, an item, or anywhere a flood fill says would cut off a reachable tile.
 - The Game tab's Natural spawning switch stops all regrowth.
+- **Targets** (`Regrowth.targets`, by `RegrowthTile` in `shared/src/world/regrowth.ts`): trees and hedges start at what the map was generated with, pumpkins and chests at `perArea`, rocks at `ROCK_TARGET`. The admin's Manipulate section changes them (`regrowth-target`, `Regrowth.setTarget`, 0 to `MAX_REGROWTH_TARGET`), and all five are saved (`treeTarget`, `hedgeTarget`, `pumpkinTarget`, `chestTarget`, `rockTarget`). A lower target only stops growth; nothing is removed.
+- Displays get the targets in every state snapshot (`regrowth`) and the counts on the map once a second (`stats.stocked`, `Regrowth.stocked`).
 
 ## Ground items
 

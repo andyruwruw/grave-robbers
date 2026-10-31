@@ -11,6 +11,23 @@ flowchart LR
   H --> S[Each new monster: count, kind, health, damage, gear, reward]
 ```
 
+## Server difficulty
+
+A setting, not a hidden level: the admin's Gameplay page sets it with a stepped slider (`DifficultyRow` in the Manipulate card, `GameSettings.difficulty`, 1 to 5, starting on 3). It scales damage only (`DIFFICULTY_LEVELS` in `shared/src/difficulty/difficulty.ts`):
+
+| Level | Damage players take | Damage monsters take |
+|---|---|---|
+| 1 Easy | -30% | +30% |
+| 2 Gentle | -15% | +15% |
+| 3 Normal | 0 | 0 |
+| 4 Hard | +37.5% | -15% |
+| 5 Hardest | +75% | -30% |
+
+- **Taken** (`DifficultyLevel.taken`): `DamageSystem.hurt` scales damage from monsters and the world (falls, traps, shots, puddles) before armor and shields guard it. Players hurting each other aren't scaled, and neither are health a player spends on purpose (altar offerings, the ritual knife).
+- **Dealt** (`DifficultyLevel.dealt`): every way a monster loses health is scaled, through `HordeContext.dealt` (set by `GameTabSystem` with `Horde.setDealt`): hits (`Monster.takeHit`, after the monster's own adjustments), bleeding, traps, palisade thorns, and falls. It applies at once, to monsters already out.
+- Nothing a player sees changes: weapon stats, armor, and the phone's numbers stay the same. Monsters just hit harder or seem to have more health.
+- Like the other Game tab settings it lives in memory and resets when the server restarts.
+
 ## Player level
 
 A player's level is the sum of four parts:
@@ -40,7 +57,8 @@ At world level L:
 | Monster health | x(1 + 0.04 L) |
 | Monster damage | x(1 + 0.03 L) |
 | Blood from kills | x(1 + 0.05 L) |
-| Zombies carrying junk | 12% + 2% per level, at most 50% |
+| Zombies and brutes armed | 12% + 2% per level, at most 50% |
+| Share of those with a craftable weapon instead of junk | 3% per level past 7, at most 40% (`craftedShare`), from the tiers in `ZOMBIE_WEAPON_TIERS` |
 | Zombies and brutes in armor | 4% per level past 2, at most 60% |
 | Share of armor that's plate | 5% per level past 8, at most 60% |
 
@@ -48,14 +66,31 @@ Armored kills leave iron: 30% of the time for a helmet, 80% for plate.
 
 ## Spawn weights by world level
 
-| Monster | Weight | First appears |
+The trickle's mix is set in percent at chosen world levels (`SPAWN_MIX` in `horde-scaling.ts`). Between two of them it blends in a straight line (`spawnWeights`), and past the last it holds. Each kind's share is also its share of the cap (`pickKind` in `horde/helpers/spawn-mix.ts`), around each player on a huge world.
+
+| World level | Zombie | Vampire | Skeleton | Brute | Ghoul | Witch | Demon | Bloater | Necromancer |
+|---|---|---|---|---|---|---|---|---|---|
+| 0 | 60% | 15% | 25% | | | | | | |
+| 4 | 50% | 15% | 20% | 5% | 10% | | | | |
+| 8 | 49% | 10% | 13% | 5% | 15% | 5% | | 3% | |
+| 10 | 45% | 10% | 12% | 5% | 15% | 8% | 1% | 4% | |
+| 15 | 42% | 10% | 10% | 5% | 15% | 10% | 3% | 4% | 1% |
+| 20 and up | 40% | 10% | 8% | 5% | 15% | 10% | 4% | 5% | 3% |
+
+- Bloaters blend in from 0 at level 4 (about 1.5% by level 6); necromancers from 0 at level 10. A necromancer's raised skeletons come on top of the mix.
+- Werewolves aren't in `SPAWN_MIX`: a blood moon adds them (8 weight on top of these 100, `extra` in `spawnWeights`).
+
+Pace and cap by world level (the cap is at most 60):
+
+| World level | One spawn every | Cap (1 / 2 / 4 players) |
 |---|---|---|
-| Zombie | 0.55 | always |
-| Vampire | 0.3 x (1 + 0.04 L) | always |
-| Skeleton | 0.03 per level past 1, at most 0.3 | L 2 |
-| Brute | 0.025 per level past 3, at most 0.4 | L 4 |
-| Ghoul | 0.03 per level past 3, at most 0.3 | L 4 |
-| Witch | 0.02 per level past 5, at most 0.2 | L 6 |
-| Demon | 0.01 per level past 9, at most 0.08 | L 10 |
+| 0 | 4.5s | 6 / 10 / 18 |
+| 4 | 3.9s | 7 / 12 / 21 |
+| 8 | 3.4s | 8 / 13 / 24 |
+| 10 | 3.2s | 8 / 14 / 26 |
+| 15 | 2.8s | 9 / 16 / 30 |
+| 20 | 2.5s | 10 / 18 / 34 |
+| 40 | 1.7s | 14 / 26 / 50 |
+| 60 | 1.3s | 18 / 34 / 60 |
 
 Ghosts spawn on their own clock (see [monsters.md](monsters.md#spawning-and-pacing)).

@@ -4,7 +4,7 @@ import { GEAR } from '../gear/gear-catalog';
 import { isGearItem } from '../inventory/bag-items';
 import { TREE } from '../skill-tree/nodes';
 import { levelOf, nodeDepth } from '../skill-tree/progress';
-import { weaponStats } from '../skill-tree/upgrades/gear-upgrades';
+import { itemStats } from '../skill-tree/upgrades/gear-upgrades';
 
 // Types
 import type { GearKind } from '../gear/types/gear-def';
@@ -63,7 +63,8 @@ export const ONLINE_SECONDS_PER_LEVEL = 480;
 const MAX_ONLINE_LEVELS = 8;
 
 /**
- * How dangerous one weapon is, in damage per second, with its upgrades.
+ * How dangerous one weapon is, in damage per second, with its upgrades
+ * and infusion.
  *
  * @param stats The weapon's upgraded stats.
  * @returns Its weighted damage per second.
@@ -129,8 +130,8 @@ export function playerLevel(gear: Gear, tree: TreeState, onlineSeconds: number):
   const owned = [...Object.values(gear.equipped), ...gear.bag]
     .filter((item: BagItem | GearItem | null): item is GearItem => item !== null && isGearItem(item));
   const kinds = new Set(owned.map((item: GearItem): GearKind => item.kind));
-  const dps = Math.max(weaponDps(HAMMER), ...[...kinds].filter((k: GearKind): boolean => !!GEAR[k].weapon)
-    .map((k: GearKind): number => weaponDps(weaponStats(k, tree))));
+  const dps = Math.max(weaponDps(HAMMER), ...owned.filter((item: GearItem): boolean => !!GEAR[item.kind].weapon)
+    .map((item: GearItem): number => weaponDps(itemStats(item, tree))));
   /**
    * The share of damage a piece of owned gear lets through, at its upgrade level.
    * @param kind The armor or shield.

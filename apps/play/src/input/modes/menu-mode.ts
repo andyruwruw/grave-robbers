@@ -4,7 +4,6 @@ import { stick } from '@halloween/ui/input/gamepad';
 
 // Local Imports
 import {
-  MENUS,
   PAD,
   REPEAT_FIRST_MS,
   REPEAT_MS,
@@ -68,14 +67,16 @@ export class MenuMode extends InputMode {
       if (pad.tap(PAD.b) || k.taps.has('Escape')) {
         if (s.stash) {
           s.send({ t: 'stash-close' });
+        } else if (s.using) {
+          s.send({ t: 'use-close' });
         } else {
           s.setMenu(null);
         }
-      } else if (!s.stash && s.menu) {
-        const at = MENUS.indexOf(s.menu);
-        const opened = MENUS.find((m: Menu): boolean => ctx.tappedAction(m));
+      } else if (!s.stash && !s.using && s.menu) {
+        const at = s.menus.indexOf(s.menu);
+        const opened = s.menus.find((m: Menu): boolean => ctx.tappedAction(m));
         if (pad.tap(PAD.lb) || pad.tap(PAD.rb)) {
-          s.setMenu(MENUS[(at + (pad.tap(PAD.rb) ? 1 : MENUS.length - 1)) % MENUS.length]);
+          s.setMenu(s.menus[(at + (pad.tap(PAD.rb) ? 1 : s.menus.length - 1)) % s.menus.length]);
         } else if (opened) {
           s.setMenu(s.menu === opened ? null : opened);
         }

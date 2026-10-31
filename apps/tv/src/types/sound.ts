@@ -93,4 +93,10 @@ export interface Voice {
    * A growl every few seconds while hunting.
    */
   growl?: Cue;
+
+  /**
+   * Its second attack, counted by `swipes` (a witch's broom, a werewolf's
+   * pounce): cues as it winds up and lands, and its windup (seconds).
+   */
+  swipe?: { windup: Cue; strike: Cue[]; time: number };
 }

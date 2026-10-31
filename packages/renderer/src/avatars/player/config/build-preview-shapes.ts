@@ -20,7 +20,6 @@ export const BUILD_PREVIEW_SHAPES: Record<StructureKind, [number, number, number
   'obelisk': [0.45, 1.95, 0.45],
   'blood-fountain': [0.85, 1.05, 0.85],
   'soul-cage': [0.7, 1.25, 0.7],
-  'mirror': [0.75, 1.45, 0.16],
   'scarecrow': [0.95, 1.6, 0.3],
   'torch': [0.2, 1.05, 0.2],
   'lantern': [0.3, 1.55, 0.3],
@@ -42,7 +41,9 @@ export const BUILD_PREVIEW_SHAPES: Record<StructureKind, [number, number, number
   'cauldron': [0.8, 0.75, 0.8],
   'anvil': [0.6, 0.7, 0.45],
   'oven': [0.86, 1.3, 0.8],
+  'quarry': [0.95, 1.4, 0.8],
   'belt': [1, 0.15, 1],
+  'sorter': [1, 0.35, 1],
   'seeds': [0.5, 0.1, 0.5],
   'sprout': [0.6, 0.35, 0.6],
   'bolt-turret': [0.7, 0.8, 0.7],
@@ -62,3 +63,9 @@ export const PLACE_OK = '#ffffff';
  * can't go there.
  */
 export const PLACE_BLOCKED = '#ff8a8a';
+
+/**
+ * How solid a wall's preview is (see `WallGhosts`): the wall itself, a
+ * little see-through.
+ */
+export const WALL_GHOST_OPACITY = 0.7;

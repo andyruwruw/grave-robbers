@@ -90,7 +90,13 @@ export interface MonsterState {
   blinks: number;
 
   /**
-   * A witch's broom swipes, counted like `attacks`.
+   * A witch's broom swipes (a werewolf's pounces, a necromancer's novas), counted like `attacks`.
    */
   swipes: number;
+
+  /**
+   * What's afflicting it, as STATUS_ bits (`monsters/monster-status.ts`;
+   * 0 for nothing).
+   */
+  status: number;
 }

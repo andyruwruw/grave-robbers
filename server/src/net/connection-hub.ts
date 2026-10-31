@@ -1,6 +1,7 @@
 // Local Imports
 import { StateBroadcaster } from './broadcast/state-broadcaster';
 import { StatsWindow } from './broadcast/stats-window';
+import { guard } from '../game/helpers/guard';
 import { PING_INTERVAL_MS } from './config/ping';
 import { buildRoutes } from './handlers/routes';
 import { PadRegistry } from './pads/pad-registry';
@@ -12,6 +13,7 @@ import { SessionRegistry } from './sessions/session-registry';
 import type { WebSocket, WebSocketServer, RawData } from 'ws';
 import type { ClientMessage } from '@halloween/shared/protocol/messages/client-message';
 import type { Game } from '../game/game';
+import type { SaveKeeper } from '../game/storage/save-keeper';
 import type { MessageHandler } from './handlers/message-handler';
 
 /**
@@ -60,15 +62,17 @@ export class ConnectionHub {
    * Starts listening for sockets and pinging them.
    * @param wss The WebSocket server.
    * @param game The game to route into.
-   * @param onWorldReset Called after the TV starts a new world.
+   * @param saves Keeps the game saved, and its world slots.
    */
   constructor(
     wss: WebSocketServer,
     readonly game: Game,
-    readonly onWorldReset: () => void,
+    readonly saves: SaveKeeper,
   ) {
     wss.on('connection', (ws: WebSocket): void => this.handleConnection(ws));
-    setInterval((): void => this.pings.pingAll(), PING_INTERVAL_MS);
+    setInterval((): void => {
+      guard('ping', (): void => this.pings.pingAll());
+    }, PING_INTERVAL_MS);
   }
 
   /**
@@ -96,9 +100,12 @@ export class ConnectionHub {
       } catch {
         return;
       }
-      this.handleMessage(ws, msg);
+      guard(`message ${typeof msg?.t === 'string' ? msg.t : '?'}`, (): void => this.handleMessage(ws, msg));
     });
-    ws.on('close', (): void => this.handleClose(ws));
+    ws.on('close', (): void => {
+      guard('close', (): void => this.handleClose(ws));
+    });
+    ws.on('error', (err: Error): void => console.error('[socket]', err.message));
   }
 
   /**

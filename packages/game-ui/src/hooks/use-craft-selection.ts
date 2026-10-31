@@ -1,9 +1,12 @@
 // Packages
-import { useState } from 'react';
-import { MAX_CRAFT, craftCost, needsAnvil } from '@halloween/shared/crafting/recipes';
-import { affordableCount } from '@halloween/shared/inventory/affordability';
+import { useRef, useState } from 'react';
+import { MAX_CRAFT, craftCost, needsAnvil, recipeParts } from '@halloween/shared/crafting/recipes';
+import { affordableCount, partsCount } from '@halloween/shared/inventory/affordability';
 import { recipeUnlocked } from '@halloween/shared/skill-tree/progress';
 import { useHold } from '@halloween/ui/hooks/use-hold';
+
+// Local Imports
+import { DOUBLE_TAP_MS } from '../config/item-details';
 
 // Types
 import type { RecipeId } from '@halloween/shared/crafting/recipes';
@@ -41,9 +44,11 @@ interface CraftSelection {
   selected: RecipeId | null;
 
   /**
-   * Picks a recipe for the craft bar, starting at one.
+   * A tap on a recipe: picks it for the craft bar, starting at one; a
+   * second tap on it within DOUBLE_TAP_MS opens its details (unless they
+   * show beside the list).
    */
-  select: (recipe: RecipeId) => void;
+  tap: (recipe: RecipeId) => void;
 
   /**
    * Sets how many to craft.
@@ -87,6 +92,7 @@ export function useCraftSelection(aside: boolean, tree: TreeState, inventory: In
   const [showLocked, setShowLocked] = useState(false);
   const [selected, setSelected] = useState<RecipeId | null>(null);
   const [count, setCount] = useState(1);
+  const lastTap = useRef<{ recipe: RecipeId; at: number } | null>(null);
   const hold = useHold<RecipeId>((recipe: RecipeId): void => {
     if (aside) {
       setSelected(recipe);
@@ -102,19 +108,29 @@ export function useCraftSelection(aside: boolean, tree: TreeState, inventory: In
    * @param recipe - The recipe.
    * @returns Up to `MAX_CRAFT`, 0 when locked or needing a missing anvil.
    */
-  const canMake = (recipe: RecipeId): number => (!recipeUnlocked(recipe, tree) || (needsAnvil(recipe) && anvil === null) ? 0 : tree.free ? MAX_CRAFT : affordableCount(craftCost(recipe, anvil), inventory, gear.bag, MAX_CRAFT));
+  const canMake = (recipe: RecipeId): number => (!recipeUnlocked(recipe, tree) || (needsAnvil(recipe) && anvil === null && !tree.free) ? 0 : tree.free ? MAX_CRAFT : Math.min(affordableCount(craftCost(recipe, anvil), inventory, gear.bag, MAX_CRAFT), partsCount(recipeParts(recipe), gear.bag)));
   const most = selected ? canMake(selected) : 0;
   const amount = Math.max(1, Math.min(count, most));
 
   /**
-   * Picks a recipe for the craft bar.
+   * Picks a recipe for the craft bar, and opens its details on a double
+   * tap.
    *
    * @param recipe - The recipe.
    */
-  const select = (recipe: RecipeId): void => {
-    setSelected(recipe);
-    setCount(1);
+  const tap = (recipe: RecipeId): void => {
+    const now = performance.now();
+    const last = lastTap.current;
+    lastTap.current = { recipe, at: now };
+    if (!aside && last?.recipe === recipe && now - last.at <= DOUBLE_TAP_MS) {
+      lastTap.current = null;
+      setDetails(recipe);
+    }
+    if (recipe !== selected) {
+      setSelected(recipe);
+      setCount(1);
+    }
   };
 
-  return { details, closeDetails: (): void => setDetails(null), showLocked, setShowLocked, selected, select, setCount, hold, canMake, most, amount };
+  return { details, closeDetails: (): void => setDetails(null), showLocked, setShowLocked, selected, tap, setCount, hold, canMake, most, amount };
 }

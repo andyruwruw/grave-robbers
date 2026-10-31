@@ -22,3 +22,8 @@ export const MAP_GEN_STORAGE_KEY = 'graveyard.mapGen';
  * localStorage key holding the TV's view preset (`TvView`).
  */
 export const TV_VIEW_STORAGE_KEY = 'graveyard.tvView';
+
+/**
+ * The look last picked for each wall (see `useWallStyle`).
+ */
+export const WALL_STYLE_STORAGE_KEY = 'graveyard.wallStyles';

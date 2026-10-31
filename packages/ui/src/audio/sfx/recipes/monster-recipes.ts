@@ -86,6 +86,43 @@ export const MONSTER_RECIPES: Record<MonsterSfx, SfxRecipe> = {
     s.tone({ type: 'sine', from: 760, to: 1500, dur: 0.4, gain: 0.05, attack: 0.08 });
     s.noise({ filter: 'bandpass', from: 3000, to: 1200, q: 3, dur: 0.7, gain: 0.12, attack: 0.1 });
   },
+  'werewolf-howl': (s) => {
+    const f = 300 + Math.random() * 40;
+    s.tone({ type: 'sawtooth', from: f * 0.7, to: f * 1.5, dur: 0.45, gain: 0.07, attack: 0.08, vibrato: [5, 8], lowpass: [1400, 2200] });
+    s.tone({ type: 'sawtooth', from: f * 1.5, to: f * 0.9, dur: 1.4, gain: 0.08, at: 0.42, vibrato: [5.5, 14], lowpass: [2200, 900] });
+    s.tone({ type: 'sine', from: f * 1.5, to: f * 0.92, dur: 1.4, gain: 0.1, at: 0.42, vibrato: [5.5, 14] });
+    s.noise({ filter: 'bandpass', from: 1200, to: 700, q: 3, dur: 1.8, gain: 0.08, attack: 0.2 });
+  },
+  'werewolf-snarl': (s) => {
+    s.noise({ filter: 'bandpass', from: 500, to: 300, q: 2, dur: 0.7, gain: 0.4, attack: 0.03 });
+    s.tone({ type: 'sawtooth', from: 72, to: 62, dur: 0.7, gain: 0.2, attack: 0.03, vibrato: [28, 9], lowpass: [700, 400] });
+    s.tone({ type: 'square', from: 48, dur: 0.6, gain: 0.06, attack: 0.04, lowpass: [260, 200] });
+  },
+  'bloater-gurgle': (s) => {
+    for (let i = 0; i < 5; i++) {
+      const at = i * 0.11 + Math.random() * 0.05;
+      s.tone({ type: 'sine', from: 90 + Math.random() * 60, to: 160 + Math.random() * 80, dur: 0.08, gain: 0.18, at });
+      s.noise({ filter: 'lowpass', from: 500, to: 200, dur: 0.07, gain: 0.15, at });
+    }
+    s.tone({ type: 'sawtooth', from: 65, to: 55, dur: 0.7, gain: 0.07, attack: 0.1, vibrato: [7, 6], lowpass: [300, 200] });
+  },
+  'bloater-burst': (s) => {
+    s.noise({ filter: 'lowpass', from: 1400, to: 120, dur: 0.5, gain: 0.85 });
+    s.tone({ type: 'sine', from: 120, to: 32, dur: 0.45, gain: 0.55 });
+    s.noise({ filter: 'bandpass', from: 700, q: 4, dur: 0.06, gain: 0.3, at: 0.12 });
+    s.noise({ filter: 'bandpass', from: 500, q: 4, dur: 0.06, gain: 0.25, at: 0.22 });
+  },
+  'necro-chant': (s) => {
+    s.tone({ type: 'sawtooth', from: 98, dur: 1.2, gain: 0.08, attack: 0.3, vibrato: [4, 3], lowpass: [500, 700] });
+    s.tone({ type: 'sawtooth', from: 147, to: 139, dur: 1.2, gain: 0.06, attack: 0.35, vibrato: [4.5, 3], lowpass: [500, 800] });
+    s.noise({ filter: 'bandpass', from: 2400, to: 1600, q: 4, dur: 1.1, gain: 0.08, attack: 0.3 });
+  },
+  'raise': (s) => {
+    s.noise({ filter: 'lowpass', from: 700, to: 200, dur: 0.35, gain: 0.45 });
+    s.tone({ type: 'sine', from: 180, to: 520, dur: 0.5, gain: 0.07, attack: 0.05, vibrato: [8, 20] });
+    s.noise({ filter: 'highpass', from: 2400, dur: 0.02, gain: 0.2, at: 0.1 });
+    s.noise({ filter: 'highpass', from: 2600, dur: 0.02, gain: 0.2, at: 0.19 });
+  },
   'ghost-moan': (s) => {
     s.tone({ type: 'sine', from: 300, to: 430, dur: 0.8, gain: 0.1, attack: 0.3, vibrato: [6, 9] });
     s.tone({ type: 'sine', from: 430, to: 250, dur: 0.9, gain: 0.1, at: 0.75, vibrato: [6, 9] });

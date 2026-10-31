@@ -31,10 +31,11 @@ export class TurretSystem extends GameSystem {
    * Every turret that's ready acts on the monsters in its range (see
    * `TURRETS`): shooters fire at the nearest, swipers cut everything
    * around them, flamethrowers burn everything in a cone toward the
-   * nearest. Kills go to the nearest player, like a trap's.
+   * nearest. Kills go to the nearest player, like a trap's. Risen allies
+   * are left alone.
    */
   fireTurrets(): void {
-    const monsters = this.horde.bodies();
+    const monsters = this.horde.bodies().filter((m): boolean => !this.horde.afflictions.isAlly(m.id));
     for (const turret of this.world.turretAmmo.readyTurrets()) {
       const def = TURRETS[turret.kind]!;
       const x = turret.tx + 0.5;

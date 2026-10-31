@@ -8,7 +8,9 @@ import { MapHandler } from './map-handler';
 import { MusicHandler } from './music-handler';
 import { PadHandler } from './pad-handler';
 import { PongHandler } from './pong-handler';
+import { SlotHandler } from './slot-handler';
 import { StashHandler } from './stash-handler';
+import { UseHandler } from './use-handler';
 import { TvToolsHandler } from './tv-tools-handler';
 
 // Types
@@ -45,8 +47,10 @@ export function buildRoutes(hub: ConnectionHub): RouteTable {
   const intent = new IntentHandler(hub);
   const bag = new BagHandler(hub);
   const stash = new StashHandler(hub);
+  const use = new UseHandler(hub);
   const build = new BuildHandler(hub);
   const pad = new PadHandler(hub);
+  const slots = new SlotHandler(hub);
   const routes: Routes = {
     'pong': pong,
     'hello-display': displaySession,
@@ -57,20 +61,29 @@ export function buildRoutes(hub: ConnectionHub): RouteTable {
     'edit-map': map,
     'save-preset': map,
     'reset-world': map,
+    'world-slots': slots,
+    'slot-create': slots,
+    'slot-open': slots,
+    'slot-delete': slots,
+    'character-release': slots,
     'kill-monsters': tvTools,
     'tv-lift': tvTools,
     'tv-light': tvTools,
-    'force-blood-moon': tvTools,
+    'start-world-event': tvTools,
     'game-settings': tvTools,
     'spawn': tvTools,
+    'regrowth-target': tvTools,
+    'clear-items': tvTools,
     'hello-controller': controllerSession,
     'join': controllerSession,
     'leave': controllerSession,
+    'transfer-code': controllerSession,
     'input': intent,
     'action': intent,
     'block': intent,
     'aim': intent,
     'turn': intent,
+    'build-style': intent,
     'panic': intent,
     'drop': intent,
     'equip': bag,
@@ -80,6 +93,12 @@ export function buildRoutes(hub: ConnectionHub): RouteTable {
     'move-item': bag,
     'craft': bag,
     'upgrade': bag,
+    'infuse': bag,
+    'use': use,
+    'use-close': use,
+    'use-feed': use,
+    'use-collect': use,
+    'use-route': use,
     'stash-move': stash,
     'stash-close': stash,
     'stash-take-down': stash,

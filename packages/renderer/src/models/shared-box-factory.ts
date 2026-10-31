@@ -31,24 +31,26 @@ export class SharedBoxFactory {
   constructor(private _castShadow: boolean) {}
 
   /**
-   * A box, sharing one material per color.
+   * A box, sharing one material per color, glow, and opacity.
    * @param size Its size.
    * @param pos Its position.
    * @param color Its color.
    * @param glow Whether it glows (unlit).
+   * @param opacity How opaque it is (below 1 it's see-through).
    * @returns The box.
    */
-  readonly box: BoxFactory = (size, pos, color, glow = false): Mesh => {
-    const key = `${color}:${glow}`;
+  readonly box: BoxFactory = (size, pos, color, glow = false, opacity = 1): Mesh => {
+    const key = `${color}:${glow}:${opacity}`;
     let material = this._materials.get(key);
     if (!material) {
-      material = glow ? new MeshBasicMaterial({ color }) : new MeshLambertMaterial({ color });
+      const see = opacity < 1 ? { transparent: true, opacity, depthWrite: false } : {};
+      material = glow ? new MeshBasicMaterial({ color, ...see }) : new MeshLambertMaterial({ color, ...see });
       this._materials.set(key, material);
     }
     const mesh = new Mesh(UNIT_BOX, material);
     mesh.scale.set(...size);
     mesh.position.set(...pos);
-    if (this._castShadow) {
+    if (this._castShadow && opacity === 1) {
       mesh.castShadow = true;
     }
     return mesh;

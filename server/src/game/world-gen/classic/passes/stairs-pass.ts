@@ -1,6 +1,3 @@
-// Packages
-import { MAP_HEIGHT, MAP_WIDTH } from '@halloween/shared/world/dimensions';
-
 // Local Imports
 import { DIRS, EXTRA_STAIRS_CHANCE, RAMP_GROUND, SCENERY } from '../../config/classic';
 import { ClassicPass } from '../classic-pass';
@@ -19,15 +16,20 @@ export class StairsPass extends ClassicPass {
    * left again: at the foot of a level change between a reachable tile and
    * an unreachable one (or one that can't get back and one that can). The
    * tiles at either end of new stairs become dirt, so nothing grows there.
+   * One flight a round, or with `spread` every fix at least that far from
+   * the others taken that round (a huge world has too many pockets to
+   * reach one at a time).
    * @param spawns Where the round trips start.
+   * @param spread Tiles apart the flights added in one round stay, or 0 for one a round.
+   * @param rounds How many rounds to try at most.
    */
-  connect(spawns: Point[]): void {
+  connect(spawns: Point[], spread = 0, rounds = 60): void {
     const starts = spawns.map(([x, y]): { x: number; y: number } => ({ x, y }));
-    for (let round = 0; round < 60; round++) {
+    for (let round = 0; round < rounds; round++) {
       const ok = this.map.roundTrip(starts);
       const fixes: [Point, Point][] = [];
-      for (let ty = 1; ty < MAP_HEIGHT - 1; ty++) {
-        for (let tx = 1; tx < MAP_WIDTH - 1; tx++) {
+      for (let ty = 1; ty < this.map.height - 1; ty++) {
+        for (let tx = 1; tx < this.map.width - 1; tx++) {
           if (!RAMP_GROUND.has(this.map.get(tx, ty))) {
             continue;
           }
@@ -38,7 +40,7 @@ export class StairsPass extends ClassicPass {
             if (
               this.map.level(ux, uy) === this.map.level(tx, ty) + 1
               && !this.map.isSolid(ux, uy)
-              && ok[ty * MAP_WIDTH + tx] !== ok[uy * MAP_WIDTH + ux]
+              && ok[this.map.index(tx, ty)] !== ok[this.map.index(ux, uy)]
               && this.map.isFoot(...back, this.map.base(tx, ty))
               && this.fitsStairs(tx, ty, [dx, dy])
             ) {
@@ -50,14 +52,33 @@ export class StairsPass extends ClassicPass {
       if (fixes.length === 0) {
         return;
       }
-      const [[tx, ty], [ux, uy]] = fixes[Math.floor(this.rand() * fixes.length)];
-      this.map.set(tx, ty, 'stairs');
-      for (const [px, py] of [[ux, uy], [tx * 2 - ux, ty * 2 - uy]]) {
-        if (this.map.get(px, py) === 'grass') {
-          this.map.set(px, py, 'path');
+      const picked = spread > 0 ? this.spreadOut(fixes, spread) : [fixes[Math.floor(this.rand() * fixes.length)]];
+      for (const [[tx, ty], [ux, uy]] of picked) {
+        this.map.set(tx, ty, 'stairs');
+        for (const [px, py] of [[ux, uy], [tx * 2 - ux, ty * 2 - uy]]) {
+          if (this.map.get(px, py) === 'grass') {
+            this.map.set(px, py, 'path');
+          }
         }
       }
     }
+  }
+
+  /**
+   * Fixes in a random order, keeping each that's at least `spread` tiles
+   * from every one already kept.
+   * @param fixes Each fix's stairs tile and the tile above it.
+   * @param spread The least distance between kept fixes.
+   * @returns The fixes kept.
+   */
+  private spreadOut(fixes: [Point, Point][], spread: number): [Point, Point][] {
+    const kept: [Point, Point][] = [];
+    for (const fix of this.shuffle(fixes)) {
+      if (kept.every(([[kx, ky]]): boolean => Math.max(Math.abs(kx - fix[0][0]), Math.abs(ky - fix[0][1])) >= spread)) {
+        kept.push(fix);
+      }
+    }
+    return kept;
   }
 
   /**
@@ -69,8 +90,8 @@ export class StairsPass extends ClassicPass {
     if (this.gen.stairs <= 0) {
       return;
     }
-    for (let ty = 1; ty < MAP_HEIGHT - 1; ty++) {
-      for (let tx = 1; tx < MAP_WIDTH - 1; tx++) {
+    for (let ty = 1; ty < this.map.height - 1; ty++) {
+      for (let tx = 1; tx < this.map.width - 1; tx++) {
         if (!RAMP_GROUND.has(this.map.get(tx, ty)) || this.rand() >= this.gen.stairs * EXTRA_STAIRS_CHANCE) {
           continue;
         }
@@ -132,8 +153,8 @@ export class StairsPass extends ClassicPass {
   tidyStairs(): void {
     for (let changed = true; changed;) {
       changed = false;
-      for (let ty = 1; ty < MAP_HEIGHT - 1; ty++) {
-        for (let tx = 1; tx < MAP_WIDTH - 1; tx++) {
+      for (let ty = 1; ty < this.map.height - 1; ty++) {
+        for (let tx = 1; tx < this.map.width - 1; tx++) {
           if (this.map.get(tx, ty) !== 'stairs' || this.stairsOk(tx, ty)) {
             continue;
           }
@@ -185,9 +206,9 @@ export class StairsPass extends ClassicPass {
    */
   fillUnreachable(spawns: Point[]): void {
     const ok = this.map.roundTrip(spawns.map(([x, y]): { x: number; y: number } => ({ x, y })));
-    for (let ty = 0; ty < MAP_HEIGHT; ty++) {
-      for (let tx = 0; tx < MAP_WIDTH; tx++) {
-        if (!this.map.isSolid(tx, ty) && !ok[ty * MAP_WIDTH + tx]) {
+    for (let ty = 0; ty < this.map.height; ty++) {
+      for (let tx = 0; tx < this.map.width; tx++) {
+        if (!this.map.isSolid(tx, ty) && !ok[this.map.index(tx, ty)]) {
           this.map.set(tx, ty, 'tree');
         }
       }

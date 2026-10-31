@@ -3,8 +3,9 @@ import { monsterReward } from '@halloween/shared/difficulty/horde-scaling';
 import { GEAR } from '@halloween/shared/gear/gear-catalog';
 import { stock } from '@halloween/shared/goods/goods';
 import { LOOT_MIN_WEAR, MONSTER_LOOT_CHANCE } from '@halloween/shared/loot/found-gear';
-import { MONSTER_BLOOD, MONSTER_BONES, MONSTER_ECTOPLASM } from '@halloween/shared/loot/monster-drops';
+import { MONSTER_BLOOD, MONSTER_BONES, MONSTER_ECTOPLASM, MONSTER_ESSENCE } from '@halloween/shared/loot/monster-drops';
 import { ARMOR_SCRAP } from '@halloween/shared/monsters/armor';
+import { altarBleed } from '@halloween/shared/skill-tree/upgrades/structure-upgrades';
 import { ALTAR_RADIUS } from '@halloween/shared/structures/occult';
 
 // Local Imports
@@ -55,13 +56,14 @@ export class MonsterSpoilsSystem extends GameSystem {
 
   /**
    * Something happened in the horde (its `event` hook): a monster's death
-   * drops its loot and spoils to whoever claims them.
+   * drops its loot and spoils to whoever claims them (nothing from one a
+   * necromancer raised).
    * @param e The event.
    * @param bled Who gets a bleed's kill, when it wasn't a hit landing now.
    */
   onEvent(e: GameEvent, bled?: Player): void {
     this.outbox.events.push(e);
-    if (e.t !== 'monster-death') {
+    if (e.t !== 'monster-death' || e.raised) {
       return;
     }
     const killer = this.claimer(bled ?? this.killer, e.x, e.y);
@@ -78,10 +80,13 @@ export class MonsterSpoilsSystem extends GameSystem {
     if (e.held) {
       give({ kind: e.held, wear: Math.ceil(GEAR[e.held].wear * (LOOT_MIN_WEAR + Math.random() * (1 - LOOT_MIN_WEAR))) });
     }
-    if (MONSTER_BLOOD[e.kind] + MONSTER_BONES[e.kind] + MONSTER_ECTOPLASM[e.kind] > 0) {
-      const offered = this.world.structureQueries.nearStructure('altar', e.x, e.y, ALTAR_RADIUS) ? 2 : 1;
+    const essence = MONSTER_ESSENCE[e.kind];
+    const essences = essence && Math.random() < essence.chance ? { [essence.goods]: 1 } : {};
+    if (MONSTER_BLOOD[e.kind] + MONSTER_BONES[e.kind] + MONSTER_ECTOPLASM[e.kind] > 0 || essence) {
+      const altar = this.world.structureQueries.awakeAltarNear(e.x, e.y, ALTAR_RADIUS);
+      const offered = altar === null ? 1 : altarBleed(altar);
       const scrap = e.armor && Math.random() < ARMOR_SCRAP[e.armor] ? 1 : 0;
-      const spoils = stock({ blood: Math.round(MONSTER_BLOOD[e.kind] * offered * monsterReward(this._game.levels.worldLevel)), bone: MONSTER_BONES[e.kind], ectoplasm: MONSTER_ECTOPLASM[e.kind], iron: scrap });
+      const spoils = stock({ blood: Math.round(MONSTER_BLOOD[e.kind] * offered * monsterReward(this._game.levels.worldLevel)), bone: MONSTER_BONES[e.kind], ectoplasm: MONSTER_ECTOPLASM[e.kind], iron: scrap, ...essences });
       const x = e.x - Math.cos(e.angle) * 0.2;
       const y = e.y - Math.sin(e.angle) * 0.2;
       if (killer) {

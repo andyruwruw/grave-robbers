@@ -1,6 +1,7 @@
 // Packages
 import React from 'react';
-import { ArrowBigUp, ScrollText, Skull } from 'lucide-react';
+import { ArrowBigUp, ScrollText, Skull, Sparkles } from 'lucide-react';
+import { gearLabel } from '@halloween/shared/gear/infusions/helpers/gear-names';
 
 // Types
 import type { KillEntry } from '../../types/feed';
@@ -16,8 +17,8 @@ interface KillFeedProps {
 }
 
 /**
- * Recent deaths, blueprint finds, and upgrades, over the map, so the whole
- * room sees who got who and what's newly unlocked.
+ * Recent deaths, blueprint finds, upgrades, and infusions, over the map, so
+ * the whole room sees who got who and what's newly unlocked or forged.
  *
  * @param {KillFeedProps} props - Component props.
  * @returns {React.JSX.Element} The rendered feed.
@@ -47,6 +48,16 @@ function KillFeed({ kills }: KillFeedProps): React.JSX.Element {
             size={12}
             className='text-brand' />
           <span className='text-foreground'>{k.label} unlocked</span>
+        </div>
+      ) : k.t === 'infused' ? (
+        <div
+          key={k.id}
+          className='flex items-center gap-sm rounded-md border border-border bg-surface px-sm py-1 font-medium text-sm'>
+          <span style={{ color: k.finderColor }}>{k.finder}</span>
+          <Sparkles
+            size={12}
+            className='text-brand' />
+          <span className='text-foreground'>{gearLabel({ kind: k.kind, infusion: k.infusion })} forged</span>
         </div>
       ) : (
         <div

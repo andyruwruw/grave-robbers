@@ -74,6 +74,20 @@ export class ScreenPicker extends ScenePart {
   }
 
   /**
+   * Where a map point (in tiles), `lift` above the ground there, shows on
+   * screen.
+   * @param x Tile-space x.
+   * @param y Tile-space y.
+   * @param lift Height above the ground, in world units.
+   * @returns The screen point.
+   */
+  screenOf(x: number, y: number, lift: number): { x: number; y: number } {
+    const rect = this._ctx.renderer.domElement.getBoundingClientRect();
+    this._projected.set(x - this._ctx.mapWidth / 2, this._ctx.elevation(x, y) + lift, y - this._ctx.mapHeight / 2).project(this.camera);
+    return { x: rect.left + ((this._projected.x + 1) / 2) * rect.width, y: rect.top + ((1 - this._projected.y) / 2) * rect.height };
+  }
+
+  /**
    * The tiles under a screen point for the map editor, nearest first: every
    * column of ground the view ray runs into as it goes on through the
    * terrain, so tiles hidden behind a raised block can be reached too (the

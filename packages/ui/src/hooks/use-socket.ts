@@ -11,6 +11,7 @@ import { SOCKET_PATH } from '@halloween/shared/protocol/network';
 import {
   RECONNECT_MAX_DELAY,
   RECONNECT_MIN_DELAY,
+  SOCKET_STALE_MS,
 } from '../config/network';
 
 // Types
@@ -69,6 +70,9 @@ interface UseSocketResult {
  * Keeps one WebSocket to the game server open for the component's lifetime,
  * reconnecting with exponential backoff and re-sending the hello each time.
  * Answers the server's pings itself and keeps the round trip it reports.
+ * An open socket that goes silent for SOCKET_STALE_MS is dropped and
+ * reopened, and a message the page fails to handle is logged instead of
+ * breaking the connection.
  *
  * @param {UseSocketOptions} options - Hook options.
  * @returns {UseSocketResult} Status, a send function, and the ping.
@@ -90,6 +94,7 @@ export function useSocket<M extends ServerMessage>({
     let disposed = false;
     let delay = RECONNECT_MIN_DELAY;
     let retryTimer: ReturnType<typeof setTimeout> | undefined;
+    let heardAt = Date.now();
 
     /**
      * Opens the socket and wires its handlers, reconnecting with backoff when it closes.
@@ -101,12 +106,19 @@ export function useSocket<M extends ServerMessage>({
       setStatus('connecting');
 
       ws.onopen = (): void => {
+        heardAt = Date.now();
         delay = RECONNECT_MIN_DELAY;
         setStatus('open');
         ws.send(JSON.stringify(helloRef.current()));
       };
       ws.onmessage = (e: MessageEvent<string>): void => {
-        const msg = JSON.parse(e.data) as M | NetMessage;
+        heardAt = Date.now();
+        let msg: M | NetMessage;
+        try {
+          msg = JSON.parse(e.data) as M | NetMessage;
+        } catch {
+          return;
+        }
         if (msg.t === 'ping') {
           ws.send(JSON.stringify({ t: 'pong' } satisfies ClientMessage));
           return;
@@ -116,7 +128,11 @@ export function useSocket<M extends ServerMessage>({
           setPing(msg.ms);
           return;
         }
-        onMessageRef.current(msg as M);
+        try {
+          onMessageRef.current(msg as M);
+        } catch (err) {
+          console.error('[socket] handling a message failed', err);
+        }
       };
       ws.onclose = (): void => {
         if (disposed) {
@@ -129,8 +145,21 @@ export function useSocket<M extends ServerMessage>({
     };
 
     connect();
+    const watchdog = setInterval((): void => {
+      const ws = wsRef.current;
+      if (disposed || !ws || ws.readyState !== WebSocket.OPEN || Date.now() - heardAt < SOCKET_STALE_MS) {
+        return;
+      }
+      ws.onclose = null;
+      ws.onmessage = null;
+      ws.close();
+      setStatus('closed');
+      clearTimeout(retryTimer);
+      retryTimer = setTimeout(connect, RECONNECT_MIN_DELAY);
+    }, 1000);
     return () => {
       disposed = true;
+      clearInterval(watchdog);
       clearTimeout(retryTimer);
       wsRef.current?.close();
     };

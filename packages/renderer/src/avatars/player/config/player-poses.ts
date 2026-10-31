@@ -26,15 +26,18 @@ export const POSE_IMPACT: ArmPose = { shoulder: 1, wrist: 0.35 };
 export const SWEEP_POSE: ArmPose = { shoulder: 1.35, wrist: 0.35 };
 
 /**
- * How far (radians, of the arm's turn; the body adds a little) a sweep
- * winds out to one side: about 11 o'clock, centered on where they face.
+ * How far (radians) a scythe's sweep winds out to one side and whips
+ * across to the other, centered on where they face. The arm turns 0.6 of
+ * it and the body 0.5, so the blade travels about 120 degrees each way,
+ * near the 271 degrees it hits.
  */
-export const SWEEP_OUT = 0.48;
+export const SCYTHE_SWEEP = 1.9;
 
 /**
- * How far a sweep whips across to the other side: about 1 o'clock.
+ * How far a glaive's sweep goes each way (about 75 degrees of blade
+ * travel, for its 157 degree hit at level 0).
  */
-export const SWEEP_ACROSS = 0.48;
+export const GLAIVE_SWEEP = 1.2;
 
 /**
  * The morning star's lash ends with the arm out level and the whip
@@ -61,6 +64,12 @@ export const STAFF_OFFHAND = 1.0;
  * How far the off arm turns inward to hold the quarterstaff.
  */
 export const STAFF_REACH = 0.7;
+
+/**
+ * How far (radians) the quarterstaff's first two hits swing out to one
+ * side and across to the other (the arm turns 0.6 of it, the body 0.5).
+ */
+export const STAFF_SWEEP = 1.2;
 
 /**
  * The gauntlets' guard (shoulder angle).
@@ -172,3 +181,30 @@ export const HIP_HEIGHT = 0.25;
  * How hard the arms pump while running.
  */
 export const ARM_PUMP = 0.55;
+
+/**
+ * The glaive throw's windup: the arm drawn back behind the shoulder, the
+ * blade laid flat.
+ */
+export const THROW_BACK: ArmPose = { shoulder: -0.55, wrist: 1.1 };
+
+/**
+ * The glaive throw's release: the arm flung out level ahead.
+ */
+export const THROW_OUT: ArmPose = { shoulder: 1.6, wrist: 0 };
+
+/**
+ * How far the body twists back on the throw's windup (and through ahead
+ * on the release, a little less), in radians.
+ */
+export const THROW_TWIST = 0.4;
+
+/**
+ * How hard the Hellmouth's spray shakes the arm, in radians.
+ */
+export const SPRAY_SHAKE = 0.035;
+
+/**
+ * How far the Hellmouth's spray sweeps side to side, in radians.
+ */
+export const SPRAY_SWEEP = 0.12;

@@ -1,6 +1,6 @@
 // Packages
 import React from 'react';
-import { ShieldHalf } from 'lucide-react';
+import { Hand, ShieldHalf } from 'lucide-react';
 import { twoHanded } from '@halloween/shared/gear/gear-catalog';
 import BuildError from '@halloween/game-ui/components/hud/build-error';
 
@@ -32,9 +32,10 @@ interface FightControlsProps {
 }
 
 /**
- * The right side while no list is open: the last build error, the Block
+ * The right side while no list is open: the last build error, the USE
+ * button (opens or works what's in front without hurting it), the Block
  * button (held, with a shield and a one-handed weapon), and the Action
- * button.
+ * button (hits and works).
  *
  * @param {FightControlsProps} props - Component props.
  * @returns {React.JSX.Element} The rendered controls.
@@ -46,6 +47,18 @@ function FightControls({ gear, buildError, commands }: FightControlsProps): Reac
         <BuildError error={buildError} />
       </div>
       <div className='flex shrink-0 items-end justify-end gap-md'>
+        <button
+          type='button'
+          aria-label='Use'
+          className='mb-16 flex h-14 w-14 touch-none flex-col items-center justify-center gap-0.5 rounded-full border-2 border-border bg-muted font-medium text-xs text-foreground active:border-foreground active:bg-brand-muted'
+          onPointerDown={(): void => {
+            navigator.vibrate?.(10);
+            commands.use();
+          }}
+          onContextMenu={(e: React.MouseEvent): void => e.preventDefault()}>
+          <Hand size={18} />
+          USE
+        </button>
         {gear.equipped.offhand?.kind === 'shield' && !twoHanded(gear.equipped.weapon?.kind) && (
           <button
             type='button'

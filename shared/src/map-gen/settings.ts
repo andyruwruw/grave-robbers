@@ -4,9 +4,10 @@
  */
 export interface MapGenSettings {
   /**
-   * The classic one-graveyard map, or a huge world (HUGE_SIZE square) of
-   * graveyard districts joined by roads through wild woods, broken up by
-   * chasms. The other knobs shape each district.
+   * The classic one-graveyard map, or a huge world (HUGE_SIZE square): one
+   * landscape of hills and hollows with landmarks scattered over it,
+   * joined by roads through wild woods, broken up by chasms. The other
+   * knobs shape either one.
    */
   size: WorldSize;
 
@@ -81,20 +82,26 @@ export interface MapGenSettings {
 export type WorldSize = 'classic' | 'huge';
 
 /**
- * A landmark the generator can build.
+ * A landmark the generator can build. The last four only exist in huge
+ * worlds.
  */
-export type MapStructure = 'chapel' | 'tower' | 'mausoleums' | 'well' | 'plots' | 'lamps';
+export type MapStructure = 'chapel' | 'tower' | 'mausoleums' | 'well' | 'plots' | 'lamps' | 'crypts' | 'ruins' | 'stones' | 'patches';
 
 /**
- * Every landmark, in the order the Game tab lists them, with its name.
+ * Every landmark, in the order the Game tab lists them, with its name, and
+ * whether only huge worlds have it (its switch shows only for Huge).
  */
-export const MAP_STRUCTURES: { key: MapStructure; label: string }[] = [
+export const MAP_STRUCTURES: { key: MapStructure; label: string; hugeOnly?: boolean }[] = [
   { key: 'tower', label: 'Watchtower hill' },
   { key: 'chapel', label: 'Ruined chapel' },
   { key: 'mausoleums', label: 'Mausoleums' },
   { key: 'well', label: 'Well plaza' },
   { key: 'plots', label: 'Hedged grave plots' },
   { key: 'lamps', label: 'Lamp posts' },
+  { key: 'crypts', label: 'Lone crypts', hugeOnly: true },
+  { key: 'ruins', label: 'Ruined houses', hugeOnly: true },
+  { key: 'stones', label: 'Stone circles', hugeOnly: true },
+  { key: 'patches', label: 'Pumpkin patches', hugeOnly: true },
 ];
 
 /**
@@ -108,7 +115,7 @@ export const DEFAULT_MAP_GEN: MapGenSettings = {
   pits: 1,
   pitSize: 1,
   stairs: 0,
-  structures: { chapel: true, tower: true, mausoleums: true, well: true, plots: true, lamps: true },
+  structures: { chapel: true, tower: true, mausoleums: true, well: true, plots: true, lamps: true, crypts: true, ruins: true, stones: true, patches: true },
   trees: 1,
   forest: 1,
   rocks: 1,

@@ -1,5 +1,6 @@
 // Packages
 import React from 'react';
+import { bagCount } from '@halloween/shared/inventory/affordability';
 
 // Local Imports
 import { useCraftSelection } from '../../hooks/use-craft-selection';
@@ -11,7 +12,7 @@ import ShowLockedToggle from './show-locked-toggle';
 // Types
 import type { RecipeId } from '@halloween/shared/crafting/recipes';
 import type { Gear } from '@halloween/shared/inventory/bag-items';
-import type { Inventory } from '@halloween/shared/goods/goods';
+import type { Goods, Inventory } from '@halloween/shared/goods/goods';
 import type { TreeState } from '@halloween/shared/skill-tree/types/skill-tree';
 
 /**
@@ -56,8 +57,9 @@ interface CraftPanelProps {
  * unlocked shows (dimmed when the materials aren't there), and locked
  * things don't show at all unless Show locked is on (then as plain lock
  * tiles that don't give away what they are). Tap one to pick it: the bar along the bottom names it, with
- * a count to step up or down (up to what's affordable) and a Craft button.
- * Hold one to see its details. What's made goes into the bag; structures
+ * its cost (what's short in red), a count to step up or down (up to
+ * what's affordable), and a Craft button.
+ * Double tap or hold one to see its details. What's made goes into the bag; structures
  * are placed from there.
  *
  * @param {CraftPanelProps} props - Component props.
@@ -71,7 +73,7 @@ function CraftPanel({
   onCraft,
   aside = false,
 }: CraftPanelProps): React.JSX.Element {
-  const { details, closeDetails, showLocked, setShowLocked, selected, select, setCount, hold, canMake, most, amount } = useCraftSelection(aside, tree, inventory, gear, anvil);
+  const { details, closeDetails, showLocked, setShowLocked, selected, tap, setCount, hold, canMake, most, amount } = useCraftSelection(aside, tree, inventory, gear, anvil);
 
   const toggleLocked = (
     <ShowLockedToggle
@@ -88,7 +90,7 @@ function CraftPanel({
       bindHold={hold.bind}
       onTap={(recipe: RecipeId): void => {
         if (hold.tapped()) {
-          select(recipe);
+          tap(recipe);
         }
       }} />
   );
@@ -99,6 +101,10 @@ function CraftPanel({
       aside={aside}
       amount={amount}
       most={most}
+      anvil={anvil}
+      free={tree.free === true}
+      have={(g: Goods): number => (g === 'candy' || g === 'blood' ? inventory[g] : bagCount(gear.bag, g))}
+      bag={gear.bag}
       onCount={setCount}
       onCraft={onCraft} />
   );

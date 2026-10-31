@@ -1,9 +1,9 @@
 /**
  * What a game controller plugged into the TV is doing, sent by the TV for
- * the player who claimed it whenever it changes (`panic`, `bag`, `craft`,
- * `tree`, `turnLeft`, and `turnRight` count presses of B, the west and
- * north face buttons, Back/Minus, LB, and RB since the claim; both sides
- * start them at 0).
+ * the player who claimed it whenever it changes (`use`, `panic`, `bag`,
+ * `craft`, `tree`, `turnLeft`, and `turnRight` count presses of A, B, the
+ * west and north face buttons, Back/Minus, LB, and RB since the claim;
+ * both sides start them at 0).
  */
 export interface PadState {
   /**
@@ -35,6 +35,11 @@ export interface PadState {
    * Block held.
    */
   block: boolean;
+
+  /**
+   * Presses of A since the claim (USE on the facing tile).
+   */
+  use: number;
 
   /**
    * Presses of B since the claim (Panic).

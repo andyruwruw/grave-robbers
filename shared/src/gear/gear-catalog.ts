@@ -14,10 +14,11 @@ import type { GearDef, GearKind, GearSlot } from './types/gear-def';
 export const GEAR_SLOTS: GearSlot[] = ['weapon', 'offhand', 'armor'];
 
 /**
- * Every gear kind, in Craft list and skill tree order.
+ * Every gear kind, in Craft list and skill tree order (the infused hammer
+ * is in neither: see `GearDef.infused`).
  */
 export const GEAR_KINDS: GearKind[] = [
-  'hammer', 'wood-armor', 'bone-armor', 'stone-armor',
+  'hammer', 'infused-hammer', 'wood-armor', 'bone-armor', 'stone-armor',
   'battle-axe', 'scythe', 'spear', 'stake', 'ritual-knife', 'crossbow', 'blood-gun', 'torch', 'shield', 'plate',
   'short-sword', 'greatsword', 'flail', 'morning-star', 'warhammer', 'quarterstaff', 'glaive', 'spiked-gauntlet',
   'bow', 'repeating-crossbow', 'musket',
@@ -49,6 +50,7 @@ export function twoHanded(kind: GearKind | null | undefined): boolean {
  */
 export const GEAR: Record<GearKind, GearDef> = {
   'hammer': MELEE_WEAPONS.hammer,
+  'infused-hammer': MELEE_WEAPONS['infused-hammer'],
   'wood-armor': ARMOR['wood-armor'],
   'bone-armor': ARMOR['bone-armor'],
   'stone-armor': ARMOR['stone-armor'],

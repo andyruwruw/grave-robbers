@@ -10,7 +10,7 @@ import type { Shot } from '../types/shot';
 import type { Puddle } from './types/puddle';
 
 /**
- * Witches' potions bursting and the puddles they leave.
+ * Witches' potions bursting, and the puddles they and bloaters leave.
  */
 export class PuddleSystem extends GameSystem {
   /**
@@ -30,7 +30,7 @@ export class PuddleSystem extends GameSystem {
    */
   splash(s: Shot): void {
     this.outbox.events.push({ t: 'splash', x: s.x, y: s.y });
-    this.puddles.push({ id: this._nextPuddleId++, x: s.x, y: s.y, at: this.world.time, until: this.world.time + PUDDLE_SECONDS, by: s.by });
+    this.spill(s.x, s.y, s.by, false);
     for (const p of this.players.values()) {
       if (!p.dead && Math.hypot(p.x - s.x, p.y - s.y) <= SPLASH_RADIUS) {
         this._game.damage.hurt(p, s.damage, s.by, s.x, s.y);
@@ -39,7 +39,18 @@ export class PuddleSystem extends GameSystem {
   }
 
   /**
-   * Witches' puddles: anyone standing in one is slowed and takes
+   * Leaves a puddle (see `stepPuddles`).
+   * @param x Where (tiles).
+   * @param y Where (tiles).
+   * @param by Whose it is for the kill feed.
+   * @param bile Whether it's a bloater's bile.
+   */
+  spill(x: number, y: number, by: string, bile: boolean): void {
+    this.puddles.push({ id: this._nextPuddleId++, x, y, at: this.world.time, until: this.world.time + PUDDLE_SECONDS, by, bile });
+  }
+
+  /**
+   * Witches' and bloaters' puddles: anyone standing in one is slowed and takes
    * PUDDLE_DAMAGE a second; they dry up after PUDDLE_SECONDS.
    * @param dt Seconds since the last step.
    */
@@ -61,6 +72,6 @@ export class PuddleSystem extends GameSystem {
    */
   puddleStates(): PuddleState[] {
     const time = this.world.time;
-    return this.puddles.map(({ id, x, y, at, until }): PuddleState => ({ id, x, y, life: Math.round(((until - time) / (until - at)) * 100) / 100 }));
+    return this.puddles.map(({ id, x, y, at, until, bile }): PuddleState => ({ id, x, y, life: Math.round(((until - time) / (until - at)) * 100) / 100, bile }));
   }
 }

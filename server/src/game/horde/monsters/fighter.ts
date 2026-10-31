@@ -1,11 +1,13 @@
 // Packages
-import { ZOMBIE_ARMED_DAMAGE } from '@halloween/shared/monsters/kinds/zombie';
+import { GEAR } from '@halloween/shared/gear/gear-catalog';
+import { ZOMBIE_ARMED_DAMAGE, ZOMBIE_WEAPON_DAMAGE } from '@halloween/shared/monsters/kinds/zombie';
 import { STRIKE_SLACK } from '@halloween/shared/monsters/monster-stats';
 import { MONSTER_RADIUS } from '@halloween/shared/monsters/movement';
 import { MELEE_REACH_DOWN, MELEE_REACH_UP } from '@halloween/shared/players/combat';
 import { moveWithCollision } from '@halloween/shared/world/collision';
 
 // Local Imports
+import { TURNED_KNOCKBACK, TURNED_SIGHT } from '../config/turned';
 import { angleOff, distance } from '../helpers/geometry';
 import { monsterBlocked } from '../helpers/terrain';
 import { Walker } from './walker';
@@ -13,6 +15,7 @@ import { Walker } from './walker';
 // Types
 import type { World } from '../../world/world';
 import type { Target } from '../types/hooks';
+import type { Monster } from './monster';
 
 /**
  * A walker that attacks players: it winds up a strike (turning to keep
@@ -56,8 +59,16 @@ export abstract class Fighter<P extends Target> extends Walker<P> {
   }
 
   /**
-   * What it does this tick: a leap in the air, nothing while stunned, a
-   * windup, or its own behavior.
+   * Fighters can be turned on the other monsters.
+   * @returns True.
+   */
+  protected get canTurn(): boolean {
+    return true;
+  }
+
+  /**
+   * What it does this tick: a leap in the air, nothing while stunned,
+   * fighting other monsters while turned, a windup, or its own behavior.
    * @param dt Seconds since the last tick.
    * @param world The world.
    * @param present Players who aren't dead.
@@ -68,8 +79,10 @@ export abstract class Fighter<P extends Target> extends Walker<P> {
       this.leap(dt, world, prey);
     } else if (world.time < this.stunUntil) {
       this.moving = false;
+    } else if (world.time < this.turned.until) {
+      this.fightMonsters(dt, world);
     } else if (this.strikeAt !== null) {
-      this.windUp(world, prey);
+      this.windUp(dt, world, prey);
     } else {
       this.act(dt, world, present, prey);
     }
@@ -93,15 +106,55 @@ export abstract class Fighter<P extends Target> extends Walker<P> {
   }
 
   /**
-   * Whether a player is close enough to attack, and not too far above or
-   * below (up on a platform, say).
+   * Drops out of a leap in progress (a pin).
+   */
+  protected cancelLeap(): void {
+    this.leapUntil = 0;
+  }
+
+  /**
+   * Turned: goes for the nearest monster with a body that isn't turned
+   * itself and hits it whenever its attack is ready, for whoever turned it.
+   * @param dt Seconds since the last tick.
+   * @param world The world.
+   */
+  private fightMonsters(dt: number, world: World): void {
+    let foe: Monster<P> | null = null;
+    let best = TURNED_SIGHT;
+    for (const m of this._ctx.roster.values()) {
+      const d = distance(this, m);
+      if (m !== this && m.hasBody && world.time >= m.turned.until && d < best) {
+        best = d;
+        foe = m;
+      }
+    }
+    if (!foe) {
+      return;
+    }
+    if (best > this.def.reach + MONSTER_RADIUS) {
+      this.moveToward(foe.x, foe.y, this.def.speed * dt, world);
+      return;
+    }
+    this.facing = Math.atan2(foe.y - this.y, foe.x - this.x);
+    if (world.time >= this.nextAttackAt) {
+      this.nextAttackAt = world.time + this.def.cooldown;
+      this.attacks++;
+      foe.takeHit(this.blow(), this.x, this.y, world, this.def.knockback ?? TURNED_KNOCKBACK, { by: this.turned.by, fromMonster: true });
+    }
+  }
+
+  /**
+   * Whether a player is close enough to attack (`reach`, plus `lunge` once
+   * the next swing is ready), and not too far above or below (up on a
+   * platform, say).
    * @param p The player.
    * @param world The world.
    * @returns True when in reach.
    */
   protected inReach(p: P, world: World): boolean {
     const rise = world.map.elevationAt(p.x, p.y) - world.map.elevationAt(this.x, this.y);
-    return distance(this, p) <= this.def.reach && rise <= MELEE_REACH_UP && -rise <= MELEE_REACH_DOWN;
+    const lunge = world.time >= this.nextAttackAt ? this.def.lunge ?? 0 : 0;
+    return distance(this, p) <= this.def.reach + lunge && rise <= MELEE_REACH_UP && -rise <= MELEE_REACH_DOWN;
   }
 
   /**
@@ -134,19 +187,38 @@ export abstract class Fighter<P extends Target> extends Walker<P> {
   }
 
   /**
-   * Holds still and keeps turning toward its target while an attack winds
-   * up, then lets it go.
+   * Keeps turning toward its target while an attack winds up (lunging in
+   * with `lunge`, else holding still), then lets it go.
+   * @param dt Seconds this step.
    * @param world The world.
    * @param prey Players monsters may go after.
    */
-  private windUp(world: World, prey: P[]): void {
+  private windUp(dt: number, world: World, prey: P[]): void {
     const p = this.prey;
     if (p && !p.dead && this.tracking(world.time)) {
       this.facing = Math.atan2(p.y - this.y, p.x - this.x);
+      this.lungeIn(dt, p, world);
     }
     if (world.time >= this.strikeAt!) {
       this.strike(prey, world);
     }
+  }
+
+  /**
+   * Steps in toward the prey during the windup, `lunge` tiles over the
+   * whole windup, until within `reach`.
+   * @param dt Seconds this step.
+   * @param p The prey.
+   * @param world The world.
+   */
+  private lungeIn(dt: number, p: P, world: World): void {
+    const def = this.def;
+    if (!def.lunge || distance(this, p) <= def.reach) {
+      return;
+    }
+    const step = (def.lunge / def.windup) * this.slowFactor(world.time) * dt;
+    Object.assign(this, moveWithCollision(monsterBlocked(world, this), this.x, this.y, Math.cos(this.facing) * step, Math.sin(this.facing) * step, MONSTER_RADIUS));
+    this.moving = true;
   }
 
   /**
@@ -198,7 +270,7 @@ export abstract class Fighter<P extends Target> extends Walker<P> {
    * @param prey Players monsters may go after.
    */
   private leap(dt: number, world: World, prey: P[]): void {
-    const step = this.leapSpeed * dt;
+    const step = this.leapSpeed * this.slowFactor(world.time) * dt;
     Object.assign(this, moveWithCollision(monsterBlocked(world, this), this.x, this.y, Math.cos(this.facing) * step, Math.sin(this.facing) * step, MONSTER_RADIUS));
     this.moving = true;
     if (this.leapHit) {
@@ -230,6 +302,7 @@ export abstract class Fighter<P extends Target> extends Walker<P> {
    * @returns The damage.
    */
   protected blow(): number {
-    return (this.def.damage + (this.held ? ZOMBIE_ARMED_DAMAGE : 0)) * this.power;
+    const armed = !this.held ? 0 : GEAR[this.held].junk ? ZOMBIE_ARMED_DAMAGE : ZOMBIE_WEAPON_DAMAGE;
+    return (this.def.damage + armed) * this.power;
   }
 }

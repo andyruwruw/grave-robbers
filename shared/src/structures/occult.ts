@@ -2,11 +2,8 @@
  * Occult works: a cursed obelisk makes monsters within OBELISK_RADIUS
  * tiles (more with upgrades) take OBELISK_CURSE times the damage; a blood
  * fountain mends whoever stands by it like a campfire (and drains
- * monsters, see TRAPS); a soul cage pulls
- * in and destroys a ghost that drifts within SOUL_CAGE_RADIUS, one every
- * SOUL_CAGE_COOLDOWN seconds; a cursed mirror turns monsters' arrows and
- * ectoplasm that pass within MIRROR_RADIUS back on them (and shatters
- * potions harmlessly).
+ * monsters, see TRAPS); a soul cage pulls in and destroys a ghost that
+ * drifts within SOUL_CAGE_RADIUS, one every SOUL_CAGE_COOLDOWN seconds.
  */
 export const OBELISK_RADIUS = 4;
 
@@ -26,11 +23,6 @@ export const SOUL_CAGE_RADIUS = 3;
 export const SOUL_CAGE_COOLDOWN = 6;
 
 /**
- * Tiles within which a cursed mirror turns shots back.
- */
-export const MIRROR_RADIUS = 1.6;
-
-/**
  * An effigy curses the ground around it: zombies, vampires, and the like
  * within EFFIGY_RADIUS tiles (more with upgrades) move at EFFIGY_SLOW of
  * their speed.
@@ -43,19 +35,23 @@ export const EFFIGY_RADIUS = 3;
 export const EFFIGY_SLOW = 0.7;
 
 /**
- * An offering at a sacrificial altar: the health it takes and the blood it
- * gives (plus one per level). Monsters that die this close to an altar
- * bleed twice as much.
+ * Health an offering at a sacrificial altar takes, as a fresh wound.
  */
 export const ALTAR_HP_COST = 2;
 
 /**
- * Blood an offering gives at level 0.
+ * Seconds an offering keeps an altar awake.
  */
-export const ALTAR_BLOOD = 3;
+export const ALTAR_AWAKE_SECONDS = 60;
 
 /**
- * Tiles from an altar within which dying monsters bleed twice as much.
+ * How many times over monsters bleed when they die near an awake altar at
+ * level 0 (plus half per level).
+ */
+export const ALTAR_BLEED = 2;
+
+/**
+ * Tiles from an awake altar within which dying monsters bleed more.
  */
 export const ALTAR_RADIUS = 4;
 

@@ -3,6 +3,8 @@ import React from 'react';
 
 // Local Imports
 import { SEGMENTS } from '../../config/item-details';
+import { statBlockUrl } from '../../helpers/stat-icon-url';
+import StatGlyph from './stat-glyph';
 
 // Types
 import type { Stat } from '../../types/stats';
@@ -18,17 +20,9 @@ interface StatBarsProps {
 }
 
 /**
- * Bar color by how full it is: weak, middling, strong.
- *
- * @param fill - How full the bar is, 0 to 1.
- * @returns The bar's background class.
- */
-function barColor(fill: number): string {
-  return fill < 0.34 ? 'bg-status-error-foreground' : fill < 0.67 ? 'bg-status-warning-foreground' : 'bg-status-success-foreground';
-}
-
-/**
- * Labeled stat bars, segmented and colored by how strong they are.
+ * Labeled stat bars, each a row of little pre-rendered 3D blocks filled in
+ * the stat's own color (damage is always red, speed always yellow), beside
+ * the stat's 3D icon.
  *
  * @param {StatBarsProps} props - Component props.
  * @returns {React.JSX.Element} The rendered bars.
@@ -36,21 +30,26 @@ function barColor(fill: number): string {
 function StatBars({ stats }: StatBarsProps): React.JSX.Element {
   return (
     <>
-      {stats.map(({ icon: Icon, label, fill }, i: number) => {
+      {stats.map(({ icon, color, label, fill }, i: number) => {
         const filled = Math.round(Math.max(0, Math.min(1, fill)) * SEGMENTS);
         return (
           <div
             key={i}
-            className='flex flex-col gap-0.5'>
+            className='flex flex-col gap-1'>
             <span className='flex items-center gap-1.5 font-medium text-xs leading-tight'>
-              <Icon size={10} />
+              <StatGlyph icon={icon} />
               {label}
             </span>
-            <span className='flex gap-px'>
+            <span className='flex'>
               {Array.from({ length: SEGMENTS }, (_, s: number) => (
-                <span
+                <img
                   key={s}
-                  className={`h-2 w-2.5 ${s < filled ? barColor(fill) : 'bg-border'}`} />
+                  src={statBlockUrl(s < filled ? color : null)}
+                  alt=''
+                  width={14}
+                  height={14}
+                  draggable={false}
+                  className='pointer-events-none [image-rendering:pixelated]' />
               ))}
             </span>
           </div>

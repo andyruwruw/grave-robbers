@@ -44,6 +44,12 @@ export interface Vitals {
   protected: boolean;
 
   /**
+   * Extra health above full from overheal (Heart Devourer, Death's
+   * Harvest), shown as extra hearts. Absent or 0 for none.
+   */
+  overheal?: number;
+
+  /**
    * How they died, while dead.
    */
   death: DeathInfo | null;

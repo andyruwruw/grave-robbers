@@ -49,7 +49,7 @@ export class Demon<P extends Target> extends ShadowWalker<P> {
       const y = p.y + Math.sin(angle) * DEMON_BLINK_BEHIND * (0.85 + Math.random() * 0.3);
       const tx = Math.floor(x);
       const ty = Math.floor(y);
-      if (tx > 0 && ty > 0 && tx < world.map.width - 1 && ty < world.map.height - 1 && walkable(tx, ty) && !this._ctx.light.isLit(tx, ty) && !monsterBlocked(world, { x, y })(tx, ty)) {
+      if (tx > 0 && ty > 0 && tx < world.map.width - 1 && ty < world.map.height - 1 && walkable(tx, ty) && !this._ctx.light.isLit(tx, ty, this.id) && !monsterBlocked(world, { x, y })(tx, ty)) {
         this._ctx.hooks.event({ t: 'blink', fromX: this.x, fromY: this.y, x, y });
         this.x = x;
         this.y = y;

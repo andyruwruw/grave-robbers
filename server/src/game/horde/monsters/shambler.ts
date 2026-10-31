@@ -93,7 +93,7 @@ export abstract class Shambler<P extends Target> extends Fighter<P> {
     if (world.time >= this.repathAt) {
       this.repathAt = world.time + ZOMBIE_REPATH * (0.8 + Math.random() * 0.4);
       const open = monsterWalkable(world);
-      this.path = findPath({ width: world.map.width, height: world.map.height, within: MONSTER_SEARCH,
+      this.path = findPath({ width: world.map.width, height: world.map.height, within: MONSTER_SEARCH, budget: this.chaseBudget(goal, world),
         from: tileOf(this),
         to: goal,
         cost: (tx: number, ty: number, fx: number, fy: number): number => {
@@ -109,6 +109,7 @@ export abstract class Shambler<P extends Target> extends Fighter<P> {
         open,
         score: (tx: number, ty: number): number => Math.hypot(tx - goal.tx, ty - goal.ty),
       }) ?? [];
+      this.backOffIfShort(goal, world);
     }
     this.skipReached();
     const next = this.path[0];

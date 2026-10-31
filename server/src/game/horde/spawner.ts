@@ -1,13 +1,8 @@
 // Packages
-import { extraPerPlayer, monsterDamage, monsterHealth, spawnSpeedup, spawnWeights } from '@halloween/shared/difficulty/horde-scaling';
-import { MAX_DEMONS } from '@halloween/shared/monsters/kinds/demon';
-import { MONSTER_KINDS } from '@halloween/shared/monsters/monster-kinds';
+import { extraPerPlayer, monsterDamage, monsterHealth, spawnSpeedup } from '@halloween/shared/difficulty/horde-scaling';
 import { MONSTERS } from '@halloween/shared/monsters/monster-stats';
 import {
   BASE_MONSTERS,
-  BLOOD_MOON_LIGHTS_PER_GHOST,
-  BLOOD_MOON_MONSTERS_PER_PLAYER,
-  BLOOD_MOON_SPAWN_INTERVAL,
   DESPAWN_AFTER,
   DESPAWN_DISTANCE,
   GHOST_SPAWN_INTERVAL,
@@ -15,6 +10,7 @@ import {
   LIGHTS_PER_GHOST,
   MAX_MONSTERS,
   MONSTERS_PER_PLAYER,
+  PRESSURE_RADIUS,
   SPAWN_EDGE,
   SPAWN_INTERVAL,
   SPAWN_MIN_DISTANCE,
@@ -25,6 +21,7 @@ import { isTrap } from '@halloween/shared/structures/traps';
 // Local Imports
 import { SUMMON_CLEAR } from './config/summon';
 import { monsterWalkable } from './helpers/terrain';
+import { pickKind } from './helpers/spawn-mix';
 import { rollTraits } from './helpers/traits';
 import { HordePart } from './horde-part';
 import { createMonster } from './monsters/monster-factory';
@@ -32,6 +29,7 @@ import { createMonster } from './monsters/monster-factory';
 // Types
 import type { MonsterKind } from '@halloween/shared/monsters/monster-kinds';
 import type { World } from '../world/world';
+import type { Monster } from './monsters/monster';
 import type { Target } from './types/hooks';
 
 /**
@@ -41,9 +39,15 @@ import type { Target } from './types/hooks';
  */
 export class Spawner<P extends Target> extends HordePart<P> {
   /**
-   * When the next zombie or vampire may come.
+   * When the next monster may come (on a huge world, each player's own
+   * clock is in `_nextNear`).
    */
   private _nextSpawnAt = 0;
+
+  /**
+   * On a huge world, when the next monster may come around each player.
+   */
+  private readonly _nextNear = new Map<P, number>();
 
   /**
    * Whether the first tick's idle zombies are out.
@@ -62,18 +66,19 @@ export class Spawner<P extends Target> extends HordePart<P> {
   private readonly _strayedAt = new Map<number, number>();
 
   /**
-   * Trickle spawning, faster and with a higher cap during a blood moon:
-   * one zombie or vampire every interval while under the per-player cap,
+   * Trickle spawning, at the pace a world event sets if one does:
+   * one monster every interval while under the per-player cap, its kind
+   * kept to the mix (`pickKind`; on a huge world, around each player on
+   * their own, `trickleNear`),
    * and ghosts on their own clock, one per few burning lights. With nobody
    * playing, a few zombies keep wandering so the screen stays alive, and
    * that many are out from the first tick.
    * @param world The world.
    * @param present Players who aren't dead.
-   * @param blood Whether a blood moon is up.
    * @param spawning Whether monsters walk in on their own.
    * @param level The world level.
    */
-  spawn(world: World, present: P[], blood: boolean, spawning: boolean, level: number): void {
+  spawn(world: World, present: P[], spawning: boolean, level: number): void {
     if (!spawning) {
       return;
     }
@@ -81,37 +86,70 @@ export class Spawner<P extends Target> extends HordePart<P> {
     const ghosts = this.roster.count('ghost');
     const walkers = this.roster.size - ghosts;
 
-    const interval = (blood ? BLOOD_MOON_SPAWN_INTERVAL : SPAWN_INTERVAL) / spawnSpeedup(level);
+    const pace = this._horde.mods.spawning;
+    const interval = (pace.interval ?? SPAWN_INTERVAL) / spawnSpeedup(level);
     const idle = present.length === 0;
-    const perPlayer = (blood ? BLOOD_MOON_MONSTERS_PER_PLAYER : MONSTERS_PER_PLAYER) + extraPerPlayer(level);
-    const cap = idle ? IDLE_ZOMBIES : Math.min(MAX_MONSTERS, Math.round(BASE_MONSTERS + present.length * perPlayer));
+    const perPlayer = (pace.perPlayer ?? MONSTERS_PER_PLAYER) + extraPerPlayer(level);
+    const cap = idle ? IDLE_ZOMBIES : Math.round(Math.min(MAX_MONSTERS, BASE_MONSTERS + present.length * perPlayer) * this._horde.loadScale);
     if (!this._started) {
       this._started = true;
       for (let i = walkers; i < IDLE_ZOMBIES; i++) {
         this.spawnAtEdge('zombie', world, present, level);
       }
       this._nextSpawnAt = time + interval;
+    } else if (world.map.edge === 'chasm') {
+      this.trickleNear(world, present, level, interval, perPlayer);
     } else if (walkers >= cap) {
       this._nextSpawnAt = time + interval;
     } else if (time >= this._nextSpawnAt) {
       this._nextSpawnAt = time + interval;
-      const weights = spawnWeights(level);
-      const total = MONSTER_KINDS.reduce((sum: number, k: MonsterKind): number => sum + weights[k], 0);
-      let roll = Math.random() * total;
-      let kind = idle ? 'zombie' : MONSTER_KINDS.find((k: MonsterKind): boolean => (roll -= weights[k]) < 0) ?? 'zombie';
-      if (kind === 'demon' && this.roster.count('demon') >= MAX_DEMONS) {
-        kind = 'zombie';
-      }
-      this.spawnAtEdge(kind, world, present, level);
+      const out = [...this.roster.values()].filter((m: { kind: MonsterKind }): boolean => m.kind !== 'ghost');
+      this.spawnAtEdge(idle ? 'zombie' : pickKind(level, cap, out, this.roster.count('demon'), this._horde.mods.spawnMix), world, present, level);
     }
 
     const burning = this._horde.light.burning();
-    const ghostCap = present.length > 0 ? Math.ceil(burning / (blood ? BLOOD_MOON_LIGHTS_PER_GHOST : LIGHTS_PER_GHOST)) : 0;
+    const ghostCap = present.length > 0 ? Math.ceil(burning / (pace.lightsPerGhost ?? LIGHTS_PER_GHOST)) : 0;
     if (ghosts >= ghostCap) {
       this._nextGhostAt = time + GHOST_SPAWN_INTERVAL;
     } else if (time >= this._nextGhostAt) {
       this._nextGhostAt = time + GHOST_SPAWN_INTERVAL;
       this.spawnAtEdge('ghost', world, present, level);
+    }
+  }
+
+  /**
+   * A huge world's trickle: each player has their own spawn clock and cap
+   * (see PRESSURE_RADIUS), shared with the players near them, and the mix
+   * holds in the walkers around them. MAX_MONSTERS still holds overall.
+   * @param world The world.
+   * @param present Players who aren't dead.
+   * @param level The world level.
+   * @param interval Seconds between spawns for a lone player.
+   * @param perPlayer Walkers allowed per player.
+   */
+  private trickleNear(world: World, present: P[], level: number, interval: number, perPlayer: number): void {
+    const time = world.time;
+    const walkers = [...this.roster.values()].filter((m: { kind: MonsterKind }): boolean => m.kind !== 'ghost');
+    for (const p of this._nextNear.keys()) {
+      if (!present.includes(p)) {
+        this._nextNear.delete(p);
+      }
+    }
+    for (const p of present) {
+      const near = (o: { x: number; y: number }): boolean => Math.hypot(o.x - p.x, o.y - p.y) < PRESSURE_RADIUS;
+      const crowd = present.filter(near).length;
+      const around = walkers.filter(near);
+      const cap = Math.round((BASE_MONSTERS + crowd * perPlayer) * this._horde.loadScale);
+      const wait = interval * crowd;
+      const next = this._nextNear.get(p) ?? time + wait;
+      if (walkers.length >= MAX_MONSTERS * this._horde.loadScale || around.length >= cap) {
+        this._nextNear.set(p, time + wait);
+      } else if (time >= next) {
+        this._nextNear.set(p, time + wait);
+        this.spawnNear(pickKind(level, cap, around, this.roster.count('demon'), this._horde.mods.spawnMix), world, present, level, p);
+      } else {
+        this._nextNear.set(p, next);
+      }
     }
   }
 
@@ -148,20 +186,21 @@ export class Spawner<P extends Target> extends HordePart<P> {
 
   /**
    * A huge world's spawn: a dark, open spot SPAWN_MIN_DISTANCE to
-   * SPAWN_RING_MAX tiles from a random player (and no closer to any
-   * other). Nothing while nobody is playing.
+   * SPAWN_RING_MAX tiles from a player (`around`, or a random one each try)
+   * and no closer to any other. Nothing while nobody is playing.
    * @param kind What to spawn.
    * @param world The world.
    * @param present Players who aren't dead.
    * @param level The world level.
+   * @param around The player it comes for, if one.
    */
-  private spawnNear(kind: MonsterKind, world: World, present: P[], level: number): void {
+  private spawnNear(kind: MonsterKind, world: World, present: P[], level: number, around?: P): void {
     if (present.length === 0) {
       return;
     }
     const walkable = monsterWalkable(world);
     for (let tries = 0; tries < 60; tries++) {
-      const p = present[Math.floor(Math.random() * present.length)];
+      const p = around ?? present[Math.floor(Math.random() * present.length)];
       const angle = Math.random() * Math.PI * 2;
       const d = SPAWN_MIN_DISTANCE + Math.random() * (SPAWN_RING_MAX - SPAWN_MIN_DISTANCE);
       const tx = Math.floor(p.x + Math.cos(angle) * d);
@@ -213,11 +252,11 @@ export class Spawner<P extends Target> extends HordePart<P> {
    * @param level The world level.
    */
   summon(kind: MonsterKind, world: World, away: { x: number; y: number }[], level: number): void {
-    const walkable = monsterWalkable(world);
+    const fits = this.summonable(kind, world);
     const spots: { tx: number; ty: number; d: number }[] = [];
     for (let ty = 1; ty < world.map.height - 1; ty++) {
       for (let tx = 1; tx < world.map.width - 1; tx++) {
-        if (world.inView(tx, ty) && world.map.get(tx, ty) !== 'fence' && (kind === 'ghost' || (walkable(tx, ty) && !isTrap(world.map.get(tx, ty)) && world.map.get(tx, ty) !== 'tree'))) {
+        if (fits(tx, ty)) {
           spots.push({ tx, ty, d: Math.min(Infinity, ...away.map((p: { x: number; y: number }): number => Math.hypot(p.x - (tx + 0.5), p.y - (ty + 0.5)))) });
         }
       }
@@ -232,16 +271,64 @@ export class Spawner<P extends Target> extends HordePart<P> {
   }
 
   /**
+   * Summons a monster right at (x, y) for the admin's cursor, past the
+   * usual rules (lit ground, traps, players near): anywhere in view that
+   * isn't solid (a ghost anywhere but the fence).
+   * @param kind What to summon.
+   * @param world The world.
+   * @param x Where (tiles).
+   * @param y Where (tiles).
+   * @param level The world level.
+   */
+  summonAt(kind: MonsterKind, world: World, x: number, y: number, level: number): void {
+    const tx = Math.floor(x);
+    const ty = Math.floor(y);
+    if (world.inView(tx, ty) && (kind === 'ghost' ? world.map.get(tx, ty) !== 'fence' : !world.map.isSolid(tx, ty))) {
+      this.add(kind, x, y, level);
+    }
+  }
+
+  /**
+   * Which tiles a summoned monster may appear on: in view, not a fence,
+   * and (but for a ghost) walkable, not a trap, and not a tree.
+   * @param kind What's summoned.
+   * @param world The world.
+   * @returns Whether a tile will do.
+   */
+  private summonable(kind: MonsterKind, world: World): (tx: number, ty: number) => boolean {
+    const walkable = monsterWalkable(world);
+    return (tx: number, ty: number): boolean => world.inView(tx, ty) && world.map.get(tx, ty) !== 'fence'
+      && (kind === 'ghost' || (walkable(tx, ty) && !isTrap(world.map.get(tx, ty)) && world.map.get(tx, ty) !== 'tree'));
+  }
+
+  /**
+   * Brings a monster up at (x, y) for a necromancer, marked as raised.
+   * @param kind What it is.
+   * @param x Where (tiles).
+   * @param y Where (tiles).
+   * @param level The world level.
+   * @returns Its id.
+   */
+  raise(kind: MonsterKind, x: number, y: number, level: number): number {
+    const m = this.add(kind, x, y, level);
+    m.raised = true;
+    return m.id;
+  }
+
+  /**
    * Makes a new monster and adds it to the roster.
    * @param kind What it is.
    * @param x Where (tiles).
    * @param y Where (tiles).
    * @param level The world level.
+   * @returns The monster.
    */
-  private add(kind: MonsterKind, x: number, y: number, level: number): void {
+  private add(kind: MonsterKind, x: number, y: number, level: number): Monster<P> {
     const id = this.roster.takeId();
     const hp = MONSTERS[kind].hp * (kind === 'ghost' ? 1 : monsterHealth(level));
     const traits = rollTraits(kind, level);
-    this.roster.add(createMonster({ id, kind, x, y, hp, power: monsterDamage(level), traits }, this._horde));
+    const m = createMonster({ id, kind, x, y, hp, power: monsterDamage(level), traits }, this._horde);
+    this.roster.add(m);
+    return m;
   }
 }

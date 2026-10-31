@@ -4,7 +4,6 @@ import { GEAR } from '@halloween/shared/gear/gear-catalog';
 import { SUPER_COMBO } from '@halloween/shared/gear/melee-rules';
 
 // Local Imports
-import { angleDelta } from '../../helpers/angles';
 import { Avatar } from '../avatar';
 import { FOLLOW_RATE } from '../config/avatar';
 import { SwooshTrail } from '../shared/swoosh-trail';
@@ -22,13 +21,14 @@ import {
   TRAIL_SIZE,
   TRAIL_STEPS,
 } from './config/player-timing';
-import { pickMeleeMotion, RELOAD_MOTION, SHOT_MOTION } from './motions/motion-picker';
+import { pickMeleeMotion, pickShotMotion, RELOAD_MOTION } from './motions/motion-picker';
 import { PlayerGear } from './player-gear';
 import { PlayerLabel } from './player-label';
 import { PlayerLocomotion } from './player-locomotion';
 import { PlayerRig } from './player-rig';
 import { PlayerShading } from './player-shading';
 import { PlayerSwing } from './player-swing';
+import { PlayerTurn } from './player-turn';
 
 // Types
 import type { Group, LineSegments, Object3D } from 'three';
@@ -60,6 +60,9 @@ export class PlayerAvatar extends Avatar<PlayerState> {
    */
   private _locomotion = new PlayerLocomotion();
 
+  /** Turns the model toward the facing, lagging and overshooting a touch. */
+  readonly turn = new PlayerTurn();
+
   /**
    * The streak behind the swinging blade.
    */
@@ -71,9 +74,9 @@ export class PlayerAvatar extends Avatar<PlayerState> {
   private _buildMarker: BuildMarker;
 
   /**
-   * The name tag.
+   * The name tag (the renderer sets what it shows).
    */
-  private _nameTag: PlayerLabel;
+  readonly nameTag: PlayerLabel;
 
   /**
    * The hurt flash, protection pulse, and haze.
@@ -101,6 +104,7 @@ export class PlayerAvatar extends Avatar<PlayerState> {
   private _motion: MotionContext = {
     time: 0,
     combo: 0,
+    swingAge: 0,
     poseOffhand: (lean: number): void => this._gear.poseOffhand(this._rig, this.target, this._locomotion, this._block, lean),
   };
 
@@ -111,6 +115,7 @@ export class PlayerAvatar extends Avatar<PlayerState> {
    */
   constructor(state: PlayerState, labelLayer: HTMLElement) {
     super(state, new VoxelParts({ keepColors: true }));
+    this.turn.snap(state.facing);
     this._swing = new PlayerSwing(state.swings);
     const cloak = `#${new Color(state.color).lerp(new Color(DARK), 0.4).getHexString()}`;
     const tunic = `#${new Color(state.color).lerp(new Color(TUNIC), 0.6).getHexString()}`;
@@ -123,7 +128,7 @@ export class PlayerAvatar extends Avatar<PlayerState> {
     this._swoosh.addSource((): Object3D | null => this._gear.blade);
     this._rig.assemble(this.group);
     this._buildMarker = new BuildMarker(state.color);
-    this._nameTag = new PlayerLabel(state, labelLayer);
+    this.nameTag = new PlayerLabel(state, labelLayer);
   }
 
   /**
@@ -131,7 +136,7 @@ export class PlayerAvatar extends Avatar<PlayerState> {
    * @returns The tag's element.
    */
   get label(): HTMLDivElement {
-    return this._nameTag.element;
+    return this.nameTag.element;
   }
 
   /**
@@ -190,7 +195,7 @@ export class PlayerAvatar extends Avatar<PlayerState> {
     const t = this.target;
     const { _rig: rig, _gear: gear, _locomotion: locomotion } = this;
     this.group.visible = !t.dead;
-    this._nameTag.element.style.display = t.dead ? 'none' : '';
+    this.nameTag.element.style.display = t.dead ? 'none' : '';
     if (t.dead) {
       this._x = t.x;
       this._y = t.y;
@@ -203,14 +208,11 @@ export class PlayerAvatar extends Avatar<PlayerState> {
     this._x += dx;
     this._y += dy;
     this._elevation = locomotion.settle(dt, t, k, groundHeight, this._elevation);
-    this._facing += angleDelta(this._facing, t.facing) * k;
+    this._facing = this.turn.step(dt, t.facing);
     locomotion.pose(dt, t, dx, dy, this._facing, rig, this.group);
     const { stride, speed, jumpPose, slumpPose: slump } = locomotion;
 
-    const gearKey = `${t.drawn ?? t.gear.weapon}|${t.gear.offhand}|${t.gear.armor}|${t.digging}`;
-    if (gearKey !== gear.gearKey) {
-      gear.apply(t);
-    }
+    gear.refresh(t);
     const seen = this._swing.track(t, time);
     if (seen === 'started') {
       gear.spinUp();
@@ -219,14 +221,15 @@ export class PlayerAvatar extends Avatar<PlayerState> {
       locomotion.superHop(this._elevation);
     }
     this._reloadAge = t.reloading ? this._reloadAge + dt : 0;
-    gear.spinDrum(dt);
-    gear.chargeGlows.update(t, time);
+    gear.step(dt, time, t);
     const swingTime = this._swing.advance(dt, t);
     this._block += ((t.blocking ? 1 : 0) - this._block) * Math.min(1, dt * BLOCK_RATE);
     this._motion.time = time;
     this._motion.combo = t.combo;
+    this._motion.swingAge = this._swing.age;
+    const infusion = t.drawn ? null : t.gearInfusion?.weapon ?? null;
     if (!t.drawn && t.gear.weapon && GEAR[t.gear.weapon].weapon?.ranged) {
-      SHOT_MOTION.apply(rig, t.aiming ? 1 : Math.min(1, this._swing.age / SHOT_TIME), this._motion);
+      pickShotMotion(t.gear.weapon, infusion).apply(rig, t.aiming ? 1 : Math.min(1, this._swing.age / SHOT_TIME), this._motion);
       if (t.reloading) {
         RELOAD_MOTION.apply(rig, this._reloadAge);
       }
@@ -235,8 +238,8 @@ export class PlayerAvatar extends Avatar<PlayerState> {
       }
     } else {
       const held = t.drawn ?? t.gear.weapon;
-      gear.curl(held === 'morning-star' ? this._swing.age / swingTime : 1, time);
-      pickMeleeMotion(held, t.digging, t.combo).apply(rig, this._swing.age / swingTime, this._motion);
+      gear.curl(held === 'morning-star' ? this._swing.curlPhase() : 1, time, this._swing.from);
+      pickMeleeMotion(held, t.digging, t.combo, infusion).apply(rig, this._swing.age / swingTime, this._motion);
       if (this._swing.age >= swingTime) {
         rig.tool.rotation.z -= stride * ARM_PUMP * speed;
       }
@@ -252,13 +255,12 @@ export class PlayerAvatar extends Avatar<PlayerState> {
       rig.tool.rotation.z += 1.6 * jumpPose;
       this._head.rotation.z += 0.3 * jumpPose;
     }
-    gear.flickerTorch(time);
 
     this.placeGroup();
     const phase = this._swing.age / swingTime;
     this._swoosh.update(dt, gear.blade !== null && phase >= HANG_END && phase <= IMPACT_END && t.connected && !t.dead, this.group);
     this._shading.apply(this._parts, t, dt, time, this.advanceHurt(dt), this.group);
-    this._nameTag.update(t);
+    this.nameTag.update(t);
   }
 
   /**
@@ -287,7 +289,7 @@ export class PlayerAvatar extends Avatar<PlayerState> {
    * Removes the name tag and disposes every material.
    */
   dispose(): void {
-    this._nameTag.dispose();
+    this.nameTag.dispose();
     super.dispose();
     this._buildMarker.dispose();
     this._shading.dispose();

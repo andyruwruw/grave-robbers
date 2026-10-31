@@ -5,19 +5,51 @@ import { SoundWatcher } from './sound-watcher';
 import type { StateMessage } from '../../types/sound';
 
 /**
+ * Seconds between a Hellmouth's roars (it sprays in quick pulses).
+ */
+const ROAR_GAP = 0.3;
+
+/**
  * Sounds for the snapshot's one-off events: chips, digging, candy and
  * pickups, unlocks, kills (which duck the music), monster deaths, splashes,
- * blinks, snuffed lights, smashes, turrets firing, and growing crops.
+ * bloaters bursting, the dead rising, blinks, blood fountains catching monsters, snuffed lights, smashes, turrets firing, and growing crops,
+ * and the infused weapons' chain lightning, blasts, wails, slams,
+ * fissures, fire sprays, novas, reflects, and infusing at the anvil.
  */
 export class EventSounds extends SoundWatcher {
+  /**
+   * When a Hellmouth last roared, in seconds.
+   */
+  private _roaredAt = -Infinity;
+
   /**
    * Plays each event.
    *
    * @param msg - The snapshot.
+   * @param now - The snapshot's arrival time in seconds.
    */
-  onState(msg: StateMessage): void {
+  onState(msg: StateMessage, now: number): void {
     for (const e of msg.events) {
-      if (e.t === 'chips') {
+      if (e.t === 'chain') {
+        this._stage.play('chain-zap', e.points[0].x, 0.7, 0.9 + Math.random() * 0.2);
+      } else if (e.t === 'death-blast') {
+        this._stage.play('blast', e.x, 0.8, 0.9 + Math.random() * 0.2);
+      } else if (e.t === 'wail') {
+        this._stage.play('wail', e.x, 0.8);
+      } else if (e.t === 'slam') {
+        this._stage.play('slam', e.x, 0.7, 0.9 + Math.random() * 0.2);
+      } else if (e.t === 'fissure') {
+        this._stage.play('fissure', e.x, 0.9);
+      } else if (e.t === 'flame-spray' && now - this._roaredAt >= ROAR_GAP) {
+        this._roaredAt = now;
+        this._stage.play('flame-roar', e.x, 0.6, 0.9 + Math.random() * 0.2);
+      } else if (e.t === 'nova') {
+        this._stage.play('nova', e.x, 0.9);
+      } else if (e.t === 'reflect') {
+        this._stage.play('reflect', e.x, 0.8, 0.9 + Math.random() * 0.2);
+      } else if (e.t === 'infused') {
+        this._stage.play('infuse', e.x, 0.9);
+      } else if (e.t === 'chips') {
         this._stage.play(e.chip === 'wood' ? 'chop' : 'mine', e.tx + 0.5, 0.6);
       } else if (e.t === 'dig') {
         this._stage.play('dig', e.tx + 0.5, 0.6);
@@ -39,9 +71,15 @@ export class EventSounds extends SoundWatcher {
       } else if (e.t === 'splash') {
         this._stage.play('splat', e.x, 0.9, 0.8);
         this._stage.play('drink', e.x, 0.5, 1.6);
+      } else if (e.t === 'burst') {
+        this._stage.play('bloater-burst', e.x, 1);
+      } else if (e.t === 'raise') {
+        this._stage.play('raise', e.x, 0.8, 0.9 + Math.random() * 0.2);
       } else if (e.t === 'blink') {
         this._stage.play('shadow-step', e.fromX, 0.7, 0.9 + Math.random() * 0.2);
         this._stage.play('shadow-step', e.x, 0.9, 0.8 + Math.random() * 0.2);
+      } else if (e.t === 'catch') {
+        this._stage.play('fountain-catch', e.tx + 0.5, 0.9, 0.9 + Math.random() * 0.2);
       } else if (e.t === 'snuff') {
         this._stage.play('snuff', e.tx + 0.5);
       } else if (e.t === 'smash' && e.tile === 'pumpkin') {

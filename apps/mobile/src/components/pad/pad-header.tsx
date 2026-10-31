@@ -1,9 +1,12 @@
 // Packages
 import React from 'react';
-import { Gamepad2, LogOut } from 'lucide-react';
+import { ArrowRightLeft, Gamepad2, LogOut } from 'lucide-react';
 import Button from '@halloween/ui/components/ui/controls/button';
 import Hearts from '@halloween/game-ui/components/hud/hearts';
 import InventoryBar from '@halloween/game-ui/components/hud/inventory-bar';
+
+// Local Imports
+import { PHONE_DISPLAY } from '../../config/display';
 
 // Types
 import type { Inventory } from '@halloween/shared/goods/goods';
@@ -45,6 +48,16 @@ interface PadHeaderProps {
   onPadMenu: (open: boolean) => void;
 
   /**
+   * Whether the move-to-another-device popover is open.
+   */
+  transferMenu: boolean;
+
+  /**
+   * Opens or closes the move-to-another-device popover.
+   */
+  onTransferMenu: (open: boolean) => void;
+
+  /**
    * Removes the player from the game.
    */
   onLeave: () => void;
@@ -52,20 +65,21 @@ interface PadHeaderProps {
 
 /**
  * The pad's top bar: hearts, candy and blood, the TV controllers button
- * (while the TV has any), and leave.
+ * (while the TV has any), move to another device, and leave.
  *
  * @param {PadHeaderProps} props - Component props.
  * @returns {React.JSX.Element} The rendered bar.
  */
-function PadHeader({ vitals, inventory, pads, myPad, padMenu, onPadMenu, onLeave }: PadHeaderProps): React.JSX.Element {
+function PadHeader({ vitals, inventory, pads, myPad, padMenu, onPadMenu, transferMenu, onTransferMenu, onLeave }: PadHeaderProps): React.JSX.Element {
   return (
     <header className='flex items-center gap-md border-b border-border px-md py-sm'>
       <Hearts
         hp={vitals.hp}
         wounded={vitals.wounded}
-        healing={vitals.healing} />
+        healing={vitals.healing}
+        overheal={vitals.overheal} />
       <span className='flex-1' />
-      <InventoryBar inventory={inventory} />
+      {PHONE_DISPLAY.showResources && <InventoryBar inventory={inventory} />}
       {pads.length > 0 && (
         <Button
           variant='ghost'
@@ -78,6 +92,14 @@ function PadHeader({ vitals, inventory, pads, myPad, padMenu, onPadMenu, onLeave
             className={myPad ? 'text-brand' : undefined} />
         </Button>
       )}
+      <Button
+        variant='ghost'
+        size='icon'
+        aria-label='Move to another device'
+        aria-pressed={transferMenu}
+        onClick={(): void => onTransferMenu(!transferMenu)}>
+        <ArrowRightLeft size={14} />
+      </Button>
       <Button
         variant='ghost'
         size='icon'

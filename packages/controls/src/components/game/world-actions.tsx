@@ -5,19 +5,24 @@ import {
   Skull,
   Sun,
 } from 'lucide-react';
+import { WORLD_EVENTS, WORLD_EVENT_KINDS } from '@halloween/shared/world-events/world-event-catalog';
 
 // Local Imports
 import { PANEL_BUTTON } from '../../config/styles';
+import { WORLD_EVENT_BUTTONS } from '../../config/world-events';
 import Kbd from './kbd';
+
+// Types
+import type { WorldEventKind } from '@halloween/shared/world-events/types/world-events';
 
 /**
  * Props for the WorldActions component.
  */
 interface WorldActionsProps {
   /**
-   * Whether a blood moon is up right now.
+   * The world events that are up right now.
    */
-  bloodMoon: boolean;
+  worldEvents: WorldEventKind[];
 
   /**
    * Whether it's daytime.
@@ -30,9 +35,9 @@ interface WorldActionsProps {
   shortcuts: boolean;
 
   /**
-   * Summons a blood moon.
+   * Starts a world event.
    */
-  onBloodMoon: () => void;
+  onStartEvent: (kind: WorldEventKind) => void;
 
   /**
    * Switches between day and night.
@@ -46,34 +51,42 @@ interface WorldActionsProps {
 }
 
 /**
- * Buttons to summon a blood moon, switch to daytime and back, and kill
+ * Buttons to start each world event, switch to daytime and back, and kill
  * every monster.
  *
  * @param {WorldActionsProps} props - Component props.
  * @returns {React.JSX.Element} The rendered buttons.
  */
 function WorldActions({
-  bloodMoon,
+  worldEvents,
   daytime,
   shortcuts,
-  onBloodMoon,
+  onStartEvent,
   onDaytime,
   onKillMonsters,
 }: WorldActionsProps): React.JSX.Element {
   return (
     <div className='flex flex-col gap-sm'>
-      <button
-        type='button'
-        disabled={bloodMoon}
-        className={`${PANEL_BUTTON} relative`}
-        onClick={onBloodMoon}>
-        <Moon
-          size={14}
-          fill='currentColor'
-          className='text-danger' />
-        {bloodMoon ? 'Blood moon rising' : 'Summon blood moon'}
-        {shortcuts && <span className='absolute right-sm'><Kbd>B</Kbd></span>}
-      </button>
+      {WORLD_EVENT_KINDS.map((kind: WorldEventKind): React.JSX.Element => {
+        const { icon: Icon, color, key } = WORLD_EVENT_BUTTONS[kind];
+        const { name } = WORLD_EVENTS[kind];
+        const up = worldEvents.includes(kind);
+        return (
+          <button
+            key={kind}
+            type='button'
+            disabled={up}
+            className={`${PANEL_BUTTON} relative`}
+            onClick={(): void => onStartEvent(kind)}>
+            <Icon
+              size={14}
+              fill='currentColor'
+              className={color} />
+            {up ? `${name} rising` : `Summon ${name.toLowerCase()}`}
+            {shortcuts && <span className='absolute right-sm'><Kbd>{key}</Kbd></span>}
+          </button>
+        );
+      })}
       <button
         type='button'
         aria-pressed={daytime}

@@ -8,7 +8,7 @@ import { moveWithCollision } from '@halloween/shared/world/collision';
 import { inTrunk } from '@halloween/shared/world/trees';
 
 // Local Imports
-import { WAYPOINT_REACHED } from '../config/ai';
+import { CHASE_BUDGET, FAILED_REPATH, LOST_BUDGET, WAYPOINT_REACHED } from '../config/ai';
 import { STONY } from '../config/tiles';
 import { tileOf } from '../helpers/geometry';
 import { monsterBlocked } from '../helpers/terrain';
@@ -77,7 +77,7 @@ export abstract class Walker<P extends Target> extends Monster<P> {
     }
     const drop = before - world.map.elevationAt(this.x, this.y);
     if (this.takesFallDamage && drop >= FALL_MIN) {
-      this.hp -= FALL_DAMAGE * Math.round(drop / LEVEL_HEIGHT);
+      this.hp -= FALL_DAMAGE * Math.round(drop / LEVEL_HEIGHT) * this._ctx.dealt;
       this.hurts++;
       if (this.hp <= 0) {
         this._ctx.kill(this, Math.atan2(this.knock.y, this.knock.x));
@@ -118,7 +118,7 @@ export abstract class Walker<P extends Target> extends Monster<P> {
 
   /**
    * Walks toward (x, y) by up to `step`, slowed in trees, on barbed wire
-   * and near effigies.
+   * and near effigies, scaled by world events.
    * @param x Where to (tiles).
    * @param y Where to (tiles).
    * @param step How far (tiles).
@@ -132,7 +132,7 @@ export abstract class Walker<P extends Target> extends Monster<P> {
     if (d < 1e-4) {
       return;
     }
-    const s = Math.min(step * (inTrunk(world.map, this.x, this.y) ? MONSTER_TREE_SLOW : 1) * this._ctx.wards.drag(this, world), d);
+    const s = Math.min(step * this._ctx.mods.monsterSpeed * (inTrunk(world.map, this.x, this.y) ? MONSTER_TREE_SLOW : 1) * this._ctx.wards.drag(this, world) * this.slowFactor(world.time), d);
     this.facing = Math.atan2(dy, dx);
     this.moving = true;
     Object.assign(this, moveWithCollision(monsterBlocked(world, this, noDrop), this.x, this.y, (dx / d) * s, (dy / d) * s, MONSTER_RADIUS));
@@ -170,7 +170,7 @@ export abstract class Walker<P extends Target> extends Monster<P> {
     this.nextAttackAt = world.time + this.def.cooldown;
     this._ctx.hooks.event({ t: 'chips', tx: tile.tx, ty: tile.ty, chip: STONY.has(tileKind) ? 'stone' : 'wood', health: world.resources.health(tile.tx, tile.ty) });
     if (tileKind === 'palisade') {
-      this.hp -= PALISADE_THORNS;
+      this.hp -= PALISADE_THORNS * this._ctx.dealt;
       this.hurts++;
       if (this.hp <= 0) {
         this._ctx.kill(this, this.facing + Math.PI);
@@ -214,5 +214,33 @@ export abstract class Walker<P extends Target> extends Monster<P> {
     this.wanderIdle = true;
     this.wanderUntil = world.time + 1.5 + Math.random() * 2;
     this.facing += (Math.random() - 0.5) * 2.5;
+  }
+
+  /**
+   * How many tiles a chase's path search may look at: plenty when the
+   * goal can be reached from here, barely any when it surely can't (see
+   * `ReachMap`), just enough to head toward it.
+   * @param goal Where it's chasing.
+   * @param world The world.
+   * @returns The search budget.
+   */
+  protected chaseBudget(goal: Step, world: World): number {
+    return this._ctx.reach.reaches(goal, tileOf(this), world) ? CHASE_BUDGET : LOST_BUDGET;
+  }
+
+  /**
+   * After a chase's search: when the path stops short of a goal that
+   * can't be reached from here at all (see `ReachMap`), waits FAILED_REPATH
+   * seconds before searching again instead of the usual moment, since
+   * nothing will have changed. A path cut short for any other reason (a
+   * vampire stopping at the light's edge) re-plans as usual.
+   * @param goal Where it's chasing.
+   * @param world The world.
+   */
+  protected backOffIfShort(goal: Step, world: World): void {
+    const end = this.path.at(-1) ?? tileOf(this);
+    if ((end.tx !== goal.tx || end.ty !== goal.ty) && !this._ctx.reach.reaches(goal, tileOf(this), world)) {
+      this.repathAt = world.time + FAILED_REPATH * (0.8 + Math.random() * 0.4);
+    }
   }
 }

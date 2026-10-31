@@ -1,10 +1,13 @@
 // Local Imports
+import { Bloater } from './kinds/bloater';
 import { Brute } from './kinds/brute';
 import { Demon } from './kinds/demon';
 import { Ghost } from './kinds/ghost';
 import { Ghoul } from './kinds/ghoul';
+import { Necromancer } from './kinds/necromancer';
 import { Skeleton } from './kinds/skeleton';
 import { Vampire } from './kinds/vampire';
+import { Werewolf } from './kinds/werewolf';
 import { Witch } from './kinds/witch';
 import { Zombie } from './kinds/zombie';
 
@@ -32,6 +35,9 @@ const MONSTER_MAKERS: Record<MonsterKind, MonsterMaker> = {
   witch: Witch,
   ghoul: Ghoul,
   demon: Demon,
+  bloater: Bloater,
+  necromancer: Necromancer,
+  werewolf: Werewolf,
 };
 
 /**

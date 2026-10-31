@@ -14,6 +14,7 @@ import { STRUCTURE_KINDS } from '@halloween/shared/structures/structure-catalog'
 import { toWorld } from '../../space/world-coords';
 import { UNIT_BOX } from '../config/avatar';
 import { BUILD_PREVIEW_SHAPES, PLACE_BLOCKED, PLACE_OK } from './config/build-preview-shapes';
+import { WallGhosts } from './wall-ghosts';
 
 // Types
 import type { PlayerState } from '@halloween/shared/protocol/state/player-state';
@@ -75,6 +76,11 @@ export class BuildMarker {
   private _blockerMaterial: LineBasicMaterial;
 
   /**
+   * Previews of walls that come in looks, drawn as the wall itself.
+   */
+  private _walls: WallGhosts;
+
+  /**
    * Builds the outline, the turn arrow, every preview shape, and the
    * blocker outline, all hidden.
    * @param color The player's color.
@@ -112,6 +118,7 @@ export class BuildMarker {
       this.marker.add(ghost);
       return [kind, ghost];
     })) as Record<StructureKind, Group>;
+    this._walls = new WallGhosts(this.marker);
     this._blockerMaterial = new LineBasicMaterial({ color: PLACE_BLOCKED, depthTest: false, transparent: true });
     this.blocker = new LineSegments(UNIT_EDGES, this._blockerMaterial);
     this.blocker.renderOrder = 10;
@@ -121,8 +128,9 @@ export class BuildMarker {
   /**
    * Outlines the tile this player would act on in their color, or while
    * they're placing a structure, a dim white outline and see-through shape
-   * of it, light red if it can't go there, with whatever is in the way
-   * outlined light red too. Null hides it.
+   * of it (a wall that comes in looks shows as the wall itself, in its
+   * look and turned, `WallGhosts`), light red if it can't go there, with
+   * whatever is in the way outlined light red too. Null hides it.
    * @param target The player's state.
    * @param tile The tile to mark, or null to hide.
    * @param place The structure being placed, if any.
@@ -136,9 +144,12 @@ export class BuildMarker {
     if (facing !== null) {
       this._turnArrow.rotation.y = -facing;
     }
+    const wall = shown && place?.valid && place.wall && facing !== null ? place.wall : null;
     for (const kind of STRUCTURE_KINDS) {
-      this._ghosts[kind].visible = place?.kind === kind;
+      this._ghosts[kind].visible = place?.kind === kind && !wall;
     }
+    const quarter = facing === null ? 0 : ((Math.round(facing / (Math.PI / 2)) % 4) + 4) % 4;
+    this._walls.show(wall && place ? { kind: place.kind, style: wall.style, dir: [0, 2, 1, 3][quarter]!, beside: wall.beside } : null);
     const blocker = shown && place ? place.blocker : null;
     this.blocker.visible = blocker !== null;
     if (blocker) {
@@ -168,5 +179,6 @@ export class BuildMarker {
     this._ghostMaterial.dispose();
     this._ghostEdges.dispose();
     this._blockerMaterial.dispose();
+    this._walls.dispose();
   }
 }

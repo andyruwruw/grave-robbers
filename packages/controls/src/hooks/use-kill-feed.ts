@@ -49,12 +49,13 @@ export function useKillFeed(): KillFeedState {
   };
 
   /**
-   * Adds the feed-worthy events (kills, blueprints, research) to the feed.
+   * Adds the feed-worthy events (kills, blueprints, research, infusions)
+   * to the feed.
    * @param events The tick's events.
    */
   const addFeedEvents = (events: GameEvent[]): void => {
     for (const e of events) {
-      if (e.t === 'kill' || e.t === 'blueprint' || e.t === 'research') {
+      if (e.t === 'kill' || e.t === 'blueprint' || e.t === 'research' || e.t === 'infused') {
         addKill(e);
       }
     }

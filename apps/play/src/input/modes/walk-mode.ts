@@ -3,7 +3,6 @@ import { stick } from '@halloween/ui/input/gamepad';
 
 // Local Imports
 import {
-  MENUS,
   MOUSE_AIM_MIN,
   SEND_MS,
 } from '../../config/play';
@@ -16,10 +15,11 @@ import type { ModeResult } from './input-mode';
 
 /**
  * Out in the world: clears the menu selection, walks with the left stick
- * or the keys, aims with the right stick or the mouse (snapped to eight
- * ways, once it's far enough from the player), and sends both when they
+ * or the keys, aims any way with the right stick or the mouse (once it's
+ * far enough from the player; `free` aim), and sends both when they
  * change (at most every `SEND_MS`). Then the subclass acts (fighting or
- * building), and a menu's key or button opens it.
+ * building), USE goes the way the mouse points (`useAt`) or else the
+ * facing, and a menu's key or button opens it.
  */
 export abstract class WalkMode extends InputMode {
   /**
@@ -43,13 +43,15 @@ export abstract class WalkMode extends InputMode {
       [mx, my] = [Math.round((kx / len) * 100) / 100, Math.round((ky / len) * 100) / 100];
     }
     let [ax, ay] = stick(pad.axis(2), pad.axis(3));
+    ctx.useAt = null;
     if (ax || ay) {
       ctx.padAimAt = now;
     } else if (k.mouse && k.mouse.at > ctx.padAimAt) {
       const ground = ctx.rendererRef.current?.groundAt(k.mouse.x, k.mouse.y);
+      ctx.useAt = ground ?? null;
       const me = ctx.predictor;
       if (ground && Math.hypot(ground.x - me.x, ground.y - me.y) > MOUSE_AIM_MIN) {
-        const angle = Math.round(Math.atan2(ground.y - me.y, ground.x - me.x) / (Math.PI / 4)) * (Math.PI / 4);
+        const angle = Math.atan2(ground.y - me.y, ground.x - me.x);
         [ax, ay] = [Math.round(Math.cos(angle) * 100) / 100, Math.round(Math.sin(angle) * 100) / 100];
       }
     }
@@ -63,13 +65,16 @@ export abstract class WalkMode extends InputMode {
       }
       if (`${ax},${ay}` !== ctx.held.aim) {
         ctx.held.aim = `${ax},${ay}`;
-        s.send({ t: 'aim', x: ax, y: ay });
+        s.send({ t: 'aim', x: ax, y: ay, free: true });
       }
     }
     if (this.act(ctx) === 'halt') {
       return 'halt';
     }
-    const opened = MENUS.find((m: Menu): boolean => ctx.tappedAction(m));
+    if (ctx.tappedAction('use')) {
+      s.send({ t: 'use', at: ctx.useAt && { x: Math.round(ctx.useAt.x * 10) / 10, y: Math.round(ctx.useAt.y * 10) / 10 } });
+    }
+    const opened = s.menus.find((m: Menu): boolean => ctx.tappedAction(m));
     if (opened) {
       s.setMenu(opened);
     }

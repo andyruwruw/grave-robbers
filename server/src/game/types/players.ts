@@ -3,6 +3,7 @@ import type { Gear } from '@halloween/shared/inventory/bag-items';
 import type { Inventory } from '@halloween/shared/goods/goods';
 import type { PlayerIdentity } from '@halloween/shared/protocol/state/player-state';
 import type { TreeState } from '@halloween/shared/skill-tree/types/skill-tree';
+import type { PlayerSave } from '../storage/types/save';
 
 /**
  * What a phone shows of its own player's belongings, their skill tree,
@@ -47,38 +48,7 @@ export type JoinResult =
   /**
    * They didn't, and why.
    */
-  | { ok: false; error: string };
-
-/**
- * What a player who left keeps for when someone joins again under the
- * same name.
- */
-export interface Departed {
-  /**
-   * Their public id, so their coffin stays theirs.
-   */
-  id: string;
-
-  /**
-   * Candy and blood.
-   */
-  inventory: Inventory;
-
-  /**
-   * The bag and what's equipped.
-   */
-  bag: Gear;
-
-  /**
-   * Their skill tree.
-   */
-  tree: TreeState;
-
-  /**
-   * Seconds their phone was connected, toward their hidden level.
-   */
-  onlineSeconds: number;
-}
+  | { ok: false; error: string; needsCode?: boolean };
 
 /**
  * What a new player is made from.
@@ -120,7 +90,7 @@ export interface PlayerInit {
   time: number;
 
   /**
-   * What they kept from last time they played under this name, if any.
+   * Their saved character, when they're coming back to one.
    */
-  back?: Departed;
+  back?: PlayerSave;
 }

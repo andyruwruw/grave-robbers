@@ -7,6 +7,7 @@ import { ScreenPicker } from './picking/screen-picker';
 import { WorldScene } from './world-scene';
 
 // Types
+import type { DisplaySettings } from '../types/display-settings';
 import type { LiftTarget } from '@halloween/shared/protocol/tv-tools';
 import type { Tile } from '@halloween/shared/world/tiles';
 import type { WorldMap } from '@halloween/shared/world/world-map';
@@ -115,6 +116,18 @@ export class WorldRenderer extends WorldScene {
   }
 
   /**
+   * Where a map point (in tiles), `lift` above the ground there, shows on
+   * screen, for /play's USE prompt.
+   * @param x Tile-space x.
+   * @param y Tile-space y.
+   * @param lift Height above the ground, in world units.
+   * @returns The screen point.
+   */
+  screenOf(x: number, y: number, lift: number): { x: number; y: number } {
+    return this._picker.screenOf(x, y, lift);
+  }
+
+  /**
    * Where the map editor's stairs could go for a pointed-at tile (see
    * `stairsOptions`).
    * @param tx Tile x pointed at.
@@ -197,6 +210,74 @@ export class WorldRenderer extends WorldScene {
   }
 
   /**
+   * Fixes how many screen pixels each rendered pixel takes (1 is no
+   * pixelation), or null to grow pixels with the zoom like the TV does.
+   * Takes effect next frame.
+   * @param scale The pixel size, or null.
+   */
+  setPixelScale(scale: number | null): void {
+    this._pixelOverride = scale === null ? null : Math.max(1, Math.round(scale));
+  }
+
+  /**
+   * Applies a display's settings (see `DisplaySettings`): brightness,
+   * camera angle, glow, aberration, fog, screen shake, blood, pickups,
+   * names, and health bars. The overlay flags (TPS, FPS, server ticks) are
+   * the app's to draw.
+   * @param settings The settings.
+   */
+  setDisplaySettings(settings: DisplaySettings): void {
+    this._parts.display.apply(settings);
+  }
+
+  /**
+   * Which player is this screen's own (for Show my name and Show my health
+   * bar), or null on a screen with none (the TV).
+   * @param id The player's id, or null.
+   */
+  setLocalPlayer(id: string | null): void {
+    this._ctx.localPlayer = id;
+  }
+
+  /**
+   * How far ahead of the followed player the camera looks, as a share of
+   * half the ground in view, toward where they face (0 centers them; /play
+   * uses PLAY_FOLLOW_LEAD).
+   * @param share The lead.
+   */
+  setFollowLead(share: number): void {
+    this._parts.rig.follow.leadShare = share;
+  }
+
+  /**
+   * How fast the camera's lead swings round when the followed player turns
+   * (LEAD_EASE by default).
+   * @param ease The rate, per second.
+   */
+  setFollowLeadSpeed(ease: number): void {
+    this._parts.rig.follow.leadEase = ease;
+  }
+
+  /**
+   * How far past the map's edge a following camera may look, in halves of
+   * the ground in view (0, the default, stops it at the edge).
+   * @param halves The overscroll.
+   */
+  setFollowOverscroll(halves: number): void {
+    this._parts.rig.follow.overscroll = halves;
+  }
+
+  /**
+   * The elevation this view rests at, in radians above the horizon (the TV
+   * uses CAMERA_ELEVATION; /play sits lower, PLAY_ELEVATION). Takes effect
+   * at once.
+   * @param angle The elevation.
+   */
+  setCameraElevation(angle: number): void {
+    this._parts.rig.setElevation(angle);
+  }
+
+  /**
    * Follows one player up close (a /play view, or a pane of the TV's split
    * screen): `view` is how much ground shows (`FollowView`). With no
    * player (or while theirs is missing) it looks at tile point `at`
@@ -207,6 +288,16 @@ export class WorldRenderer extends WorldScene {
    */
   setFollow(id: string | null, view: FollowView = FOLLOW_TALL, at: { x: number; y: number } | null = null): void {
     this._parts.rig.setFollow(id, view, at);
+  }
+
+  /**
+   * The tile point a following camera is looking at now, or null while it
+   * frames the whole map.
+   * @returns The point, in tiles.
+   */
+  viewCenter(): { x: number; y: number } | null {
+    const at = this._parts.rig.follow.at;
+    return at ? { x: at.x + this._ctx.mapWidth / 2, y: at.z + this._ctx.mapHeight / 2 } : null;
   }
 
   /**

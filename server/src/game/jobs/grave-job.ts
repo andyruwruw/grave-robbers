@@ -1,15 +1,8 @@
 // Packages
-import { stock } from '@halloween/shared/goods/goods';
-import {
-  DIG_BLUEPRINT_CHANCE,
-  DIG_BONES,
-  DIG_BONE_CHANCE,
-  DIG_CANDY,
-  DIG_WOOD,
-  DIG_WOOD_CHANCE,
-} from '@halloween/shared/loot/graves';
+import { DIG_BLUEPRINT_CHANCE } from '@halloween/shared/loot/graves';
 
 // Local Imports
+import { rollGrave } from '../helpers/loot-rolls';
 import { DiggingJob } from './digging-job';
 
 // Types
@@ -39,8 +32,8 @@ export class GraveJob extends DiggingJob {
 
   /**
    * Digs at a grave, `hits` times. Once it's dug up the stone sinks away
-   * and the grave gives up candy, maybe wood, maybe a piece of gear, and
-   * maybe a blueprint, which unlocks a node of the digger's skill tree.
+   * and the grave gives up candy, maybe wood, bones, or headstone rubble
+   * (stone), and maybe a blueprint, which unlocks a node of the digger's skill tree.
    * @param p The player.
    * @param tx The tile's column.
    * @param ty The tile's row.
@@ -58,11 +51,7 @@ export class GraveJob extends DiggingJob {
     if (!done) {
       return;
     }
-    this._game.pickups.award(p, stock({
-      wood: Math.random() < DIG_WOOD_CHANCE ? this.roll(DIG_WOOD) : 0,
-      bone: Math.random() < DIG_BONE_CHANCE ? this.roll(DIG_BONES) : 0,
-      candy: this.roll(DIG_CANDY),
-    }), tx + 0.4, ty + 0.55);
+    this._game.pickups.award(p, rollGrave(), tx + 0.4, ty + 0.55);
     this.findBlueprint(p, DIG_BLUEPRINT_CHANCE);
   }
 }

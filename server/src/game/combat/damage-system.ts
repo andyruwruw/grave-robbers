@@ -1,4 +1,5 @@
 // Packages
+import { difficultyOf } from '@halloween/shared/difficulty/difficulty';
 import { GEAR, wearsOut } from '@halloween/shared/gear/gear-catalog';
 import { isGearItem } from '@halloween/shared/inventory/bag-items';
 import { KNOCKBACK_DISTANCE, KNOCKBACK_TIME } from '@halloween/shared/players/combat';
@@ -18,7 +19,9 @@ import type { Player } from '../players/player';
 export class DamageSystem extends GameSystem {
   /**
    * Damages a player unless they're protected or already dead, killing
-   * them at zero.
+   * them at zero. Damage from monsters and the world (not other players)
+   * is scaled by the server's difficulty first (`DifficultyLevel.taken`);
+   * after guarding, any overheal soaks it before their health.
    * @param p The player.
    * @param amount The damage before guarding.
    * @param by Who or what did it (a player, or a name for the kill feed).
@@ -31,21 +34,19 @@ export class DamageSystem extends GameSystem {
     if (p.dead || p.protected) {
       return false;
     }
+    if (typeof by === 'string') {
+      amount *= difficultyOf(this.settings.difficulty).taken;
+    }
     if (fromX !== undefined && fromY !== undefined) {
       amount = this.guard(p, amount, fromX, fromY, crush);
     }
-    const before = Math.ceil(p.hp);
-    p.hp -= amount;
-    const last = p.wounds.at(-1);
-    if (last && this.world.time - last.at < 0.5) {
-      last.amount += amount;
-      last.at = this.world.time;
-    } else {
-      p.wounds.push({ at: this.world.time, amount });
+    const soaked = Math.min(p.overheal, amount);
+    p.overheal -= soaked;
+    amount -= soaked;
+    if (amount <= 0) {
+      return true;
     }
-    if (Math.ceil(p.hp) !== before) {
-      p.hurts++;
-    }
+    p.wound(amount, this.world.time);
     if (p.hp <= 0) {
       this._game.life.kill(p, by);
     }

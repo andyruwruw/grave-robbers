@@ -69,8 +69,3 @@ export const DENSITY_RANGE = 1.6;
  * The fog's color, before the light map lights it.
  */
 export const FOG_COLOR = new Color('#4a5470');
-
-/**
- * The fog's color under a blood moon.
- */
-export const BLOOD_FOG_COLOR = new Color('#6e3640');

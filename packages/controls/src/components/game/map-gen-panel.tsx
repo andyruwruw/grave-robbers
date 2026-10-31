@@ -25,10 +25,10 @@ interface MapGenPanelProps {
 
 /**
  * Settings for the next random map, shown while the Game tab's map picker
- * is on Random: its size (classic, or a huge world of graveyard districts
- * whose look the rest sets), sliders for mountains, pits, extra stairs,
+ * is on Random: its size (classic, or a huge world of landmarks spread
+ * over hills and woods, whose look the rest sets), sliders for mountains, pits, extra stairs,
  * and how much of each kind of scenery, and switches for which landmarks
- * get built.
+ * get built (the huge-world-only ones shown only for Huge).
  *
  * @param {MapGenPanelProps} props - Component props.
  * @returns {React.JSX.Element} The rendered panel.
@@ -59,7 +59,7 @@ function MapGenPanel({ settings, onChange }: MapGenPanelProps): React.JSX.Elemen
         <div className='flex flex-col gap-xsm'>
           <span className='text-xs text-foreground'>Size</span>
           <div className='grid grid-cols-2 gap-xsm'>
-            {([['classic', 'Classic', 'One graveyard'], ['huge', 'Huge', `${HUGE_SIZE} x ${HUGE_SIZE}, nine graveyards`]] as const).map(([size, label, hint]) => (
+            {([['classic', 'Classic', 'One graveyard'], ['huge', 'Huge', `${HUGE_SIZE} x ${HUGE_SIZE}, a whole world`]] as const).map(([size, label, hint]) => (
               <button
                 key={size}
                 type='button'
@@ -91,7 +91,7 @@ function MapGenPanel({ settings, onChange }: MapGenPanelProps): React.JSX.Elemen
           </label>
         ))}
         <div className='flex flex-col gap-xsm'>
-          {MAP_STRUCTURES.map(({ key, label }) => {
+          {MAP_STRUCTURES.filter(({ hugeOnly }): boolean => !hugeOnly || settings.size === 'huge').map(({ key, label }) => {
             const on = settings.structures[key];
             return (
               <button

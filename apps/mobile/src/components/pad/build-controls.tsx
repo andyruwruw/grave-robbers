@@ -4,8 +4,11 @@ import {
   ArrowLeft,
   Flame,
   Hammer,
+  RotateCcw,
+  RotateCw,
 } from 'lucide-react';
 import { itemLabel } from '@halloween/shared/inventory/item-keys';
+import { TURNED } from '@halloween/shared/structures/placement';
 import BuildError from '@halloween/game-ui/components/hud/build-error';
 import ItemIcon from '@halloween/game-ui/components/items/item-icon';
 
@@ -58,8 +61,9 @@ interface BuildControlsProps {
 
 /**
  * The building strip: what's being built, a Turn stick to face where it
- * should go, Hold (torches only, to take one in hand instead), Back, and
- * Build.
+ * should go, rotate buttons for what's placed facing a way (belts and
+ * walls), Hold (torches only, to take one in hand instead), Back, and
+ * Build. A wall's looks pop up in the corner (`ControllerPad`).
  *
  * @param {BuildControlsProps} props - Component props.
  * @returns {React.JSX.Element} The rendered controls.
@@ -83,6 +87,20 @@ function BuildControls({ building, placing, color, buildError, commands, onDone,
         <DirectionStick
           color={color}
           onAim={commands.aim} />
+        {TURNED.has(building.build) && (
+          <div className='flex flex-col gap-xsm'>
+            {([[-1, RotateCcw, 'Rotate left'], [1, RotateCw, 'Rotate right']] as const).map(([dir, Icon, label]) => (
+              <button
+                key={dir}
+                type='button'
+                aria-label={label}
+                className='flex h-10 w-10 items-center justify-center rounded-full border-2 border-border bg-muted text-foreground'
+                onClick={(): void => commands.turn(dir)}>
+                <Icon size={16} />
+              </button>
+            ))}
+          </div>
+        )}
         {building.build === 'torch' && (
           <button
             type='button'

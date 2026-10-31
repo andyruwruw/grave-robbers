@@ -1,10 +1,10 @@
 // Packages
 import React from 'react';
 import { Pencil } from 'lucide-react';
-import Card from '@halloween/ui/components/ui/primitives/card';
 
 // Local Imports
 import { PANEL_BUTTON } from '../../config/styles';
+import TitledCard from '../ui/titled-card';
 import TvViewPicker from './tv-view-picker';
 
 // Types
@@ -49,26 +49,25 @@ function MapCard({
   children,
 }: MapCardProps): React.JSX.Element {
   return (
-    <Card className='flex flex-col'>
-      <div className='flex flex-col gap-lg px-lg py-md'>
-        <span className='text-sm font-medium text-foreground'>Map</span>
-        {onEditMap && (
-          <button
-            type='button'
-            className={PANEL_BUTTON}
-            onClick={onEditMap}>
-            <Pencil size={14} />
-            Map Editor
-          </button>
-        )}
-        {tvView && onTvView && (
-          <TvViewPicker
-            tvView={tvView}
-            onTvView={onTvView} />
-        )}
-        {children}
-      </div>
-    </Card>
+    <TitledCard
+      title='Map'
+      bodyClassName='flex flex-col gap-lg px-lg py-md'>
+      {onEditMap && (
+        <button
+          type='button'
+          className={PANEL_BUTTON}
+          onClick={onEditMap}>
+          <Pencil size={14} />
+          Map Editor
+        </button>
+      )}
+      {tvView && onTvView && (
+        <TvViewPicker
+          tvView={tvView}
+          onTvView={onTvView} />
+      )}
+      {children}
+    </TitledCard>
   );
 }
 

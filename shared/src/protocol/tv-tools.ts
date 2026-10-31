@@ -1,5 +1,12 @@
+// Local Imports
+import { GEAR, GEAR_KINDS } from '../gear/gear-catalog';
+import { MONSTER_KINDS } from '../monsters/monster-kinds';
+import { STRUCTURE_KINDS } from '../structures/structure-catalog';
+
 // Types
+import type { GearKind } from '../gear/types/gear-def';
 import type { MonsterKind } from '../monsters/monster-kinds';
+import type { StructureKind } from '../structures/types/structures';
 
 /**
  * Something on the map the TV's mouse can pick up.
@@ -41,11 +48,30 @@ export interface MapView {
 }
 
 /**
- * What the Game tab can conjure next to a player.
+ * The map tiles the Game tab can conjure.
  */
-export type SpawnKind = 'tree' | 'pumpkin' | 'chest' | 'rock' | 'loot' | MonsterKind;
+export type SpawnTile = 'tree' | 'pumpkin' | 'chest' | 'rock';
 
 /**
- * Everything the Game tab can conjure, in the order it lists them.
+ * What the Game tab can conjure: a tile, a random piece of loot, a
+ * monster, a piece of gear on the ground, or a structure (built at level
+ * 0, by no one).
  */
-export const SPAWN_KINDS: SpawnKind[] = ['tree', 'pumpkin', 'chest', 'rock', 'loot', 'zombie', 'vampire', 'ghost', 'brute', 'skeleton', 'witch', 'ghoul', 'demon'];
+export type SpawnKind = SpawnTile | 'loot' | MonsterKind | `gear:${GearKind}` | `build:${StructureKind}`;
+
+/**
+ * The tiles the Game tab can conjure, in the order it lists them.
+ */
+export const SPAWN_TILES: SpawnTile[] = ['tree', 'pumpkin', 'chest', 'rock'];
+
+/**
+ * Everything the Game tab can conjure, in the order it lists them (no
+ * infused-only gear: that's only made by infusing).
+ */
+export const SPAWN_KINDS: SpawnKind[] = [
+  ...SPAWN_TILES,
+  'loot',
+  ...MONSTER_KINDS,
+  ...GEAR_KINDS.filter((k: GearKind): boolean => !GEAR[k].infused).map((k: GearKind): SpawnKind => `gear:${k}`),
+  ...STRUCTURE_KINDS.map((k: StructureKind): SpawnKind => `build:${k}`),
+];

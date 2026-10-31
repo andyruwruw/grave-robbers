@@ -7,9 +7,16 @@ export const MAX_HP = 10;
  * Health never comes back on its own: a burning campfire mends whoever
  * rests beside it, a tonic heals on the spot, and the ritual knife's kills
  * mend slowly. Damage taken in the last FRESH_WOUND_SECONDS can't be healed
- * yet (the phone and TV show it grey).
+ * yet (the phone and TV show it grey). At level 0 a campfire takes a
+ * full minute to mend all MAX_HP.
  */
-export const CAMPFIRE_HEAL_PER_SECOND = 1 / 4;
+export const CAMPFIRE_HEAL_PER_SECOND = 1 / 6;
+
+/**
+ * How much faster a campfire mends per level of its builder (+10% a level,
+ * so level 3 mends all MAX_HP in about 46s).
+ */
+export const CAMPFIRE_HEAL_PER_LEVEL = 0.1;
 
 /**
  * Hearts a second the ritual knife's kills mend.

@@ -28,3 +28,20 @@ export const GAME_KEYS: Record<string, keyof Pick<GameSettings, 'allUnlocks' | '
   l: 'lightsOff',
   d: 'daytime',
 };
+
+/**
+ * Chromatic aberration (0 to 1) while Incognito shows the music, for a
+ * more scenic graveyard behind it (`useScenicLook`).
+ */
+export const SCENIC_ABERRATION = 0.9;
+
+/**
+ * Ground fog thickness (0 to 1) while Incognito shows the music.
+ */
+export const SCENIC_FOG = 1;
+
+/**
+ * Milliseconds the scenic look takes to fade in or out (the Incognito
+ * screen's own fade).
+ */
+export const SCENIC_FADE_MS = 1500;

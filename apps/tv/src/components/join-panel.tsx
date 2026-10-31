@@ -14,14 +14,17 @@ interface JoinPanelProps {
 
 /**
  * URL phones should open. The controller is served from the same origin as
- * the TV page, but a TV opened at localhost needs the machine's LAN address
- * swapped in or phones can't reach it.
+ * the TV page in production; in dev it's the phone app's own server
+ * (`__PHONE_PORT__`), whichever port the TV was opened on. A TV opened at
+ * localhost needs the machine's LAN address swapped in or phones can't
+ * reach it.
  *
  * @param lanAddress - The machine's LAN address, if the server knows it.
  * @returns The controller's URL.
  */
 function controllerUrl(lanAddress: string | null): string {
-  const { protocol, hostname, port } = window.location;
+  const { protocol, hostname } = window.location;
+  const port = __PHONE_PORT__ !== null ? String(__PHONE_PORT__) : window.location.port;
   const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
   const host = isLocal && lanAddress ? lanAddress : hostname;
   return `${protocol}//${host}${port ? `:${port}` : ''}/`;

@@ -40,7 +40,7 @@ export abstract class ShadowWalker<P extends Target> extends Fighter<P> {
     const def = this.def;
     const light = this._ctx.light;
     const here = tileOf(this);
-    const inLight = light.isLit(here.tx, here.ty);
+    const inLight = light.isLit(here.tx, here.ty, this.id);
     const p = inLight ? null : this._ctx.sight.perceive(this, prey, world);
     if (p && this.inReach(p, world)) {
       this.attack(p, world);
@@ -56,24 +56,27 @@ export abstract class ShadowWalker<P extends Target> extends Fighter<P> {
       return;
     }
     const walkable = monsterWalkable(world);
-    const dark = (tx: number, ty: number): boolean => walkable(tx, ty) && !light.isLit(tx, ty);
+    const dark = (tx: number, ty: number): boolean => walkable(tx, ty) && !light.isLit(tx, ty, this.id);
     const step = (ok: (tx: number, ty: number) => boolean) => (tx: number, ty: number, fx: number, fy: number): number =>
       (ok(tx, ty) && world.map.canStep(fx, fy, tx, ty) ? (world.map.get(tx, ty) === 'tree' ? 1 / MONSTER_TREE_SLOW : 1) : Infinity);
     if (world.time >= this.repathAt) {
       this.repathAt = world.time + VAMPIRE_REPATH;
       const smash = (tx: number, ty: number, fx: number, fy: number): number =>
-        (VAMPIRE_SMASHES.has(world.map.get(tx, ty)) && !light.isLit(tx, ty) && world.map.canStep(fx, fy, tx, ty)
+        (VAMPIRE_SMASHES.has(world.map.get(tx, ty)) && !light.isLit(tx, ty, this.id) && world.map.canStep(fx, fy, tx, ty)
           ? 1 + (world.structureQueries.hp(tx, ty) ?? 0) * 0.3
           : step(dark)(tx, ty, fx, fy));
       this.path = inLight || !goal
         ? findPath({ width: world.map.width, height: world.map.height, within: MONSTER_SEARCH, from: here, cost: step(walkable), open: walkable, accept: dark }) ?? []
-        : findPath({ width: world.map.width, height: world.map.height, within: MONSTER_SEARCH,
+        : findPath({ width: world.map.width, height: world.map.height, within: MONSTER_SEARCH, budget: this.chaseBudget(tileOf(goal), world),
           from: here,
           to: tileOf(goal),
           cost: smash,
           open: dark,
           score: (tx: number, ty: number): number => Math.hypot(tx + 0.5 - goal.x, ty + 0.5 - goal.y),
         }) ?? [];
+      if (!inLight && goal) {
+        this.backOffIfShort(tileOf(goal), world);
+      }
     }
     this.skipReached();
     const next = this.path[0];
@@ -106,7 +109,7 @@ export abstract class ShadowWalker<P extends Target> extends Fighter<P> {
         this.facing += (Math.random() - 0.5) * 2;
       } else {
         const walkable = monsterWalkable(world);
-        const dark = (tx: number, ty: number): boolean => walkable(tx, ty) && !this._ctx.light.isLit(tx, ty);
+        const dark = (tx: number, ty: number): boolean => walkable(tx, ty) && !this._ctx.light.isLit(tx, ty, this.id);
         for (let tries = 0; tries < 12 && this.path.length === 0; tries++) {
           const angle = Math.random() * Math.PI * 2;
           const reach = 4 + Math.random() * 5;

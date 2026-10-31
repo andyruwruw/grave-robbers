@@ -1,10 +1,11 @@
 // Types
+import type { Material } from '../../goods/goods';
 import type { CraftKey } from '../../inventory/item-keys';
 
 /**
  * One node of the skill tree: a piece of gear or a structure.
  */
-export type NodeId = CraftKey | 'mat:arrows';
+export type NodeId = CraftKey | `mat:${Material}`;
 
 /**
  * Where a node sits in the tree.
@@ -47,6 +48,12 @@ export interface TreeNode {
    * How it opens up.
    */
   unlock: Unlock;
+
+  /**
+   * A material shown where it comes from (opened with the station that
+   * makes it, or the thing that needs it): it can't be upgraded.
+   */
+  fixed?: boolean;
 }
 
 /**

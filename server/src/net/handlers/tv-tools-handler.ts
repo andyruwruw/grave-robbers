@@ -9,11 +9,12 @@ import type { DisplaySession } from '../types/session';
 /**
  * Messages this family handles.
  */
-type TvToolMessage = 'kill-monsters' | 'tv-lift' | 'tv-light' | 'force-blood-moon' | 'game-settings' | 'spawn';
+type TvToolMessage = 'kill-monsters' | 'tv-lift' | 'tv-light' | 'start-world-event' | 'game-settings' | 'spawn' | 'regrowth-target' | 'clear-items';
 
 /**
- * The TV's tools: killing monsters, the mouse's lift and light, the blood
- * moon, the Game tab's switches, and conjuring.
+ * The TV's tools: killing monsters, the mouse's lift and light, world
+ * events, the Game tab's switches, conjuring, and the admin's regrowth
+ * targets and clearing the ground.
  */
 export class TvToolsHandler extends DisplayHandler<TvToolMessage> {
   /**
@@ -33,14 +34,20 @@ export class TvToolsHandler extends DisplayHandler<TvToolMessage> {
       case 'tv-light':
         this.game.tvHand.setCursorLight(msg.at);
         return;
-      case 'force-blood-moon':
-        this.game.moon.forceBloodMoon();
+      case 'start-world-event':
+        this.game.worldEvents.start(msg.kind);
         return;
       case 'game-settings':
         this.game.gameTab.configure(msg.settings);
         return;
+      case 'regrowth-target':
+        this.game.world.growth.setTarget(msg.tile, msg.target);
+        return;
+      case 'clear-items':
+        this.game.world.items.clear();
+        return;
       case 'spawn':
-        this.game.conjure.spawn(msg.kind);
+        this.game.conjure.spawn(msg.kind, msg.at && Number.isFinite(msg.at.x) && Number.isFinite(msg.at.y) ? msg.at : null);
         return;
     }
   }

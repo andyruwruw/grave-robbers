@@ -20,9 +20,11 @@ import type { NodeId } from '../types/skill-tree';
  */
 export const STRUCTURE_UPGRADE_EFFECTS: Partial<Record<StructureKind, string>> = {
   'anvil': `Parts and late gear cost ${Math.round(ANVIL_DISCOUNT_PER_LEVEL * 100)}% less, +30% health`,
-  'blood-fountain': 'Drains faster, wider light, +30% health',
+  'blood-fountain': 'Drains faster, heals 10% faster, wider light, +30% health',
+  'campfire': 'Heals 10% faster, wider light, +30% health',
+  'soul-fire': 'Heals 10% faster, wider light, +30% health',
   'research-table': `Upgrades nearby cost ${Math.round(RESEARCH_DISCOUNT_PER_LEVEL * 100)}% less, +30% health`,
-  'altar': '+1 blood per offering, +30% health',
+  'altar': 'Kills nearby bleed more, +30% health',
   'bell': 'Wider ward, +30% health',
   'spikes': '+30% damage and health',
   'iron-spikes': '+30% damage and health',
@@ -42,7 +44,10 @@ export function upgradeEffect(id: NodeId): string {
   if (id === 'mat:arrows') {
     return `Steady supply: +${Math.round(STEADY_SUPPLY * 100)}% chance a shot spares its arrow or bolt`;
   }
-  const [kind, what] = id.split(':') as ['gear', GearKind] | ['build', StructureKind];
+  const [kind, what] = id.split(':') as ['gear', GearKind] | ['build', StructureKind] | ['mat', string];
+  if (kind === 'mat') {
+    return '';
+  }
   if (kind === 'gear') {
     const def = GEAR[what];
     const perk = WEAPON_PERKS[what];

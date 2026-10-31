@@ -1,10 +1,11 @@
 // Packages
 import React from 'react';
-import { Settings as SettingsIcon, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import ItemIcon from '@halloween/game-ui/components/items/item-icon';
 
 // Local Imports
-import { MENU_LABELS, MENUS } from '../../config/play';
+import { MENU_LABELS } from '../../config/play';
+import BindingGlyph from '../bindings/binding-glyph';
 
 // Types
 import type { KeyAction, Menu } from '../../types/play';
@@ -32,6 +33,11 @@ interface MenuTabsProps {
    * Opens a menu, or closes it (null).
    */
   onMenu: (menu: Menu | null) => void;
+
+  /**
+   * The menus offered (the Armory only once an anvil is available).
+   */
+  menus: Menu[];
 }
 
 /**
@@ -41,13 +47,13 @@ interface MenuTabsProps {
  * @param {MenuTabsProps} props - Component props.
  * @returns {React.JSX.Element} The rendered header.
  */
-function MenuTabs({ menu, device, bound, onMenu }: MenuTabsProps): React.JSX.Element {
+function MenuTabs({ menu, device, bound, onMenu, menus }: MenuTabsProps): React.JSX.Element {
   return (
     <header
       data-pad-skip
       className='flex items-center gap-xsm border-b border-border px-md py-xsm'>
-      {device === 'pad' && <span className='font-medium text-xs text-foreground-subtle'>LB</span>}
-      {MENUS.map((m: Menu) => (
+      {device === 'pad' && <BindingGlyph binding={{ button: 4 }} />}
+      {menus.map((m: Menu) => (
         <button
           key={m}
           type='button'
@@ -56,16 +62,12 @@ function MenuTabs({ menu, device, bound, onMenu }: MenuTabsProps): React.JSX.Ele
           aria-pressed={menu === m}
           className={`flex h-9 w-9 items-center justify-center rounded-md border ${menu === m ? 'border-brand bg-brand-muted text-foreground' : 'border-border bg-muted text-foreground-muted'}`}
           onClick={(): void => onMenu(m)}>
-          {m === 'settings' ? (
-            <SettingsIcon size={16} />
-          ) : (
-            <ItemIcon
-              item={`ui:${m}`}
-              size={26} />
-          )}
+          <ItemIcon
+            item={`ui:${m}`}
+            size={26} />
         </button>
       ))}
-      {device === 'pad' && <span className='font-medium text-xs text-foreground-subtle'>RB</span>}
+      {device === 'pad' && <BindingGlyph binding={{ button: 5 }} />}
       <span className='flex-1' />
       <button
         type='button'

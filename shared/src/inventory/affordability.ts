@@ -1,10 +1,40 @@
 // Local Imports
 import { MATERIALS, RESOURCES } from '../goods/goods';
-import { isMaterialItem } from './bag-items';
+import { isGearItem, isMaterialItem } from './bag-items';
 
 // Types
+import type { GearKind } from '../gear/types/gear-def';
 import type { Bundle, Inventory, Material, Resource } from '../goods/goods';
 import type { BagItem } from './bag-items';
+
+/**
+ * How many plain (uninfused) pieces of a gear kind are in a bag, the ones a
+ * recipe's `parts` can use.
+ *
+ * @param bag The bag's slots.
+ * @param kind The gear kind.
+ * @returns The count.
+ */
+export function partCount(bag: readonly (BagItem | null)[], kind: GearKind): number {
+  return bag.filter((item: BagItem | null): boolean => !!item && isGearItem(item) && item.kind === kind && !item.infusion).length;
+}
+
+/**
+ * How many times over a bag holds the gear a recipe builds in (at most
+ * `cap`).
+ *
+ * @param parts One gear kind per piece needed.
+ * @param bag The bag's slots.
+ * @param cap The most to count.
+ * @returns How many can be made from what's carried.
+ */
+export function partsCount(parts: readonly GearKind[], bag: readonly (BagItem | null)[], cap = 99): number {
+  let n = cap;
+  for (const kind of new Set(parts)) {
+    n = Math.min(n, Math.floor(partCount(bag, kind) / parts.filter((k: GearKind): boolean => k === kind).length));
+  }
+  return n;
+}
 
 /**
  * How much of a material is in a bag, across its stacks.

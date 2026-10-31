@@ -13,7 +13,6 @@ import { MAP_HEIGHT, MAP_WIDTH } from '@halloween/shared/world/dimensions';
 // Local Imports
 import {
   AMBIENT,
-  BLOOD_AMBIENT,
   DAY_AMBIENT,
   DAY_DIM,
   LEVELS,
@@ -184,15 +183,16 @@ export class LightMap {
   }
 
   /**
-   * Blends the ambient darkness toward blood red, then toward daylight,
-   * each 0..1.
-   * @param blood How blood red, 0..1.
+   * Blends the ambient darkness toward a world event's tint, then toward
+   * daylight.
+   * @param tint The tinted darkness (linear rgb), or null.
+   * @param amount How far toward the tint, 0..1.
    * @param day How bright day it is, 0..1.
    */
-  setSky(blood: number, day: number): void {
+  setSky(tint: readonly number[] | null, amount: number, day: number): void {
     this._dim = 1 - DAY_DIM * day;
     this._ambient = AMBIENT.map((c: number, i: number): number => {
-      const night = c + (BLOOD_AMBIENT[i] - c) * blood;
+      const night = tint ? c + (tint[i] - c) * amount : c;
       return night + (DAY_AMBIENT[i] - night) * day;
     });
   }

@@ -109,7 +109,7 @@ export class Outbox extends GameSystem {
   takeVitalsChanges(): [string, Vitals][] {
     const changes: [string, Vitals][] = [];
     for (const p of this.players.values()) {
-      const key = `${Math.ceil(p.hp * 2)}|${Math.ceil(p.wounded() * 2)}|${Math.ceil(Math.min(p.feast, MAX_HP - p.hp) * 2)}|${p.protected}|${p.dead}`;
+      const key = `${Math.ceil(p.hp * 2)}|${Math.ceil(p.wounded() * 2)}|${Math.ceil(Math.min(p.feast, MAX_HP - p.hp) * 2)}|${p.protected}|${p.dead}|${Math.ceil(p.overheal * 2)}`;
       if (key !== p.vitalsKey) {
         p.vitalsKey = key;
         changes.push([p.token, this._game.views.vitals(p)]);

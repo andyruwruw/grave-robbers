@@ -17,7 +17,8 @@ export type GearKind =
   | 'battle-axe' | 'scythe' | 'spear' | 'stake' | 'ritual-knife' | 'crossbow' | 'blood-gun' | 'torch' | 'shield' | 'plate'
   | 'short-sword' | 'greatsword' | 'flail' | 'morning-star' | 'warhammer' | 'quarterstaff' | 'glaive' | 'spiked-gauntlet'
   | 'bow' | 'repeating-crossbow' | 'musket'
-  | 'stick' | 'femur' | 'shovel';
+  | 'stick' | 'femur' | 'shovel'
+  | 'infused-hammer';
 
 /**
  * One kind of gear. `wear` is how many hits a stake lasts; nothing else
@@ -81,4 +82,10 @@ export interface GearDef extends ArmorStats {
    * has, and the hand torch (a torch from a stack of torches, held).
    */
   innate?: boolean;
+
+  /**
+   * Only made by infusing at an anvil (the infused hammer): never crafted,
+   * found, or carried by monsters, and not in the skill tree.
+   */
+  infused?: boolean;
 }

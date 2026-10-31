@@ -1,3 +1,7 @@
+// Types
+import type { RegrowthTile } from '@halloween/shared/world/regrowth';
+import type { WorldEventKind } from '@halloween/shared/world-events/types/world-events';
+
 /**
  * Health numbers for the Overview tab, refreshed about once a second.
  */
@@ -49,7 +53,32 @@ export interface StatsSnapshot {
   items: number;
 
   /**
-   * Whether a blood moon is up.
+   * The world events that are up.
    */
-  bloodMoon: boolean;
+  worldEvents: WorldEventKind[];
+
+  /**
+   * How many of each regrowing tile the map has now.
+   */
+  stocked: Record<RegrowthTile, number>;
+}
+
+/**
+ * What the TPS, FPS, and server ticks overlay reads once a second.
+ */
+export interface PerfSample {
+  /**
+   * Server ticks in the last second, or null before the first snapshot.
+   */
+  tps: number | null;
+
+  /**
+   * Average ms one server tick took, or null before the first snapshot.
+   */
+  stepMs: number | null;
+
+  /**
+   * This screen's frame rate, or null without a renderer.
+   */
+  fps: number | null;
 }

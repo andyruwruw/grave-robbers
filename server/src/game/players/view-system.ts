@@ -1,10 +1,13 @@
 // Packages
+import { GEAR_SLOTS } from '@halloween/shared/gear/gear-catalog';
 import { MAX_HP, RESPAWN_DELAY } from '@halloween/shared/players/health';
 
 // Local Imports
 import { GameSystem } from '../core/game-system';
 
 // Types
+import type { GearSlot } from '@halloween/shared/gear/types/gear-def';
+import type { Infusion } from '@halloween/shared/gear/types/infusion';
 import type { PlayerIdentity, PlayerState } from '@halloween/shared/protocol/state/player-state';
 import type { Vitals } from '@halloween/shared/protocol/state/vitals';
 import type { Carried } from '../types/players';
@@ -53,8 +56,8 @@ export class ViewSystem extends GameSystem {
   }
 
   /**
-   * A player's health, wounds, healing to come, protection, and death,
-   * for their phone.
+   * A player's health, wounds, healing to come, protection, overheal, and
+   * death, for their phone.
    * @param p The player.
    * @returns Their vitals.
    */
@@ -64,10 +67,27 @@ export class ViewSystem extends GameSystem {
       wounded: Math.ceil(p.wounded() * 2) / 2,
       healing: Math.ceil(Math.min(p.feast, MAX_HP - p.hp) * 2) / 2,
       protected: p.protected,
+      ...(p.overheal > 0 ? { overheal: Math.ceil(p.overheal * 2) / 2 } : {}),
       death: p.dead
         ? { killer: p.killedBy, survived: Math.round(p.respawnAt - RESPAWN_DELAY - p.aliveSince), respawnIn: Math.max(0, p.respawnAt - this.world.time) }
         : null,
     };
+  }
+
+  /**
+   * The infusion of each equipped item that has one, for broadcasting.
+   * @param p The player.
+   * @returns Each infused slot's infusion.
+   */
+  private gearInfusion(p: Player): Partial<Record<GearSlot, Infusion>> {
+    const out: Partial<Record<GearSlot, Infusion>> = {};
+    for (const slot of GEAR_SLOTS) {
+      const infusion = p.bag.equipped[slot]?.infusion;
+      if (infusion) {
+        out[slot] = infusion;
+      }
+    }
+    return out;
   }
 
   /**
@@ -76,6 +96,7 @@ export class ViewSystem extends GameSystem {
    * @returns Their state as broadcast.
    */
   private publicState(p: Player): PlayerState {
+    const weapon = p.weapon();
     return {
       id: p.id,
       name: p.name,
@@ -91,6 +112,7 @@ export class ViewSystem extends GameSystem {
       building: p.building,
       buildAim: p.buildAim && { x: Math.round(p.buildAim.x * 100) / 100, y: Math.round(p.buildAim.y * 100) / 100 },
       buildFacing: p.buildFacing,
+      buildStyle: p.building ? p.buildStyles[p.building] ?? 0 : 0,
       hp: Math.round(p.hp * 10) / 10,
       wounded: Math.round(p.wounded() * 10) / 10,
       hurts: p.hurts,
@@ -103,13 +125,18 @@ export class ViewSystem extends GameSystem {
       aiming: p.aimUntil !== null,
       aimTarget: p.aimTarget,
       combo: p.combo,
-      charge: p.weapon().charge ? Math.round((p.charge / p.weapon().charge!) * 10) / 10 : 0,
+      charge: weapon.charge ? Math.round((p.charge / weapon.charge) * 10) / 10 : 0,
       reloading: p.reloadUntil !== null,
       gear: {
         weapon: p.bag.equipped.weapon?.kind ?? null,
         offhand: p.bag.equipped.offhand?.kind ?? null,
         armor: p.bag.equipped.armor?.kind ?? null,
       },
+      gearInfusion: this.gearInfusion(p),
+      ...(p.thrown ? { thrown: true } : {}),
+      ...(p.overheal > 0 ? { overheal: Math.round(p.overheal * 10) / 10 } : {}),
+      ...(weapon.slayEvery && this.world.time < p.slayReadyAt ? { dimmed: true } : {}),
+      ...(p.quickSwing ? { quickSwing: true } : {}),
     };
   }
 

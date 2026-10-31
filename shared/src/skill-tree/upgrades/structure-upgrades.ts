@@ -2,7 +2,7 @@
 import { roundTenth } from '../../helpers/math';
 import { DIGGER_SECONDS } from '../../structures/automation';
 import { LIT } from '../../structures/lights';
-import { ALTAR_BLOOD, BELL_RADIUS } from '../../structures/occult';
+import { ALTAR_BLEED, BELL_RADIUS } from '../../structures/occult';
 import { STATIONS } from '../../structures/stations';
 import { STRUCTURES } from '../../structures/structure-catalog';
 import { SENTRY_DAMAGE, TURRETS } from '../../structures/turrets';
@@ -84,13 +84,14 @@ export function spikeDamage(base: number, level: number): number {
 }
 
 /**
- * Blood one offering at an altar gives at its builder's level.
+ * How many times over monsters bleed dying near an awake altar at its
+ * builder's level: each upgrade adds half.
  *
  * @param level The altar builder's level.
- * @returns Blood per offering.
+ * @returns The blood multiplier.
  */
-export function altarBlood(level: number): number {
-  return ALTAR_BLOOD + level;
+export function altarBleed(level: number): number {
+  return ALTAR_BLEED + 0.5 * level;
 }
 
 /**
@@ -117,14 +118,14 @@ export function turretDamage(kind: StructureKind, level: number): number {
 }
 
 /**
- * Seconds a bone digger takes to dig its grave again at its builder's
- * level.
+ * Seconds between a bone digger's digs at its builder's level: each
+ * upgrade adds a third of its speed, twice as fast at level 3.
  *
  * @param level The digger builder's level.
- * @returns Seconds between digs.
+ * @returns Seconds per dig.
  */
 export function diggerSeconds(level: number): number {
-  return roundTenth(DIGGER_SECONDS / (1 + 0.5 * level));
+  return roundTenth(DIGGER_SECONDS / (1 + level / 3));
 }
 
 /**

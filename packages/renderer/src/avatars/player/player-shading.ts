@@ -46,8 +46,8 @@ export class PlayerShading {
 
     const opacity = 1 - 0.4 * shimmer;
     for (const m of parts.materials) {
-      m.transparent = opacity < 1;
-      m.opacity = opacity;
+      m.opacity = opacity * ((m.userData.opacity as number | undefined) ?? 1);
+      m.transparent = m.opacity < 1;
     }
   }
 

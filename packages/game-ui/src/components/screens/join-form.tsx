@@ -1,7 +1,7 @@
 // Packages
 import React, { useState } from 'react';
 import { Ghost } from 'lucide-react';
-import { MAX_NAME_LENGTH, PLAYER_COLORS } from '@halloween/shared/players/roster';
+import { MAX_NAME_LENGTH, PLAYER_COLORS, TRANSFER_CODE_LENGTH } from '@halloween/shared/players/roster';
 import Button from '@halloween/ui/components/ui/controls/button';
 import TextField from '@halloween/ui/components/ui/controls/text-field';
 import Card from '@halloween/ui/components/ui/primitives/card';
@@ -30,14 +30,20 @@ interface JoinFormProps {
   joining: boolean;
 
   /**
-   * Called with the trimmed name and chosen color.
+   * Whether the name typed belongs to a character on another device, so
+   * the form asks for that device's transfer code.
    */
-  onJoin: (name: string, color: string) => void;
+  needsCode?: boolean;
+
+  /**
+   * Called with the trimmed name, the chosen color, and any transfer code.
+   */
+  onJoin: (name: string, color: string, code: string) => void;
 
   /**
    * The line under the title.
    */
-  blurb?: string;
+  blurb?: React.ReactNode;
 
   /**
    * Name filled in when none is saved yet.
@@ -62,7 +68,9 @@ function loadProfile(): { name: string; color: string } {
 }
 
 /**
- * Name + color picker shown before a phone has a player.
+ * Name + color picker shown before a phone has a player. When the name
+ * belongs to a character another device has (`needsCode`), it also asks
+ * for the transfer code that device shows.
  *
  * @param {JoinFormProps} props - Component props.
  * @returns {React.JSX.Element} The rendered form.
@@ -70,6 +78,7 @@ function loadProfile(): { name: string; color: string } {
 function JoinForm({
   error,
   joining,
+  needsCode = false,
   onJoin,
   blurb = 'Your phone is your controller. Pick a name and a color.',
   defaultName = '',
@@ -77,6 +86,7 @@ function JoinForm({
   const [profile] = useState(loadProfile);
   const [name, setName] = useState(profile.name || defaultName);
   const [color, setColor] = useState(profile.color);
+  const [code, setCode] = useState('');
 
   /**
    * Joins with the trimmed name and chosen color, and remembers them.
@@ -89,7 +99,7 @@ function JoinForm({
       return;
     }
     writeStorage(PROFILE_STORAGE_KEY, JSON.stringify({ name: trimmed, color }));
-    onJoin(trimmed, color);
+    onJoin(trimmed, color, needsCode ? code.trim() : '');
   };
 
   return (
@@ -111,6 +121,13 @@ function JoinForm({
           placeholder='Spooky Steve'
           onChange={(v: string): void => setName(v.slice(0, MAX_NAME_LENGTH))}
           errorMessage={error ?? undefined} />
+        {needsCode && (
+          <TextField
+            label='Transfer code'
+            value={code}
+            placeholder='ABC123'
+            onChange={(v: string): void => setCode(v.replace(/\s+/g, '').toUpperCase().slice(0, TRANSFER_CODE_LENGTH))} />
+        )}
         <div className='flex flex-col gap-xsm'>
           <span className='text-xs font-medium text-foreground-muted'>Color</span>
           <div className='grid grid-cols-8 gap-xsm'>

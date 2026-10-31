@@ -10,7 +10,8 @@ import type { Tile } from '@halloween/shared/world/tiles';
 import type { Player } from '../players/player';
 
 /**
- * Seeds or a sprout, with a watering can in the bag: blood makes them grow.
+ * Seeds or a sprout, on USE with a watering can in the bag: blood makes
+ * them grow.
  */
 export class WateringJob extends TileJob {
   /**

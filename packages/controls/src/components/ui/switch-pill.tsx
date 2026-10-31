@@ -1,5 +1,6 @@
 // Packages
 import React from 'react';
+import VoxelSwitch from '@halloween/ui/components/ui/controls/voxel-switch';
 
 /**
  * Props for the SwitchPill component.
@@ -12,18 +13,14 @@ interface SwitchPillProps {
 }
 
 /**
- * The on/off pill at the end of a switch row: brand colored with the knob
- * to the right while on.
+ * The on/off switch at the end of a sidebar switch row: the voxel switch
+ * (`VoxelSwitch`), brand colored with its block to the right while on.
  *
  * @param {SwitchPillProps} props - Component props.
  * @returns {React.JSX.Element} The rendered pill.
  */
 function SwitchPill({ on }: SwitchPillProps): React.JSX.Element {
-  return (
-    <span className={`flex h-5 w-9 shrink-0 items-center rounded-full border p-[2px] transition-colors ${on ? 'border-brand bg-brand' : 'border-border bg-background'}`}>
-      <span className={`h-3.5 w-3.5 rounded-full transition-transform ${on ? 'translate-x-4 bg-foreground' : 'bg-foreground-muted'}`} />
-    </span>
-  );
+  return <VoxelSwitch on={on} />;
 }
 
 export default SwitchPill;

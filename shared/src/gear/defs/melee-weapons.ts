@@ -10,7 +10,14 @@ import type { WeaponStats } from '../types/weapon-stats';
  * and building swing uses it whatever weapon is equipped (it comes out for
  * the job and goes away after), and it's the weapon when none is.
  */
-export const HAMMER: WeaponStats = { damage: 2, cooldown: 0.55, reach: 1.8, arcCos: 0.2, knockback: 0.5, chop: 1 };
+export const HAMMER: WeaponStats = { damage: 2, cooldown: 0.55, reach: 1.8, arcCos: 0.2, knockback: 0.25, chop: 1 };
+
+/**
+ * The hammer once it's infused (see `docs/infusions.md`): a real gear item,
+ * two-handed and much harder hitting, with the hammer's reach, arc, and
+ * knockback. It still does every job the hammer does.
+ */
+export const INFUSED_HAMMER: WeaponStats = { ...HAMMER, damage: 4.5, cooldown: 0.55, hands: 2 };
 
 /**
  * The melee weapons' gear defs, the hammer first.
@@ -25,6 +32,15 @@ export const MELEE_WEAPONS = {
     innate: true,
     weapon: HAMMER,
   },
+  'infused-hammer': {
+    label: 'Infused hammer',
+    slot: 'weapon',
+    wear: 1,
+    cost: stock({}),
+    loot: 0,
+    infused: true,
+    weapon: INFUSED_HAMMER,
+  },
   'battle-axe': {
     label: 'Battle axe',
     slot: 'weapon',
@@ -37,16 +53,15 @@ export const MELEE_WEAPONS = {
     label: 'Scythe',
     slot: 'weapon',
     wear: 1,
-    anvil: true,
-    cost: stock({ planks: 3, iron: 3 }),
+    cost: stock({ wood: 16, stone: 6, blood: 10 }),
     loot: 1,
     weapon: { damage: 2.8, cooldown: 0.8, reach: 2.4, arcCos: -0.7, knockback: 1.6, hands: 2 },
   },
   'spear': {
-    label: 'Ghoul Poker',
+    label: 'Spear',
     slot: 'weapon',
     wear: 1,
-    cost: stock({ wood: 2 }),
+    cost: stock({ wood: 6, stone: 4 }),
     loot: 3,
     weapon: { damage: 1.5, cooldown: 0.55, reach: 2.7, arcCos: 0.75, knockback: 1.2, line: 0.45 },
   },
@@ -55,7 +70,7 @@ export const MELEE_WEAPONS = {
     slot: 'weapon',
     wear: 1,
     breaks: true,
-    cost: stock({ wood: 1 }),
+    cost: stock({ wood: 3 }),
     loot: 3,
     weapon: { damage: 1, cooldown: 0.4, reach: 1.4, arcCos: 0.3, knockback: 0.6, slays: 'vampire' },
   },
@@ -72,13 +87,12 @@ export const MELEE_WEAPONS = {
     label: 'Short sword',
     slot: 'weapon',
     wear: 1,
-    anvil: true,
-    cost: stock({ planks: 1, iron: 2 }),
+    cost: stock({ planks: 5, iron: 2 }),
     loot: 2,
     weapon: { damage: 3, cooldown: 0.4, reach: 1.7, arcCos: 0.2, knockback: 0.8 },
   },
   'greatsword': {
-    label: 'Hell\'s Greatsword',
+    label: 'Greatsword',
     slot: 'weapon',
     wear: 1,
     anvil: true,
@@ -108,8 +122,7 @@ export const MELEE_WEAPONS = {
     label: 'Warhammer',
     slot: 'weapon',
     wear: 1,
-    anvil: true,
-    cost: stock({ planks: 2, stone: 2, iron: 4 }),
+    cost: stock({ wood: 20, stone: 10, blood: 10 }),
     loot: 1,
     weapon: { damage: 14, cooldown: 1.8, reach: 1.8, arcCos: 0.1, knockback: 3.2, bruteBane: 1.5, windup: 0.8 },
   },
@@ -117,7 +130,7 @@ export const MELEE_WEAPONS = {
     label: 'Holy Quarterstaff',
     slot: 'weapon',
     wear: 1,
-    cost: stock({ planks: 3 }),
+    cost: stock({ planks: 8 }),
     loot: 2,
     weapon: { damage: 3, cooldown: 0.45, reach: 2.4, arcCos: -0.5, knockback: 2, hands: 2, deflect: 0.85, stun: 0.2, combo: [{ mult: 1 }, { mult: 1 }, { mult: 1.3 }] },
   },
@@ -125,8 +138,7 @@ export const MELEE_WEAPONS = {
     label: 'Cursed Glaive',
     slot: 'weapon',
     wear: 1,
-    anvil: true,
-    cost: stock({ planks: 3, iron: 5, silver: 1 }),
+    cost: stock({ planks: 10, iron: 5 }),
     loot: 1,
     weapon: { damage: 5.5, cooldown: 0.75, reach: 2.8, arcCos: 0.2, knockback: 1.4, hands: 2, tip: 1.4, combo: [{ mult: 1 }, { mult: 1, line: 0.45, reach: 0.3 }] },
   },
@@ -137,6 +149,6 @@ export const MELEE_WEAPONS = {
     anvil: true,
     cost: stock({ iron: 2, bone: 3 }),
     loot: 1,
-    weapon: { damage: 2.2, cooldown: 0.28, reach: 1.2, arcCos: 0.5, knockback: 0.6, bleed: 1, hands: 2, combo: [{ mult: 1 }, { mult: 1 }, { mult: 1.15 }], charge: 6 },
+    weapon: { damage: 2.6, cooldown: 0.22, reach: 1.2, arcCos: 0.5, knockback: 0.6, bleed: 1, hands: 2, combo: [{ mult: 1 }, { mult: 1 }, { mult: 1.15 }], charge: 6 },
   },
 } satisfies Partial<Record<GearKind, GearDef>>;

@@ -28,8 +28,8 @@ export function toSong({ id, parts, art, title, artist }: MediaSong): Song {
 /**
  * Each part's level for a mood. With nobody playing everything plays. Once
  * people are around, exploring keeps the bed (instruments and bass) with the
- * melody hushed, and the drums and full melody come in for a fight (the
- * blood moon keeps some drums going). Single mp3s and unknown parts always
+ * melody hushed, and the drums and full melody come in for a fight (a
+ * world event can keep some drums going). Single mp3s and unknown parts always
  * play in full.
  *
  * @param part - The part's name.
@@ -41,7 +41,7 @@ export function partLevel(part: string, mood: MusicMood): number {
     return 1;
   }
   if (part === 'drums') {
-    return mood.fight ? 1 : mood.bloodMoon ? 0.5 : 0;
+    return mood.fight ? 1 : mood.drums;
   }
   if (part === 'melody') {
     return mood.fight ? 1 : 0.4;

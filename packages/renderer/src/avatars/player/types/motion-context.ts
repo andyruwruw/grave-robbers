@@ -14,6 +14,11 @@ export interface MotionContext {
   combo: number;
 
   /**
+   * Seconds since the last swing (or shot, or spray pulse) began.
+   */
+  swingAge: number;
+
+  /**
    * Poses the off arm (lantern, torch, or shield) for a body lean.
    * @param lean How far the body leans with the swing.
    */

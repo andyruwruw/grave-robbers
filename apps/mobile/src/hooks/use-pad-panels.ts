@@ -1,11 +1,17 @@
 // Packages
-import { useEffect, useState } from 'react';
+import {
+  useEffect,
+  useState,
+} from 'react';
 import { isBuildItem } from '@halloween/shared/inventory/bag-items';
 
 // Types
-import type { BagItem, BuildItem } from '@halloween/shared/inventory/bag-items';
-import type { PadInfo } from '@halloween/shared/protocol/pads';
+import type {
+  BagItem,
+  BuildItem,
+} from '@halloween/shared/inventory/bag-items';
 import type { PlayerCommands } from '@halloween/game-ui/session/player-commands';
+import type { PadInfo } from '@halloween/shared/protocol/pads';
 import type { Panel } from '../types/pad';
 
 /**
@@ -93,15 +99,24 @@ export function usePadPanels(
   myPad: PadInfo | null,
   dead: boolean,
   bag: (BagItem | null)[],
-  padMenuRequest: { menu: Panel; id: number } | null,
+  padMenuRequest: {
+    menu: Panel;
+    id: number;
+  } | null,
   commands: PlayerCommands,
 ): PadPanels {
-  const [padMenu, setPadMenu] = useState(false);
-  useEffect(() => {
-    if (pads.length === 0) {
-      setPadMenu(false);
-    }
-  }, [pads.length]);
+  const [
+    padMenu,
+    setPadMenu,
+  ] = useState(false);
+  useEffect(
+    () => {
+      if (pads.length === 0) {
+        setPadMenu(false);
+      }
+    },
+    [pads.length],
+  );
   const [panel, setPanel] = useState<Panel | null>(null);
   const [placing, setPlacing] = useState<number | null>(null);
 

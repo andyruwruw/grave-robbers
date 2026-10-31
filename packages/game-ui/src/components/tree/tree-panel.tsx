@@ -27,6 +27,7 @@ import TreeSidebar from './tree-sidebar';
 import type { BagItem } from '@halloween/shared/inventory/bag-items';
 import type { Inventory, Resource } from '@halloween/shared/goods/goods';
 import type { NodeId, TreeState } from '@halloween/shared/skill-tree/types/skill-tree';
+import type { HoldProps } from '@halloween/ui/hooks/use-hold';
 import type { Placed, Seen } from '../../types/tree';
 
 /**
@@ -73,6 +74,13 @@ interface TreePanelProps {
   onUpgrade: (node: NodeId) => void;
 
   /**
+   * Takes a node down a level (the admin's view-only tree). When given,
+   * right clicking a node picks it and calls this, and clicking the picked
+   * node again upgrades it.
+   */
+  onDowngrade?: (node: NodeId) => void;
+
+  /**
    * Closes the tree.
    */
   onBack: () => void;
@@ -109,6 +117,7 @@ function TreePanel({
   tree,
   research,
   onUpgrade,
+  onDowngrade,
   onBack,
   onPanic,
 }: TreePanelProps): React.JSX.Element {
@@ -158,11 +167,23 @@ function TreePanel({
               selected={selected === p.node.id}
               tree={tree}
               hoverDetails={hoverDetails}
-              hold={hoverDetails ? {} : hold.bind(p.node.id)}
+              hold={{
+                ...(hoverDetails ? {} : hold.bind(p.node.id)),
+                ...(onDowngrade && {
+                  onContextMenu: (e: React.MouseEvent): void => {
+                    e.preventDefault();
+                    setSelected(p.node.id);
+                    onDowngrade(p.node.id);
+                  },
+                }),
+              } as HoldProps}
               onHover={hover.start}
               onUnhover={hover.cancel}
               onClick={(): void => {
                 if (hold.tapped()) {
+                  if (onDowngrade && selected === p.node.id) {
+                    onUpgrade(p.node.id);
+                  }
                   setSelected(p.node.id);
                 }
               }} />
@@ -187,6 +208,8 @@ function TreePanel({
           level={level}
           cost={cost}
           can={can}
+          inventory={inventory}
+          bag={bag}
           hoverDetails={hoverDetails}
           width={sidebar.width}
           onUpgrade={onUpgrade} />

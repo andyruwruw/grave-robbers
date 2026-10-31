@@ -8,7 +8,23 @@ import { Vector3 } from 'three';
 export const PIXEL_SCALE = 3;
 
 /**
- * Camera elevation above the horizon, in radians.
+ * The camera half-height (world units) at which pixels are PIXEL_SCALE
+ * screen pixels: about the TV framing a whole classic map. Zoomed in past
+ * it (a /play view, a TV pane following a player) each rendered pixel
+ * grows by the same factor, rounded to whole screen pixels, so pixels stay
+ * the same size in the world instead of getting finer.
+ */
+export const PIXEL_REFERENCE_HALF_HEIGHT = 16;
+
+/**
+ * The largest a pixel grows when zoomed in, in screen pixels, unless a view
+ * sets its own size (`WorldRenderer.setPixelScale`; /play does).
+ */
+export const DEFAULT_PIXEL_LIMIT = 4;
+
+/**
+ * Camera elevation above the horizon, in radians: the TV's and admin's.
+ * A view can pick another (`WorldRenderer.setCameraElevation`).
  */
 export const CAMERA_ELEVATION = (55 * Math.PI) / 180;
 
@@ -18,6 +34,12 @@ export const CAMERA_ELEVATION = (55 * Math.PI) / 180;
  * CAMERA_TILT_RATE radians a second.
  */
 export const TOP_VIEW_ELEVATION = (80 * Math.PI) / 180;
+
+/**
+ * /play's elevation: a little lower than the TV's, so the follow view
+ * looks more across the ground and less straight down.
+ */
+export const PLAY_ELEVATION = (47 * Math.PI) / 180;
 
 /**
  * How fast the camera eases between its two elevations, in radians a
@@ -49,6 +71,21 @@ export const FOLLOW_TALL = 20;
 export const FOLLOW_EASE = 6;
 
 /**
+ * How fast a follow camera's lead (see `CameraFollow.leadShare`) swings
+ * round to a new facing by default: much slower than the follow, so a
+ * quick turn of the aim doesn't whip the view about (/play's Camera lead
+ * speed changes it, `CameraFollow.leadEase`).
+ */
+export const LEAD_EASE = 1.25;
+
+/**
+ * /play's lead: how far ahead of the player the camera sits, as a share of
+ * half the ground in view, so there's always more room in front than
+ * behind.
+ */
+export const PLAY_FOLLOW_LEAD = 0.1;
+
+/**
  * How far past the map's edge a follow camera may look, in tiles (see
  * FOLLOW_TALL).
  */
@@ -68,3 +105,16 @@ export const SHAKE_TIME = 0.16;
  * How far the screen shakes when a hit connects, in world units.
  */
 export const SHAKE_AMOUNT = 0.14;
+
+/**
+ * The camera's usual near and far clipping distances. Zoomed far out
+ * (the admin's view), they widen so the whole view still draws.
+ */
+export const NEAR = 1;
+export const FAR = 200;
+
+/**
+ * Extra depth kept in the clipping range past the ground the camera sees,
+ * for what stands up off it.
+ */
+export const VIEW_DEPTH_SLACK = 20;

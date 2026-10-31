@@ -1,3 +1,6 @@
+// Packages
+import { MAX_KNOWN_TOKENS } from '@halloween/shared/players/roster';
+
 // Local Imports
 import { MessageHandler } from './message-handler';
 
@@ -7,16 +10,17 @@ import type { ClientMessage } from '@halloween/shared/protocol/messages/client-m
 import type { Session } from '../types/session';
 
 /**
- * A phone (or /play) saying hello, joining, and leaving for good.
+ * A phone (or /play) saying hello, joining, asking for a transfer code,
+ * and leaving for good.
  */
-export class ControllerSessionHandler extends MessageHandler<'hello-controller' | 'join' | 'leave'> {
+export class ControllerSessionHandler extends MessageHandler<'hello-controller' | 'join' | 'leave' | 'transfer-code'> {
   /**
    * Acts on `hello-controller`, `join` or `leave`.
    * @param ws The socket it came from.
    * @param session That socket's session.
    * @param msg The message.
    */
-  handle(ws: WebSocket, session: Session, msg: Extract<ClientMessage, { t: 'hello-controller' | 'join' | 'leave' }>): void {
+  handle(ws: WebSocket, session: Session, msg: Extract<ClientMessage, { t: 'hello-controller' | 'join' | 'leave' | 'transfer-code' }>): void {
     switch (msg.t) {
       case 'hello-controller': {
         const identity = typeof msg.token === 'string' ? this.game.joining.resume(msg.token) : null;
@@ -32,15 +36,23 @@ export class ControllerSessionHandler extends MessageHandler<'hello-controller' 
         if (session.role !== 'controller' || session.token) {
           return;
         }
-        const result = this.game.joining.join(String(msg.name ?? ''), String(msg.color ?? ''));
+        const tokens = Array.isArray(msg.tokens) ? msg.tokens.filter((t: unknown): t is string => typeof t === 'string').slice(0, MAX_KNOWN_TOKENS) : [];
+        const result = this.game.joining.join(String(msg.name ?? ''), String(msg.color ?? ''), { tokens, code: String(msg.code ?? '') });
         if (!result.ok) {
-          this.sessions.send(ws, { t: 'join-error', error: result.error });
+          this.sessions.send(ws, { t: 'join-error', error: result.error, needsCode: result.needsCode });
           return;
         }
         session.token = result.identity.token;
         this.sessions.claimToken(ws, result.identity.token);
         this.sessions.send(ws, { t: 'joined', identity: result.identity });
         this.sendPrivateState(ws, result.identity.token);
+        return;
+      }
+      case 'transfer-code': {
+        const player = session.role === 'controller' && session.token ? this.game.roster.players.get(session.token) : undefined;
+        if (player) {
+          this.sessions.send(ws, { t: 'transfer-code', ...this.game.joining.transfers.make(player.id) });
+        }
         return;
       }
       case 'leave':

@@ -2,7 +2,7 @@
 import { GOODS, stock } from '@halloween/shared/goods/goods';
 import { LIT } from '@halloween/shared/structures/lights';
 import { STRUCTURES, isStructure } from '@halloween/shared/structures/structure-catalog';
-import { RAMP_DIRS } from '@halloween/shared/world/ramps';
+import { turnDir, turnStyle } from '@halloween/shared/world/ramps';
 import { WorldMap } from '@halloween/shared/world/world-map';
 import { unpackBlends } from '@halloween/shared/map-editor/blend/blend-areas';
 
@@ -13,24 +13,24 @@ import { generateHugeWorld } from '../world-gen/generate-huge-world';
 // Types
 import type { Goods } from '@halloween/shared/goods/goods';
 import type { MapGenSettings } from '@halloween/shared/map-gen/settings';
-import type { MapPreset, WorldSave } from '../storage/types/save';
+import type { LoadedWorld, MapPreset, WorldSave } from '../storage/types/save';
 import type { GroundItems } from './items/ground-items';
 import type { WorldLights } from './structures/features/world-lights';
 import type { StructureStore } from './structures/structure-store';
 import type { OpenedMap } from './types/setup';
 
 /**
- * Opens the map a world starts on: the save's if it decodes, else the
+ * Opens the map a world starts on: the saved one if given, else the
  * preset's if given (and it fits), else a newly generated one.
- * @param save The save to load, or null.
+ * @param loaded The saved world, or null.
  * @param preset The preset to start from, or null.
  * @param gen The generator knobs, for a generated map.
  * @returns The map and what goes with it.
  */
-export function openMap(save: WorldSave | null, preset: MapPreset | null, gen?: MapGenSettings): OpenedMap {
-  const loaded = save ? WorldMap.decode(save.tiles, save.levels, save.ramps, save.width) : null;
-  if (save && loaded) {
-    return { seed: save.seed, map: loaded, time: save.time, view: save.view ?? null, quiet: save.quiet ?? false, blends: unpackBlends(save.blends), save };
+export function openMap(loaded: LoadedWorld | null, preset: MapPreset | null, gen?: MapGenSettings): OpenedMap {
+  if (loaded) {
+    const { save, map } = loaded;
+    return { seed: save.seed, map, time: save.time, view: save.view ?? null, quiet: save.quiet ?? false, blends: unpackBlends(save.blends), save };
   }
   const fromPreset = preset ? WorldMap.decode(preset.tiles, preset.levels, preset.ramps, preset.width) : null;
   const seed = fromPreset ? preset!.seed : Math.floor(Math.random() * 2 ** 31);
@@ -83,11 +83,11 @@ export function seedPresetStructures(map: WorldMap, structures: StructureStore, 
     if (isStructure(tile)) {
       const tx = i % map.width;
       const ty = Math.floor(i / map.width);
-      const turn = map.turnOf(tx, ty);
+      const code = map.rampAt(i);
       map.set(tx, ty, 'grass');
       structures.place(tx, ty, tile, 0);
-      if (turn) {
-        map.setRamp(tx, ty, RAMP_DIRS.findIndex(([dx, dy]): boolean => dx === turn[0] && dy === turn[1]));
+      if (code > 0) {
+        map.setRamp(tx, ty, turnDir(code), turnStyle(code));
       }
       lights.eternal(tx, ty);
     }

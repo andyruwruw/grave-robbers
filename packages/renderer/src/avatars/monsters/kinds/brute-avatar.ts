@@ -79,7 +79,7 @@ export class BruteAvatar extends ArmedMonsterAvatar {
      * @returns The one picked.
      */
     const pick = <T>(list: T[]): T => list[Math.floor(rand() * list.length)];
-    const { box } = this._parts;
+    const { box, eye } = this._parts;
     const rounded = this._parts.roundedBox.bind(this._parts);
     const skin = pick(BRUTE_SKINS);
     const pants = pick(ZOMBIE_PANTS);
@@ -120,8 +120,8 @@ export class BruteAvatar extends ArmedMonsterAvatar {
       ...rounded([0.24, 0.22, 0.24], [0, 0.1, 0], skin),
       ...rounded([0.17, 0.09, 0.22], [0.06, -0.01, 0], dark),
       box([0.07, 0.05, 0.26], [0.1, 0.16, 0], dark),
-      box([0.02, 0.035, 0.05], [0.125, 0.11, -0.06], ZOMBIE_EYE, true),
-      box([0.02, 0.035, 0.05], [0.125, 0.11, 0.06], ZOMBIE_EYE, true),
+      eye([0.02, 0.035, 0.05], [0.125, 0.11, -0.06], ZOMBIE_EYE),
+      eye([0.02, 0.035, 0.05], [0.125, 0.11, 0.06], ZOMBIE_EYE),
       box([0.03, 0.06, 0.03], [0.14, 0.05, -0.07], BRUTE_TUSK),
       box([0.03, 0.06, 0.03], [0.14, 0.05, 0.07], BRUTE_TUSK),
     );

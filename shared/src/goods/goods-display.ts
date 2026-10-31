@@ -20,6 +20,11 @@ export const RESOURCE_COLORS: Record<Goods, string> = {
   'cursed-core': '#c02a4a',
   pumpkin: '#e8742a',
   'watering-can': '#8a2030',
+  'holy-water': '#bfe4ff',
+  'brute-tendon': '#b0485a',
+  'ghoul-fang': '#ece2c6',
+  'hex-shard': '#9a3fe0',
+  brimstone: '#ff7a1a',
   candy: '#f5c62e',
   blood: '#b0141e',
 };
@@ -43,6 +48,11 @@ export const GOODS_LABELS: Record<Goods, string> = {
   'cursed-core': 'Cursed core',
   pumpkin: 'Pumpkin',
   'watering-can': 'Blood watering can',
+  'holy-water': 'Holy water',
+  'brute-tendon': 'Brute tendon',
+  'ghoul-fang': 'Ghoul fang',
+  'hex-shard': 'Hex shard',
+  brimstone: 'Brimstone',
   candy: 'Candy',
   blood: 'Blood',
 };

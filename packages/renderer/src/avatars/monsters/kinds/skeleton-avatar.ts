@@ -35,7 +35,7 @@ export class SkeletonAvatar extends ChargingMonsterAvatar {
    * on the string while it draws.
    */
   protected build(): void {
-    const { box } = this._parts;
+    const { box, eye } = this._parts;
     const rand = seededRandom(this.target.id * 7919 + 13);
     const bone = SKELETON_BONES[Math.floor(rand() * SKELETON_BONES.length)];
     this._size = 0.95 + rand() * 0.1;
@@ -66,8 +66,8 @@ export class SkeletonAvatar extends ChargingMonsterAvatar {
       box([0.1, 0.05, 0.16], [0.05, 0, 0], SKELETON_JOINT),
       box([0.02, 0.06, 0.06], [0.105, 0.12, -0.05], SKELETON_SOCKET),
       box([0.02, 0.06, 0.06], [0.105, 0.12, 0.05], SKELETON_SOCKET),
-      box([0.025, 0.025, 0.025], [0.11, 0.12, -0.05], SKELETON_EYE, true),
-      box([0.025, 0.025, 0.025], [0.11, 0.12, 0.05], SKELETON_EYE, true),
+      eye([0.025, 0.025, 0.025], [0.11, 0.12, -0.05], SKELETON_EYE),
+      eye([0.025, 0.025, 0.025], [0.11, 0.12, 0.05], SKELETON_EYE),
       box([0.02, 0.035, 0.03], [0.11, 0.07, 0], SKELETON_SOCKET),
       box([0.02, 0.02, 0.1], [0.105, 0.025, 0], SKELETON_SOCKET),
     );

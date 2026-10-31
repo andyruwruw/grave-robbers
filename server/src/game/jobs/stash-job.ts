@@ -6,11 +6,12 @@ import type { Tile } from '@halloween/shared/world/tiles';
 import type { Player } from '../players/player';
 
 /**
- * A storage chest: its keeper opens it on their phone.
+ * A storage chest: a swing never breaks it (its keeper opens it with USE,
+ * see `UseSystem`, and picks it up from there once it's empty).
  */
 export class StashJob extends TileJob {
   /**
-   * Opens the player's own storage chest on their phone.
+   * A swing on a storage chest does nothing but buzz.
    * @param p The player.
    * @param tx The tile's column.
    * @param ty The tile's row.
@@ -20,13 +21,7 @@ export class StashJob extends TileJob {
    */
   tryStrike(p: Player, tx: number, ty: number, tile: Tile, chop: number): boolean {
     if (tile === 'stash') {
-      if (this.world.structureDamage.stashAt(tx, ty)?.keeper === p.name.toLowerCase()) {
-        p.stashAt = { tx, ty };
-        this.outbox.stashChanged.add(p.token);
-        this.outbox.sound(p, 'equip');
-      } else {
-        this.outbox.sound(p, 'error');
-      }
+      this.outbox.sound(p, 'error');
       return true;
     }
     return false;

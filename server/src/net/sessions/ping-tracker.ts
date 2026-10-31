@@ -2,7 +2,7 @@
 import { WebSocket } from 'ws';
 
 // Local Imports
-import { PING_SMOOTHING } from '../config/ping';
+import { PING_SMOOTHING, PONG_TIMEOUT_MS } from '../config/ping';
 import { HubPart } from '../core/hub-part';
 
 // Types
@@ -41,6 +41,11 @@ export class PingTracker extends HubPart {
   pingAll(): void {
     const now = Date.now();
     for (const [ws, ping] of this._pings) {
+      if (ping.sentAt !== null && now - ping.sentAt > PONG_TIMEOUT_MS) {
+        console.log('[socket] dropped a socket that stopped answering pings');
+        ws.terminate();
+        continue;
+      }
       if (ping.sentAt === null && ws.readyState === WebSocket.OPEN) {
         ping.sentAt = now;
         ws.send(JSON.stringify({ t: 'ping' }));

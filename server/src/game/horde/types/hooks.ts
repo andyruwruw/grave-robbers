@@ -1,5 +1,8 @@
 // Types
+import type { RaiseTrick, TurnTrick } from '@halloween/shared/gear/types/special-tricks';
+import type { BurnTrick, CurseTrick, PinTrick, PoisonTrick, SlowTrick } from '@halloween/shared/gear/types/status-tricks';
 import type { GameEvent } from '@halloween/shared/protocol/game-events';
+import type { MonsterDeath } from './death';
 
 /**
  * What the horde needs to know about a player.
@@ -63,6 +66,18 @@ export interface HordeHooks<P extends Target> {
    * `land` tiles).
    */
   shoot: (x: number, y: number, angle: number, shot: HostileShot) => void;
+
+  /**
+   * A bloater burst at (x, y), leaving a puddle of bile.
+   */
+  spill: (x: number, y: number, by: string) => void;
+
+  /**
+   * A monster died, however it happened (after `event`'s monster-death),
+   * with who gets the kill and what it was suffering from, for on-kill
+   * effects (see `MonsterDeath`).
+   */
+  died?: (death: MonsterDeath<P>) => void;
 }
 
 /**
@@ -107,7 +122,9 @@ export interface HostileShot {
  * armor, `stagger` is the chance it breaks off a windup, `bruteBane`
  * multiplies damage to brutes and lets knockback move them, `execute`
  * multiplies damage to anything under half health, and `bleed` keeps
- * hurting for BLEED_SECONDS, credited to `by`.
+ * hurting for BLEED_SECONDS, credited to `by`. The infusion fields share
+ * `WeaponStats`' names, so a weapon spread into a hit carries them (see
+ * `docs/infusions.md`).
  */
 export interface HitEffects<P> {
   /**
@@ -141,7 +158,85 @@ export interface HitEffects<P> {
   bleed?: number;
 
   /**
-   * Who the bleed is credited to.
+   * Who the hit (and any wound it opens) is credited to.
    */
   by?: P | null;
+
+  /**
+   * The weapon's reach (tiles), for a pin that only takes on the tip.
+   */
+  reach?: number;
+
+  /**
+   * Sets it burning (not a ghost).
+   */
+  burn?: BurnTrick;
+
+  /**
+   * A chance to poison it (not a ghost).
+   */
+  poison?: PoisonTrick;
+
+  /**
+   * A chance to curse it.
+   */
+  curse?: CurseTrick;
+
+  /**
+   * A chance to slow it.
+   */
+  slowOnHit?: SlowTrick;
+
+  /**
+   * Pins it (never a brute).
+   */
+  pin?: PinTrick;
+
+  /**
+   * In place of GHOST_KNOCKBACK on a ghost.
+   */
+  ghostKnock?: number;
+
+  /**
+   * A cursed monster takes the larger of this and `execute` times the
+   * damage, at any health.
+   */
+  executeCursed?: number;
+
+  /**
+   * A cursed monster under this share of its health dies outright.
+   */
+  cursedKillBelow?: number;
+
+  /**
+   * A chance it turns on the other monsters, if it was already bleeding.
+   */
+  turn?: TurnTrick;
+
+  /**
+   * It rises on `by`'s side if it dies of the bleed this hit opens.
+   */
+  raise?: RaiseTrick;
+
+  /**
+   * Seconds a stun holds, in place of STUN_SECONDS.
+   */
+  stunFor?: number;
+
+  /**
+   * A stun that rolls on a brute staggers it instead (Earthshaker).
+   */
+  bruteStagger?: boolean;
+
+  /**
+   * Whether it landed on the weapon's tip (past TIP_FROM of its reach),
+   * when the caller knows; otherwise worked out from `reach`.
+   */
+  tipped?: boolean;
+
+  /**
+   * A turned or risen monster's blow, the only kind that hurts a risen
+   * ally.
+   */
+  fromMonster?: boolean;
 }

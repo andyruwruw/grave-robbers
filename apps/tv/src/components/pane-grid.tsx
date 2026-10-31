@@ -4,6 +4,7 @@ import WorldView from '@halloween/renderer/world/world-view';
 
 // Types
 import type { WorldCache } from '@halloween/controls/display/world-cache';
+import type { DisplaySettings } from '@halloween/renderer/types/display-settings';
 import type { TvMouseHandlers } from '@halloween/controls/types/mouse';
 import type { WorldRenderer } from '@halloween/renderer/world/world-renderer';
 import type { Pane } from '../types/panes';
@@ -38,6 +39,11 @@ interface PaneGridProps {
   interp: number;
 
   /**
+   * The TV's display settings, for a new pane's renderer.
+   */
+  display: DisplaySettings;
+
+  /**
    * Points a pane's camera at its player, the spawn, or the whole map.
    */
   aim: (key: string, renderer: WorldRenderer) => void;
@@ -51,7 +57,7 @@ interface PaneGridProps {
  * @param {PaneGridProps} props - The panes and what their renderers need.
  * @returns {React.JSX.Element} The rendered grid.
  */
-function PaneGrid({ panes, mouse, renderers, cache, interp, aim }: PaneGridProps): React.JSX.Element {
+function PaneGrid({ panes, mouse, renderers, cache, interp, display, aim }: PaneGridProps): React.JSX.Element {
   return (
     <div className={`grid h-full w-full gap-[2px] bg-black ${panes.length > 1 ? 'grid-cols-2' : ''} ${panes.length > 2 ? 'grid-rows-2' : ''}`}>
       {panes.map((pane: Pane, index: number) => (
@@ -69,6 +75,8 @@ function PaneGrid({ panes, mouse, renderers, cache, interp, aim }: PaneGridProps
               renderers.current.set(pane.key, renderer);
               cache.prime(renderer);
               renderer.setInterpolation(interp);
+              renderer.setDisplaySettings(display);
+              renderer.setLocalPlayer(null);
               aim(pane.key, renderer);
             }} />
           {panes.length > 1 && (

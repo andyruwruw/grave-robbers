@@ -1,7 +1,5 @@
 // Packages
-import { altarBlood } from '@halloween/shared/skill-tree/upgrades/structure-upgrades';
-import { WORKING_GLOW } from '@halloween/shared/structures/lights';
-import { ALTAR_HP_COST } from '@halloween/shared/structures/occult';
+import { ALTAR_AWAKE_SECONDS, ALTAR_HP_COST } from '@halloween/shared/structures/occult';
 
 // Local Imports
 import { TileJob } from './tile-job';
@@ -11,11 +9,12 @@ import type { Tile } from '@halloween/shared/world/tiles';
 import type { Player } from '../players/player';
 
 /**
- * An altar: the player bleeds on it for blood.
+ * A sleeping altar, on USE: the player bleeds on it to wake it.
  */
 export class AltarJob extends TileJob {
   /**
-   * Bleeds the player on an altar.
+   * Bleeds the player on a sleeping altar (an awake one is left to the
+   * structure job, so swings at it break it down).
    * @param p The player.
    * @param tx The tile's column.
    * @param ty The tile's row.
@@ -24,7 +23,7 @@ export class AltarJob extends TileJob {
    * @returns Whether this job took the swing.
    */
   tryStrike(p: Player, tx: number, ty: number, tile: Tile, chop: number): boolean {
-    if (tile === 'altar') {
+    if (tile === 'altar' && !this.world.structureQueries.awake(tx, ty)) {
       this.offer(p, tx, ty);
       return true;
     }
@@ -32,9 +31,9 @@ export class AltarJob extends TileJob {
   }
 
   /**
-   * Bleeds a player on an altar: it takes some health (never their last)
-   * and gives blood, more from an altar built by someone further up the
-   * tree, and the altar glows for a while.
+   * Bleeds a player on an altar: it takes some health as a fresh wound
+   * (never their last) and wakes the altar, glowing, for a while, so
+   * monsters dying near it bleed more.
    * @param p The player.
    * @param tx The tile's column.
    * @param ty The tile's row.
@@ -44,12 +43,8 @@ export class AltarJob extends TileJob {
       this.outbox.sound(p, 'error');
       return;
     }
-    p.hp -= ALTAR_HP_COST;
-    p.hurts++;
-    const blood = altarBlood(this.world.structureQueries.level(tx, ty));
-    this._game.bag.take(p, 'blood', blood);
-    this.outbox.events.push({ t: 'pickup', x: p.x, y: p.y, goods: 'blood' });
-    this.world.lights.kindle(tx, ty, WORKING_GLOW);
+    p.wound(ALTAR_HP_COST, this.world.time);
+    this.world.lights.kindle(tx, ty, ALTAR_AWAKE_SECONDS);
     this.outbox.events.push({ t: 'chips', tx, ty, chip: 'stone', health: this.world.resources.health(tx, ty) });
     this.outbox.sound(p, 'unlock');
   }

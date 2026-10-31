@@ -3,11 +3,10 @@ import { DirectionalLight, HemisphereLight } from 'three';
 import { MAP_HEIGHT, MAP_WIDTH } from '@halloween/shared/world/dimensions';
 
 // Local Imports
+import { hexColor } from '../../helpers/colors';
 import { MOON_OFFSET } from '../camera/config/camera';
 import { ScenePart } from '../scene-part';
 import {
-  BLOOD_MOON,
-  BLOOD_MOON_FADE,
   DAY_FADE,
   DAY_GROUND,
   DAY_SKY,
@@ -23,7 +22,7 @@ import type { WorldContext } from '../world-context';
 
 /**
  * The moon (the shadow-casting light) and the sky's soft fill, shifting
- * toward red under a blood moon and toward sunlight by day or in the map
+ * toward a world event's tint and toward sunlight by day or in the map
  * editor's flat light.
  */
 export class SkyLighting extends ScenePart {
@@ -38,11 +37,6 @@ export class SkyLighting extends ScenePart {
   readonly moon: DirectionalLight;
 
   /**
-   * Whether a blood moon is up.
-   */
-  bloodMoon = false;
-
-  /**
    * Broad daylight (the Game tab's daytime).
    */
   daytime = false;
@@ -51,11 +45,6 @@ export class SkyLighting extends ScenePart {
    * The map editor's view: flat daylight, no blood moon.
    */
   flat = false;
-
-  /**
-   * How far (0..1) the scene has shifted toward a blood moon.
-   */
-  private _bloodMix = 0;
 
   /**
    * How far (0..1) the scene has shifted toward day.
@@ -95,19 +84,25 @@ export class SkyLighting extends ScenePart {
   }
 
   /**
-   * Eases toward (or away from) the blood moon and day, and colors the
-   * moon, sky, darkness, fog, and grade to match.
+   * Eases toward (or away from) day, and colors the moon, sky, darkness,
+   * fog, and grade to match, tinted by the world events' look.
    * @param dt Seconds since the last frame.
    * @param post The post-processing, which grades day differently.
    */
   update(dt: number, post: PostEffects): void {
-    this._bloodMix = Math.min(1, Math.max(0, this._bloodMix + (this.bloodMoon ? 1 : -1) * BLOOD_MOON_FADE * dt));
+    const look = this._ctx.look;
+    const tint = this.flat ? null : look.sky;
     this._dayMix = Math.min(1, Math.max(0, this._dayMix + (this.daytime || this.flat ? 1 : -1) * DAY_FADE * (this.flat ? 4 : 1) * dt));
-    this._ctx.lightMap.setSky(this.flat ? 0 : this._bloodMix, this._dayMix);
-    this._ctx.fog.setBloodMoon(this._bloodMix);
+    this._ctx.lightMap.setSky(tint?.ambient ?? null, tint?.amount ?? 0, this._dayMix);
+    this._ctx.fog.setTint(tint ? hexColor(tint.fog) : null, tint?.amount ?? 0, tint?.fogThicken ?? 0);
     this._ctx.fog.setDay(this._dayMix);
     post.setDay(this._dayMix);
-    this.moon.color.copy(MOON).lerp(BLOOD_MOON, this._bloodMix).lerp(SUN, this._dayMix);
+    post.setEventAberration(look.aberration);
+    this.moon.color.copy(MOON);
+    if (tint) {
+      this.moon.color.lerp(hexColor(tint.moon), tint.amount);
+    }
+    this.moon.color.lerp(SUN, this._dayMix);
     this.moon.intensity = 2.2 + this._dayMix * 1.3;
     this.sky.intensity = 2 + this._dayMix;
     this.sky.color.copy(NIGHT_SKY).lerp(DAY_SKY, this._dayMix);

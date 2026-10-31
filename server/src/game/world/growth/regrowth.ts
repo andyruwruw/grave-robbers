@@ -1,10 +1,13 @@
+// Packages
+import { MAX_REGROWTH_TARGET, REGROWTH_TILES } from '@halloween/shared/world/regrowth';
+
 // Local Imports
 import { GROW_INTERVAL, ROCK_CHECK_INTERVAL, TOMBSTONE_SHARE } from '../config/growth';
 import { countTiles } from '../helpers/tiles';
 import { WorldFeature } from '../world-feature';
 
 // Types
-import type { GrownSpot, Occupant, Occupied, StockedTile } from '../types/growth';
+import type { GrownSpot, Occupant, Occupied, RestockedTile, StockedTile } from '../types/growth';
 import type { WorldSite } from '../types/site';
 import type { TilePoint } from '../types/structures';
 import type { Planter } from './planter';
@@ -37,7 +40,7 @@ export class Regrowth extends WorldFeature {
    * @param _planter Finds room for what grows.
    * @param targets How many of each stocked tile the map keeps.
    */
-  constructor(site: WorldSite, private readonly _planter: Planter, readonly targets: Record<StockedTile, number>) {
+  constructor(site: WorldSite, private readonly _planter: Planter, readonly targets: Record<RestockedTile, number>) {
     super(site);
     this._growAt = { tree: this.clock.now + GROW_INTERVAL.tree, pumpkin: this.clock.now + GROW_INTERVAL.pumpkin, chest: this.clock.now + GROW_INTERVAL.chest };
   }
@@ -67,7 +70,7 @@ export class Regrowth extends WorldFeature {
 
     if (this.clock.now >= this._nextRockCheck) {
       this._nextRockCheck = this.clock.now + ROCK_CHECK_INTERVAL;
-      this._planter.maybeGrowRock(occupied);
+      this._planter.maybeGrowRock(occupied, this.targets.rock);
     }
 
     const grown: GrownSpot[] = [];
@@ -96,14 +99,44 @@ export class Regrowth extends WorldFeature {
       if (at) {
         grown.push({ ...at, tile });
       }
+      const hedge = tile === 'tree' && countTiles(this.map, 'hedge') < this.targets.hedge ? this._planter.grow('hedge', occupied) : null;
+      if (hedge) {
+        grown.push({ ...hedge, tile: 'hedge' });
+      }
     }
     return grown;
   }
 
   /**
+   * Sets how many of a tile the map keeps growing back to (the admin's
+   * Manipulate section), within 0 to MAX_REGROWTH_TARGET.
+   * @param tile The tile.
+   * @param target How many to keep.
+   */
+  setTarget(tile: RestockedTile, target: number): void {
+    if (REGROWTH_TILES.includes(tile) && Number.isFinite(target)) {
+      this.targets[tile] = Math.max(0, Math.min(MAX_REGROWTH_TARGET, Math.round(target)));
+    }
+  }
+
+  /**
+   * How many of each regrowing tile the map has now (trees count stumps).
+   * @returns The counts.
+   */
+  stocked(): Record<RestockedTile, number> {
+    return {
+      tree: countTiles(this.map, 'tree', 'stump'),
+      hedge: countTiles(this.map, 'hedge'),
+      pumpkin: countTiles(this.map, 'pumpkin'),
+      chest: countTiles(this.map, 'chest'),
+      rock: countTiles(this.map, 'rock'),
+    };
+  }
+
+  /**
    * Puts a tree, pumpkin, chest, or rock on open grass anywhere on the
-   * map, whatever the targets say (the TV's Game tab). Null if
-   * there's no room.
+   * map, whatever the targets say (the TV's Game tab, the admin's Random
+   * Location). Null if there's no room.
    * @param tile What to put down.
    * @param occupied Whether someone stands on or beside a tile.
    * @returns Where it went, or null.

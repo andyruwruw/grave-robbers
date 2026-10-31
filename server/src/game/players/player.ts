@@ -14,7 +14,7 @@ import type { PlayerInit } from '../types/players';
  * they carry, and combat timers (all in game-clock seconds). This layer is
  * their health and death.
  */
-export class Player extends PlayerFighter implements Omit<PlayerState, 'wounded' | 'slowed' | 'drawn' | 'digging' | 'aiming' | 'charge' | 'reloading'> {
+export class Player extends PlayerFighter implements Omit<PlayerState, 'buildStyle' | 'wounded' | 'slowed' | 'drawn' | 'digging' | 'aiming' | 'charge' | 'reloading' | 'gearInfusion'> {
   /**
    * Health, 0..MAX_HP.
    */
@@ -67,6 +67,36 @@ export class Player extends PlayerFighter implements Omit<PlayerState, 'wounded'
   feast = 0;
 
   /**
+   * Extra health above full from kills (Heart Devourer, Death's
+   * Harvest), soaked before health.
+   */
+  overheal = 0;
+
+  /**
+   * When the overheal runs out (game clock): `seconds` after its last
+   * top-up.
+   */
+  overhealUntil = 0;
+
+  /**
+   * Their glaive is out, thrown (Soulbound and Wraith Glaive): they can't
+   * act until it's back (see `GlaiveSystem`).
+   */
+  thrown = false;
+
+  /**
+   * A kill banked a quick reload (Bone Rattler): the next reload takes the
+   * weapon's `reloadOnKill` share of its time.
+   */
+  reloadBanked = false;
+
+  /**
+   * Until when the Hellmouth's spray is paid for (game clock): it takes
+   * its next blood once this passes (see `FlameSpraySystem`).
+   */
+  sprayPaidUntil = 0;
+
+  /**
    * What their phone was last told about their vitals.
    */
   vitalsKey = '';
@@ -87,6 +117,27 @@ export class Player extends PlayerFighter implements Omit<PlayerState, 'wounded'
    */
   wounded(): number {
     return Math.min(MAX_HP - this.hp, this.wounds.reduce((sum: number, w): number => sum + w.amount, 0));
+  }
+
+  /**
+   * Takes health as a fresh wound, joining one taken in the last half
+   * second, and flashes them if it cost a half heart or more.
+   * @param amount The health to take.
+   * @param time The game clock now.
+   */
+  wound(amount: number, time: number): void {
+    const before = Math.ceil(this.hp);
+    this.hp -= amount;
+    const last = this.wounds.at(-1);
+    if (last && time - last.at < 0.5) {
+      last.amount += amount;
+      last.at = time;
+    } else {
+      this.wounds.push({ at: time, amount });
+    }
+    if (Math.ceil(this.hp) !== before) {
+      this.hurts++;
+    }
   }
 
   /**

@@ -9,8 +9,9 @@ import { SOCKET_PATH, TICK_RATE } from '@halloween/shared/protocol/network';
 // Local Imports
 import { APPS_DIR } from './config/paths';
 import { APPS, MAX_CATCH_UP, PORT, SAVE_INTERVAL_MS } from './config/server';
-import { Game } from './game/game';
-import { loadWorld, saveWorld } from './game/storage/world-save-file';
+import { guard, logCaught } from './game/helpers/guard';
+import { BACKUP_EVERY_MIN } from './game/storage/config/save';
+import { SaveKeeper } from './game/storage/save-keeper';
 import { ConnectionHub } from './net/connection-hub';
 import { mountMedia } from './net/media/media-routes';
 import { mountSpotify } from './net/spotify/spotify-routes';
@@ -41,21 +42,22 @@ const server = createServer(app);
  */
 const wss = new WebSocketServer({ server, path: SOCKET_PATH, perMessageDeflate: { threshold: 1024, zlibDeflateOptions: { level: 1 } } });
 /**
- * The one game, loaded from the world save.
+ * The saved worlds, and the one game played from the active one.
  */
-const game = new Game(loadWorld());
+const saves = new SaveKeeper();
 
 /**
- * Writes the world to the save file.
+ * The one game.
  */
-const save = (): void => saveWorld(game.world.save());
-save();
+const game = saves.game;
+saves.save();
 
 /**
  * The connection hub that routes every socket to the game.
  */
-const hub = new ConnectionHub(wss, game, save);
-setInterval(save, SAVE_INTERVAL_MS);
+const hub = new ConnectionHub(wss, game, saves);
+setInterval((): void => saves.save(), SAVE_INTERVAL_MS);
+setInterval((): void => saves.backup('hourly'), BACKUP_EVERY_MIN * 60_000);
 
 /**
  * One fixed step, in seconds. Timers are coarse (about 15.6ms on Windows),
@@ -79,22 +81,25 @@ setInterval((): void => {
   last = now;
   let steps = 0;
   while (behind >= dt) {
-    game.step(dt);
+    guard('step', (): void => game.step(dt));
     behind -= dt;
     steps++;
   }
   if (steps > 0) {
-    hub.broadcastState(steps, performance.now() - now);
+    const ms = performance.now() - now;
+    game.governor.observe(ms, steps, dt);
+    guard('broadcast', (): void => hub.broadcastState(steps, ms));
   }
 }, 1000 / TICK_RATE / 4);
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.on(signal, (): void => {
-    save();
+    saves.save();
     process.exit(0);
   });
 }
-process.on('uncaughtException', (err: Error): void => console.error('[uncaught]', err));
+process.on('uncaughtException', (err: Error): void => logCaught('uncaught', err));
+process.on('unhandledRejection', (err: unknown): void => logCaught('unhandled rejection', err));
 
 server.on('error', (err: Error): void => {
   console.error(`[server] can't listen on :${PORT}`, err.message);

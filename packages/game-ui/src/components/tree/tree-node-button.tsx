@@ -114,7 +114,7 @@ function TreeNodeButton({
           size={9}
           className='absolute right-0.5 top-0.5 text-foreground-muted' />
       )}
-      {seen === 'open' && (
+      {seen === 'open' && !n.fixed && (
         <span className='absolute -bottom-2.5 inset-x-1 rounded-[1px] bg-background p-px'>
           <TreeLevelPips
             level={levelOf(n.id, tree)}

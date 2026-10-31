@@ -36,6 +36,11 @@ const MIDDLE_COLOR = '#9a3ae0';
 const BUBBLE_COLOR = '#d08aff';
 
 /**
+ * A bloater's bile puddle, its brighter middle, and its bubbles.
+ */
+const BILE_COLORS = { pool: '#4a6a14', middle: '#8ab42a', bubble: '#d6f25a' };
+
+/**
  * Bubbles per puddle.
  */
 const BUBBLES = 5;
@@ -86,7 +91,8 @@ interface Slot {
 }
 
 /**
- * Draws the puddles witches' potions leave, fading as they dry up. They
+ * Draws the puddles witches' potions (purple) and bloaters (green bile)
+ * leave, fading as they dry up. They
  * glow faintly on their own, so they show in the dark.
  */
 export class Puddles {
@@ -146,6 +152,8 @@ export class Puddles {
       const { x, z } = toWorld(p.x, p.y);
       slot.group.position.set(x, ground(p.x, p.y) + PUDDLE_LIFT, z);
       const fade = Math.min(1, p.life * 4);
+      slot.disc.color.set(p.bile ? BILE_COLORS.pool : POOL_COLOR);
+      slot.middle.color.set(p.bile ? BILE_COLORS.middle : MIDDLE_COLOR);
       slot.disc.opacity = 0.55 * fade;
       slot.middle.opacity = 0.5 * fade;
       slot.bubbles.forEach((bubble: Mesh, b: number): void => {
@@ -154,6 +162,7 @@ export class Puddles {
         const r = SPLASH_RADIUS * (0.2 + ((b * 0.29) % 0.6));
         bubble.position.set(Math.cos(angle) * r, cycle * 0.12, Math.sin(angle) * r);
         bubble.scale.setScalar((1 - cycle) * fade);
+        (bubble.material as MeshBasicMaterial).color.set(p.bile ? BILE_COLORS.bubble : BUBBLE_COLOR);
       });
     });
   }

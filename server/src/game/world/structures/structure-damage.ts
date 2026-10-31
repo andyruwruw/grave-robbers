@@ -1,3 +1,7 @@
+// Packages
+import { GOODS, stock } from '@halloween/shared/goods/goods';
+import { MOUND_REFILL_MIN, MOUND_REFILL_SPREAD } from '@halloween/shared/loot/graves';
+
 // Local Imports
 import { WorldFeature } from '../world-feature';
 
@@ -16,7 +20,9 @@ export class StructureDamage extends WorldFeature {
   private _spilledStashes: SpilledStash[] = [];
 
   /**
-   * Damages the structure on a tile, restoring the floor if it breaks.
+   * Damages the structure on a tile, restoring the floor if it breaks (a
+   * mound under it starts filling again, and a bone digger's hoard spills
+   * for its builder alone).
    * @param tx The tile's column.
    * @param ty The tile's row.
    * @param amount Hit points to take off.
@@ -31,6 +37,12 @@ export class StructureDamage extends WorldFeature {
     if (s.hp <= 0) {
       this.structures.delete(i);
       this.map.set(tx, ty, s.floor);
+      if (s.floor === 'mound') {
+        this.timers.mounds.set(i, this.clock.now + MOUND_REFILL_MIN + Math.random() * MOUND_REFILL_SPREAD);
+      }
+      if (s.hoard && GOODS.some((g): boolean => (s.hoard![g] ?? 0) > 0)) {
+        this.items.addItem(tx + 0.5, ty + 0.5, stock(s.hoard), null, s.owner ?? null);
+      }
       if (s.stash?.some((item: BagItem | null): boolean => item !== null)) {
         this._spilledStashes.push({ x: tx + 0.5, y: ty + 0.5, keeper: s.keeper ?? '', items: s.stash.filter((item): item is BagItem => item !== null) });
       }

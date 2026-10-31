@@ -1,6 +1,6 @@
 // Packages
 import { GEAR } from '@halloween/shared/gear/gear-catalog';
-import { weaponStats } from '@halloween/shared/skill-tree/upgrades/gear-upgrades';
+import { itemStats } from '@halloween/shared/skill-tree/upgrades/gear-upgrades';
 
 // Local Imports
 import { WalkMode } from './walk-mode';
@@ -29,10 +29,10 @@ export class FightMode extends WalkMode {
     if (act !== ctx.held.act) {
       ctx.held.act = act;
       s.send({ t: 'action', down: act });
-      const kind = s.weapon ?? 'hammer';
+      const kind = s.weapon?.kind ?? 'hammer';
       if (act && s.playerId && !GEAR[kind].weapon?.ranged && now >= ctx.swingReadyAt) {
         ctx.rendererRef.current?.predictSwing(s.playerId);
-        ctx.swingReadyAt = now + weaponStats(kind, s.tree).cooldown * 1000;
+        ctx.swingReadyAt = now + itemStats(s.weapon, s.tree).cooldown * 1000;
       }
     }
     const block = ctx.pad.down(pads.block) || ctx.keyDown('block');

@@ -65,4 +65,11 @@ export interface SearchOptions {
    * Stop at the first tile that satisfies this (for "nearest X" searches).
    */
   accept?: (tx: number, ty: number) => boolean;
+
+  /**
+   * Most tiles to look at before giving up: the search then ends at the
+   * best `score`d tile it found so far (or finds nothing without a
+   * `score`). Unset searches the whole area.
+   */
+  budget?: number;
 }

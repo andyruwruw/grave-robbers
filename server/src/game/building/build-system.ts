@@ -3,6 +3,7 @@ import { isBuildItem } from '@halloween/shared/inventory/bag-items';
 import { PLAYER_RADIUS } from '@halloween/shared/players/movement';
 import { levelOf } from '@halloween/shared/skill-tree/progress';
 import { RAISED, TURNED, canBuildOn } from '@halloween/shared/structures/placement';
+import { clampStyle } from '@halloween/shared/structures/wall-styles';
 import { buildTarget } from '@halloween/shared/world/targeting';
 import { isSolidTile } from '@halloween/shared/world/tiles';
 
@@ -88,13 +89,34 @@ export class BuildSystem extends GameSystem {
     this.world.structures.place(tx, ty, stack.build, levelOf(`build:${stack.build}`, p.tree), stack.build === 'stash' ? p.name.toLowerCase() : p.id);
     if (TURNED.has(stack.build)) {
       const quarter = ((Math.round((p.buildFacing ?? p.facing) / (Math.PI / 2)) % 4) + 4) % 4;
-      this.world.map.setRamp(tx, ty, [0, 2, 1, 3][quarter]!);
+      this.world.map.setRamp(tx, ty, [0, 2, 1, 3][quarter]!, clampStyle(stack.build, p.buildStyles[stack.build] ?? 0));
     }
     p.protectedUntil = 0;
     p.swings++;
     this._game.actions.draw(p, 'hammer');
     this.outbox.sound(p, 'build');
     return null;
+  }
+
+  /**
+   * Builds a structure for the Game tab or the admin's Spawn page: at level
+   * 0, by no one, on a tile in view, by the same rules as a player's build
+   * unless `anyway` (the admin's cursor, which has checked the floor).
+   * @param kind The structure.
+   * @param tx The tile's column.
+   * @param ty The tile's row.
+   * @param anyway Skip the build rules.
+   * @returns Whether it went down.
+   */
+  conjure(kind: StructureKind, tx: number, ty: number, anyway = false): boolean {
+    if (!this.world.inView(tx, ty) || (!anyway && this.buildBlocked(kind, tx, ty))) {
+      return false;
+    }
+    this.world.structures.place(tx, ty, kind, 0);
+    if (TURNED.has(kind)) {
+      this.world.map.setRamp(tx, ty, 0);
+    }
+    return true;
   }
 
   /**

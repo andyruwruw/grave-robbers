@@ -1,5 +1,6 @@
 // Packages
 import { MONSTERS } from '@halloween/shared/monsters/monster-stats';
+import { STATUS_WARDED } from '@halloween/shared/monsters/monster-status';
 
 // Local Imports
 import { Bleeding } from './state/bleeding';
@@ -78,9 +79,19 @@ export abstract class MonsterCore<P extends Target> {
   blinks = 0;
 
   /**
-   * Counts up each time a witch swipes her broom.
+   * Counts up each time a witch swipes her broom or a werewolf pounces.
    */
   swipes = 0;
+
+  /**
+   * Warded by a necromancer this tick (see NECRO_WARD).
+   */
+  warded = false;
+
+  /**
+   * Raised by a necromancer (it leaves nothing when it dies).
+   */
+  raised = false;
 
   /**
    * The junk weapon it carries, or null.
@@ -105,7 +116,7 @@ export abstract class MonsterCore<P extends Target> {
   /**
    * How hard it hits, set by the world level when it appeared.
    */
-  readonly power: number;
+  private readonly _power: number;
 
   /**
    * Dazed until then: frozen, doing nothing.
@@ -152,8 +163,16 @@ export abstract class MonsterCore<P extends Target> {
     this.armor = init.traits.armor;
     this.hp = init.hp;
     this.maxHp = init.hp;
-    this.power = init.power;
+    this._power = init.power;
     this.lastSeen = new LastSeen(init.x, init.y);
+  }
+
+  /**
+   * How hard it hits: its world level's power, scaled by world events.
+   * @returns The damage multiplier.
+   */
+  get power(): number {
+    return this._power * this._ctx.mods.monsterPower;
   }
 
   /**
@@ -197,6 +216,16 @@ export abstract class MonsterCore<P extends Target> {
       draining: this.draining,
       blinks: this.blinks,
       swipes: this.swipes,
+      status: this.status(),
     };
+  }
+
+  /**
+   * Its status bits (see `shared/src/monsters/monster-status.ts`): here
+   * only whether a necromancer wards it; `Afflicted` adds the rest.
+   * @returns The STATUS_ bits.
+   */
+  status(): number {
+    return this.warded ? STATUS_WARDED : 0;
   }
 }

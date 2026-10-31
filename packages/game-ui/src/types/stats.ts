@@ -1,14 +1,20 @@
 // Types
-import type { ComponentType } from 'react';
+import type { StatColor, StatIcon } from './stat-icons';
 
 /**
- * One stat: an icon, what it is, and how full its bar is (0 to 1).
+ * One stat: an icon, what it is, its bar's color (the same for that stat on
+ * every item), and how full its bar is (0 to 1).
  */
 export interface Stat {
   /**
    * The icon beside its label.
    */
-  icon: ComponentType<{ size?: number }>;
+  icon: StatIcon;
+
+  /**
+   * Its bar's color.
+   */
+  color: StatColor;
 
   /**
    * What it is.

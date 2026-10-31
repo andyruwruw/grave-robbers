@@ -130,6 +130,14 @@ export abstract class Avatar<TState extends AvatarState> {
   abstract flail(amount: number, time: number): void;
 
   /**
+   * The head, for showing it on its own (a blood fountain's victim).
+   * @returns The head group.
+   */
+  get head(): Group {
+    return this._head;
+  }
+
+  /**
    * Smoothed tile-space position, for its light or glow.
    * @returns The position.
    */

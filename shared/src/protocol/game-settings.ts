@@ -1,3 +1,6 @@
+// Local Imports
+import { DIFFICULTY_DEFAULT } from '../difficulty/difficulty';
+
 /**
  * Testing switches from the TV's Game tab.
  */
@@ -40,13 +43,21 @@ export interface GameSettings {
   levelBoost: number;
 
   /**
+   * The server's difficulty, DIFFICULTY_MIN to DIFFICULTY_MAX (see
+   * `DIFFICULTY_LEVELS`): how hard monsters hit players and how much
+   * damage they shrug off.
+   */
+  difficulty: number;
+
+  /**
    * Testing: every recipe and skill tree node is open to everyone (All
    * unlocks), and crafting costs nothing (Free crafting).
    */
   allUnlocks: boolean;
 
   /**
-   * Testing: crafting costs nothing (Free crafting).
+   * Testing: crafting and infusing cost nothing and need no anvil (Free
+   * crafting).
    */
   freeCrafting: boolean;
 
@@ -56,6 +67,13 @@ export interface GameSettings {
    * back. Off (the sandbox), only what the Game tab spawns shows up.
    */
   spawning: boolean;
+
+  /**
+   * Heavy one-off work runs on its own thread so the game keeps playing:
+   * for now, generating a huge world. Off, it runs on the game's thread
+   * and everything freezes while it does.
+   */
+  threads: boolean;
 }
 
 /**
@@ -70,9 +88,11 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
   tvDrag: true,
   tvLight: true,
   levelBoost: 0,
+  difficulty: DIFFICULTY_DEFAULT,
   allUnlocks: false,
   freeCrafting: false,
   spawning: true,
+  threads: true,
 };
 
 /**

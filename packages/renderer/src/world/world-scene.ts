@@ -12,10 +12,18 @@ import { PlayerAvatars } from './actors/player-avatars';
 import { SnapshotInterpolator } from './actors/snapshot-interpolator';
 import { BuildPreview } from './build/build-preview';
 import { CameraRig } from './camera/camera-rig';
-import { PIXEL_SCALE } from './camera/config/camera';
+import {
+  DEFAULT_PIXEL_LIMIT,
+  FAR,
+  NEAR,
+  PIXEL_SCALE,
+} from './camera/config/camera';
+import { pixelScaleFor } from './camera/helpers/pixel-scale';
+import { MapOverview } from './chunks/map-overview';
 import { Scenery } from './chunks/scenery';
 import { TerrainChunks } from './chunks/terrain-chunks';
 import { TileAnimations } from './chunks/tile-animations';
+import { DisplayApplier } from './display/display-applier';
 import { CrossbowReticles } from './effects/crossbow-reticles';
 import { EventEffects } from './effects/event-effects';
 import { Projectiles } from './effects/projectiles';
@@ -24,6 +32,8 @@ import { FrameStats } from './frame-stats';
 import { FogStampCollector } from './lights/fog-stamp-collector';
 import { LightCollector } from './lights/light-collector';
 import { SkyLighting } from './lights/sky-lighting';
+import { WorldEventLook } from './lights/world-event-look';
+import { freeScene } from './helpers/free-scene';
 import { WorldContext } from './world-context';
 
 // Types
@@ -31,8 +41,9 @@ import type { ItemState } from '@halloween/shared/goods/ground-items';
 import type { GameEvent } from '@halloween/shared/protocol/game-events';
 import type { MonsterState } from '@halloween/shared/protocol/state/monster-state';
 import type { PlayerState } from '@halloween/shared/protocol/state/player-state';
-import type { LightState, PuddleState, ShotState } from '@halloween/shared/protocol/state/world-state';
+import type { LightState, PatchState, PuddleState, ShotState, VictimState } from '@halloween/shared/protocol/state/world-state';
 import type { MapView } from '@halloween/shared/protocol/tv-tools';
+import type { WorldEventState } from '@halloween/shared/world-events/types/world-events';
 import type { TileChange } from '@halloween/shared/world/tiles';
 import type { StyleSettings } from '../types/effects';
 import type { SceneParts } from './types/scene-parts';
@@ -72,6 +83,17 @@ export class WorldScene {
   private _frame = 0;
 
   /**
+   * Screen pixels per rendered pixel right now (see `syncPixelScale`).
+   */
+  private _pixelScale = PIXEL_SCALE;
+
+  /**
+   * A pixel size the view picked for itself (/play), or null to grow
+   * pixels with the zoom up to DEFAULT_PIXEL_LIMIT (see `pixelScaleFor`).
+   */
+  protected _pixelOverride: number | null = null;
+
+  /**
    * Builds the scene into a container and starts drawing it.
    * @param container The element the canvas fills.
    * @param labelLayer The HTML layer name labels and health bars go in.
@@ -89,22 +111,23 @@ export class WorldScene {
     const monsters = new MonsterAvatars(ctx, rig, interp, lift, players);
     const chunks = new TerrainChunks(ctx, rig, (): Iterable<number> => tiles.growing.keys());
     const tiles = new TileAnimations(ctx, chunks, players);
-    const events = new EventEffects(ctx, monsters, tiles, players);
+    const overview = new MapOverview(ctx);
+    const events = new EventEffects(ctx, monsters, tiles, players, rig);
     const preview = new BuildPreview(ctx, players.avatars, monsters.monsters);
 
     ctx.lightMap.darken(ctx.piles.group);
     ctx.lightMap.darken(ctx.chips.group);
     ctx.lightMap.darken(ctx.gore.group);
-    ctx.scene.add(ctx.puddles.group);
-    ctx.scene.add(chunks.group, scenery.outskirts, ctx.flames.group, ctx.piles.group, ctx.chips.group, ctx.gore.group, ctx.pickups.group, ctx.altarGauges.group, ctx.fog.group);
+    ctx.scene.add(ctx.puddles.group, ctx.patches.group);
+    ctx.scene.add(chunks.group, overview.mesh, scenery.outskirts, ctx.flames.group, ctx.piles.group, ctx.chips.group, ctx.gore.group, ctx.pickups.group, ctx.altarGauges.group, ctx.fountainVictims.group, ctx.fog.group, ctx.bolts.group, ctx.rings.group, ctx.cracks.group);
     const projectiles = new Projectiles(ctx);
 
     rig.aim();
-    ctx.camera.near = 1;
-    ctx.camera.far = 200;
+    ctx.camera.near = NEAR;
+    ctx.camera.far = FAR;
 
     const post = new PostEffects(ctx.renderer, ctx.scene, ctx.camera);
-    this._parts = { stats: new FrameStats(), rig, chunks, scenery, tiles, events, projectiles, sky, interp, monsters, players, reticles: new CrossbowReticles(ctx), preview, lights: new LightCollector(ctx), fogStamps: new FogStampCollector(ctx), post };
+    this._parts = { stats: new FrameStats(), rig, chunks, overview, scenery, tiles, events, projectiles, sky, look: new WorldEventLook(ctx), interp, monsters, players, reticles: new CrossbowReticles(ctx), preview, lights: new LightCollector(ctx), fogStamps: new FogStampCollector(ctx), post, display: new DisplayApplier(ctx, rig, post) };
     this.setStyle(DEFAULT_STYLE);
     this._frameLoop = new FrameLoop(ctx, this._parts);
 
@@ -134,13 +157,29 @@ export class WorldScene {
   }
 
   /**
-   * Applies the TV's look settings (focus, vibrance, glow, aberration).
+   * Screen pixels per world pixel right now (the pixelation), for /play's
+   * HUD to pixelate to match.
+   * @returns The scale.
+   */
+  get pixelScale(): number {
+    return this._pixelScale;
+  }
+
+  /**
+   * The element the world's canvas fills, for overlays drawn over it.
+   * @returns The container.
+   */
+  get container(): HTMLElement {
+    return this._ctx.container;
+  }
+
+  /**
+   * Applies the TV's look settings (focus, vibrance, glow, aberration,
+   * fog).
    * @param style The settings.
    */
   setStyle(style: StyleSettings): void {
-    this._parts.post.setStyle(style);
-    this._ctx.fog.setDensity(style.fog * 2);
-    this._ctx.lightMap.setBoost(1 + style.vibrance * 0.5);
+    this._parts.display.setStyle(style);
   }
 
   /**
@@ -166,6 +205,7 @@ export class WorldScene {
     this._ctx.seed = seed;
     this._parts.rig.view = view;
     this._parts.chunks.rebuild();
+    this._parts.overview.setMap();
     this._parts.scenery.buildOutskirts();
     this._parts.scenery.buildTower();
     this._parts.rig.aim();
@@ -181,17 +221,19 @@ export class WorldScene {
   }
 
   /**
-   * Applies a tick's ground items and burning lights, and plays its one-off
-   * effects.
+   * Applies a tick's ground items, burning lights, and fountain victims,
+   * and plays its one-off effects.
    * @param items Items on the ground.
    * @param lights Burning lights.
    * @param events The tick's events.
+   * @param victims Monsters blood fountains hold.
    */
-  setWorldState(items: ItemState[], lights: LightState[], events: GameEvent[]): void {
+  setWorldState(items: ItemState[], lights: LightState[], events: GameEvent[], victims: VictimState[] = []): void {
     this._ctx.items = items;
     this._ctx.piles.set(items);
     this._ctx.lightMap.darken(this._ctx.piles.group);
     this._ctx.lights = lights;
+    this._ctx.victims = victims;
     this._parts.events.play(events);
     this._ctx.lightMap.darken(this._ctx.chips.group);
     this._parts.monsters.flushDying();
@@ -214,14 +256,29 @@ export class WorldScene {
   }
 
   /**
+   * Scorched ground, fire trails, and incense on the ground this tick.
+   * @param patches The patches.
+   */
+  setPatches(patches: PatchState[]): void {
+    this._ctx.patches.set(patches);
+  }
+
+  /**
    * Applies the latest monsters: creates, updates, and removes avatars.
    * Vanished avatars wait for this tick's death events to tear them apart.
    * @param monsters Every monster.
-   * @param bloodMoon Whether a blood moon is up.
    */
-  setMonsters(monsters: MonsterState[], bloodMoon: boolean): void {
-    this._parts.sky.bloodMoon = bloodMoon;
+  setMonsters(monsters: MonsterState[]): void {
     this._parts.monsters.set(monsters);
+  }
+
+  /**
+   * The world events that are up, whose looks ease in (and out once they
+   * end).
+   * @param events The events.
+   */
+  setWorldEvents(events: WorldEventState[]): void {
+    this._parts.look.active = events.map((e: WorldEventState) => e.kind);
   }
 
   /**
@@ -239,26 +296,20 @@ export class WorldScene {
     cancelAnimationFrame(this._frame);
     this._resizeObserver.disconnect();
     this._parts.players.removeAll();
-    this.setMonsters([], false);
+    this.setMonsters([]);
     this.setWorldState([], [], []);
-    this._ctx.gore.dispose();
-    this._ctx.puddles.dispose();
-    this._ctx.pickups.dispose();
-    this._ctx.altarGauges.dispose();
-    this._ctx.healthBars.dispose();
-    this._parts.tiles.disposeDebris();
-    this._ctx.shotMaterials.dispose();
-    this._parts.chunks.clear();
-    this._parts.scenery.dispose();
-    this._parts.tiles.dispose();
-    this._ctx.lightMap.dispose();
-    this._parts.post.dispose();
-    this._ctx.flames.dispose();
-    this._ctx.piles.dispose();
-    this._ctx.chips.dispose();
-    this._ctx.fog.dispose();
-    this._ctx.renderer.dispose();
-    this._ctx.renderer.domElement.remove();
+    freeScene(this._ctx, this._parts);
+  }
+
+  /**
+   * Resizes the low-res buffer when the zoom changes the pixel scale.
+   */
+  private syncPixelScale(): void {
+    const scale = this._pixelOverride ?? pixelScaleFor(this._ctx.camera.top, DEFAULT_PIXEL_LIMIT);
+    if (scale !== this._pixelScale) {
+      this._pixelScale = scale;
+      this.resize();
+    }
   }
 
   /**
@@ -271,20 +322,35 @@ export class WorldScene {
     if (w === 0 || h === 0) {
       return;
     }
-    const lowW = Math.max(1, Math.floor(w / PIXEL_SCALE));
-    const lowH = Math.max(1, Math.floor(h / PIXEL_SCALE));
+    const lowW = Math.max(1, Math.floor(w / this._pixelScale));
+    const lowH = Math.max(1, Math.floor(h / this._pixelScale));
     this._ctx.renderer.setSize(lowW, lowH, false);
     this._parts.post.setSize(lowW, lowH);
     this._parts.rig.fit();
   }
 
   /**
-   * Draws a frame and asks for the next.
+   * When a frame last logged an error (ms), to log one every few seconds.
+   */
+  private _failedAt = 0;
+
+  /**
+   * Draws a frame and asks for the next. A frame that throws is logged (at
+   * most every 5s) and the next one tries again, so one bad model can't
+   * freeze the screen.
    */
   private _loop = (): void => {
     this._frame = requestAnimationFrame(this._loop);
-    const dt = Math.min(this._ctx.clock.getDelta(), 0.1);
-    const time = this._ctx.clock.elapsedTime;
-    this._frameLoop.run(dt, time);
+    try {
+      this.syncPixelScale();
+      const dt = Math.min(this._ctx.clock.getDelta(), 0.1);
+      const time = this._ctx.clock.elapsedTime;
+      this._frameLoop.run(dt, time);
+    } catch (err) {
+      if (performance.now() - this._failedAt > 5000) {
+        this._failedAt = performance.now();
+        console.error('[renderer] a frame failed', err);
+      }
+    }
   };
 }

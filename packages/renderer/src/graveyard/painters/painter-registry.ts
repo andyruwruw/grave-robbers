@@ -1,6 +1,7 @@
 // Local Imports
 import { BeltPainter } from './automation/belt-painter';
 import { DiggerPainter } from './automation/digger-painter';
+import { SorterPainter } from './automation/sorter-painter';
 import { SeedsPainter } from './farming/seeds-painter';
 import { SproutPainter } from './farming/sprout-painter';
 import { PlatformPainter } from './floors/platform-painter';
@@ -31,6 +32,7 @@ import { CauldronPainter } from './stations/cauldron-painter';
 import { CoffinPainter } from './stations/coffin-painter';
 import { FurnacePainter } from './stations/furnace-painter';
 import { OvenPainter } from './stations/oven-painter';
+import { QuarryPainter } from './stations/quarry-painter';
 import { ResearchTablePainter } from './stations/research-table-painter';
 import { SawmillPainter } from './stations/sawmill-painter';
 import { SifterPainter } from './stations/sifter-painter';
@@ -53,7 +55,6 @@ import { WoodWallPainter } from './walls/wood-wall-painter';
 import { BellPainter } from './wards/bell-painter';
 import { EffigyPainter } from './wards/effigy-painter';
 import { GhostLampPainter } from './wards/ghost-lamp-painter';
-import { MirrorPainter } from './wards/mirror-painter';
 import { ObeliskPainter } from './wards/obelisk-painter';
 import { ScarecrowPainter } from './wards/scarecrow-painter';
 import { SoulCagePainter } from './wards/soul-cage-painter';
@@ -102,7 +103,6 @@ export const PAINTERS: Partial<Record<Tile, TilePainter>> = {
   obelisk: new ObeliskPainter(),
   'blood-fountain': new BloodFountainPainter(),
   'soul-cage': new SoulCagePainter(),
-  mirror: new MirrorPainter(),
   torch: new TorchPainter(),
   lantern: new LanternPainter(),
   'research-table': new ResearchTablePainter(),
@@ -119,7 +119,9 @@ export const PAINTERS: Partial<Record<Tile, TilePainter>> = {
   cauldron: new CauldronPainter(),
   anvil: new AnvilPainter(),
   oven: new OvenPainter(),
+  quarry: new QuarryPainter(),
   belt: new BeltPainter(),
+  sorter: new SorterPainter(),
   seeds: new SeedsPainter(),
   sprout: new SproutPainter(),
   'bolt-turret': new BoltTurretPainter(),

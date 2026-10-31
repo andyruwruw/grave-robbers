@@ -22,11 +22,11 @@ export class GearDrop extends GroundDrop {
    * @returns The drop's group.
    */
   build(item: ItemState): Group {
-    const { kind } = item.held as GearItem;
+    const { kind, infusion } = item.held as GearItem;
     const pile = this.place(item);
     pile.rotation.y = (item.id * 2.39996) % (Math.PI * 2);
     const model = new Group();
-    model.add(...buildGearModel(kind, this._ctx.materials.boxes.box).parts);
+    model.add(...buildGearModel(kind, this._ctx.materials.boxes.box, infusion).parts);
     const pose = GROUND_POSE[kind];
     model.rotation.set(pose.rx, 0, pose.rz);
     model.position.set(...pose.offset);

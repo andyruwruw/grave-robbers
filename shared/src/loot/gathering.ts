@@ -33,6 +33,6 @@ export interface Gatherable {
  */
 export const GATHERABLE: Partial<Record<Tile, Gatherable>> = {
   tree: { resource: 'wood', hits: 5, amount: 2, leaves: 'stump' },
-  rock: { resource: 'stone', hits: 5, amount: 2, leaves: 'grass' },
+  rock: { resource: 'stone', hits: 5, amount: 3, leaves: 'grass' },
   hedge: { resource: 'wood', hits: 2, amount: 1, leaves: 'grass' },
 };

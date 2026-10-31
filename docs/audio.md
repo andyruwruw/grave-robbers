@@ -6,7 +6,7 @@ Client audio lives in `packages/ui/src/audio/`; media is served by the server.
 
 | File (`packages/ui/src/audio/`) | Does |
 |---|---|
-| `sfx/synth.ts`, `sfx/recipes/` | WebAudio recipes for every `SfxName` (`RECIPES` from `player-recipes.ts`, `monster-recipes.ts`, `world-recipes.ts`) |
+| `sfx/synth.ts`, `sfx/recipes/` | WebAudio recipes for every `SfxName` (`RECIPES` from `player-recipes.ts`, `monster-recipes.ts`, `world-recipes.ts`, `infusion-recipes.ts`) |
 | `sfx/sfx.ts`, `sfx/sfx-engine.ts` | The page's one `sfx` engine (`SfxEngine`), boosted by `SFX_BOOST` through a limiter |
 | `sfx/sfx-overrides.ts` | A `sfx/<name>.mp3` from the media folder overrides a recipe |
 | `sfx/ambience-loop.ts` | Plays the TV's ambience tracks in turn, each crossfading into the next over `AMBIENCE_FADE` (4s) so the loop never gaps |
@@ -28,8 +28,26 @@ The TV's sound lives in `apps/tv/src/audio/`:
 
 ## Sound effects
 
-- **TV:** world sounds panned by map position. Guns play a heavy `gunshot` (deeper for the musket); the morning star a loud `whip-crack` as the lash lands. Each attack's hit sound is timed to its windup; brutes and ghouls growl while they hunt. A hammer job plays a swing, never a shot.
+- **TV:** world sounds panned by map position. Guns play a heavy `gunshot` (deeper for the musket); the morning star a loud `whip-crack` as the lash lands. Each attack's hit sound is timed to its windup; brutes and ghouls growl while they hunt. A hammer job plays a swing, never a shot. A blood fountain catching a monster (the `catch` event, see [building.md](building.md#the-blood-fountains-victim)) plays `fountain-catch` (`WORLD_RECIPES`: a splash, two glugs, a sinking tone, and a faint wavering moan), panned to the fountain by `EventSounds`.
 - **Phones:** a `sounds` message plays the player's own actions; hurt, death, and respawn come from vitals.
+
+### Infusion sounds
+
+The `InfusionSfx` group (`INFUSION_RECIPES` in `sfx/recipes/infusion-recipes.ts`), played by the TV's `EventSounds` for the infusion events (see [infusions.md](infusions.md)). /play and the phone don't play them.
+
+| Event | Sound |
+|---|---|
+| `chain` | `chain-zap`, panned from the first monster struck |
+| `death-blast` | `blast` |
+| `wail` | `wail` |
+| `slam` | `slam` |
+| `fissure` | `fissure` |
+| `flame-spray` | `flame-roar`, at most every 0.3s (`ROAR_GAP`) |
+| `nova` | `nova` |
+| `reflect` | `reflect` |
+| `infused` | `infuse` |
+
+- **A spraying Hellmouth** plays no swing sound at all, neither `gunshot` nor `shoot` (`PlayerSounds` skips a swing while the weapon's variant has `spray`); only `flame-roar` from its `flame-spray` events.
 
 ## Music
 

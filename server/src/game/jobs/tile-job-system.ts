@@ -5,7 +5,6 @@ import { facingTile } from '@halloween/shared/world/targeting';
 
 // Local Imports
 import { GameSystem } from '../core/game-system';
-import { AltarJob } from './altar-job';
 import { ChestJob } from './chest-job';
 import { HAMMER_JOBS } from './config/jobs';
 import { GatherJob } from './gather-job';
@@ -15,8 +14,6 @@ import { PumpkinJob } from './pumpkin-job';
 import { StashJob } from './stash-job';
 import { StructureJob } from './structure-job';
 import { TombJob } from './tomb-job';
-import { TurretLoadJob } from './turret-load-job';
-import { WateringJob } from './watering-job';
 
 // Types
 import type { Player } from '../players/player';
@@ -24,21 +21,20 @@ import type { TileJob } from './tile-job';
 
 /**
  * Swings that land on the facing tile instead of a body: each kind of
- * tile is a `TileJob`, tried in order until one takes the swing.
+ * tile is a `TileJob`, tried in order until one takes the swing. A swing
+ * only hits and works; feeding, relighting, loading, offering, watering,
+ * collecting and opening are the USE button's (`UseSystem`).
  */
 export class TileJobSystem extends GameSystem {
   /**
    * Every job a tile can be, in the order they're tried. The order
-   * matters: stash, altar, turret loading and watering come before the
+   * matters: the stash (which a swing never breaks) comes before the
    * catch-all structure job.
    */
   private readonly _jobs: TileJob[] = [
     new PumpkinJob(this._game),
     new ChestJob(this._game),
     new StashJob(this._game),
-    new AltarJob(this._game),
-    new TurretLoadJob(this._game),
-    new WateringJob(this._game),
     new StructureJob(this._game),
     new GraveJob(this._game),
     new TombJob(this._game),

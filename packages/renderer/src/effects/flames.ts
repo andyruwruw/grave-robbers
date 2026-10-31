@@ -18,13 +18,14 @@ import type { FlameSpot } from '../types/effects';
 const UNIT_BOX = new BoxGeometry(1, 1, 1);
 
 /**
- * Most flames drawn at once.
+ * Most flames drawn at once: 96 for torches and fires, plus room for
+ * burning monsters and ground (`BURN_FLAME.budget`, `PATCH_FLAMES.budget`).
  */
-const POOL_SIZE = 96;
+const POOL_SIZE = 136;
 
 /**
  * Animated voxel flames for burning torches and campfires (and crimson
- * ones for blood). A fixed pool of
+ * ones for blood), burning monsters, and burning ground. A fixed pool of
  * three-box flames is repositioned every frame; unused ones are hidden.
  */
 export class Flames {

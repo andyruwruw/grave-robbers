@@ -5,6 +5,7 @@ import type { BagItem, Gear } from '../../inventory/bag-items';
 import type { TreeState } from '../../skill-tree/types/skill-tree';
 import type { PadInfo } from '../pads';
 import type { PlayerIdentity } from '../state/player-state';
+import type { UsePanel } from '../state/use-panel';
 import type { Vitals } from '../state/vitals';
 
 /**
@@ -22,7 +23,12 @@ export type ControllerMessage =
   /**
    * Joining failed, and why.
    */
-  | { t: 'join-error'; error: string }
+  | { t: 'join-error'; error: string; needsCode?: boolean }
+  /**
+   * A code that moves this character to another device, and when it stops
+   * working (ms since the epoch).
+   */
+  | { t: 'transfer-code'; code: string; until: number }
   /**
    * Everything carried, the skill tree, and the research and anvil levels in
    * reach.
@@ -49,13 +55,18 @@ export type ControllerMessage =
    */
   | { t: 'stash'; items: (BagItem | null)[] | null }
   /**
+   * The digger or station panel USE opened, or null once it's closed.
+   */
+  | { t: 'using'; panel: UsePanel | null }
+  /**
    * The game controllers plugged into TVs.
    */
   | { t: 'pads'; pads: PadInfo[] }
   /**
-   * A claimed controller opened one of the phone's panels.
+   * Opens one of the phone's panels: a claimed controller's menu buttons,
+   * or USE on a research table (the tree) or an anvil (the armory).
    */
-  | { t: 'pad-menu'; menu: 'bag' | 'craft' | 'tree' }
+  | { t: 'pad-menu'; menu: 'bag' | 'craft' | 'tree' | 'armory' }
   /**
    * Left the game.
    */

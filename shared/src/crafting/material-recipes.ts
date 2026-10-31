@@ -7,10 +7,11 @@ import type { CraftKey } from '../inventory/item-keys';
 
 /**
  * Recipes that make a stack of a material: ammo, parts forged at an anvil
- * (chain, cursed cores), and the blood watering can. `opens` is the node
+ * (chain, cursed cores), the blood watering can, and holy water (an
+ * essence for infusions, opened with the sifter that finds its silver). `opens` is the node
  * whose unlock opens the recipe (none: known from the start).
  */
-export type MatRecipe = 'arrows' | 'bolts' | 'chain' | 'cursed-core' | 'watering-can';
+export type MatRecipe = 'arrows' | 'bolts' | 'chain' | 'cursed-core' | 'watering-can' | 'holy-water';
 
 /**
  * One material recipe.
@@ -42,10 +43,11 @@ export interface MatRecipeDef {
  */
 export const MAT_RECIPES: Record<MatRecipe, MatRecipeDef> = {
   'arrows': { cost: stock({ wood: 1 }), makes: 4 },
-  'bolts': { cost: stock({ wood: 1 }), makes: 3 },
+  'bolts': { cost: stock({ wood: 1 }), makes: 3, opens: 'gear:crossbow' },
   'chain': { cost: stock({ iron: 2 }), makes: 1, opens: 'build:anvil', anvil: true },
   'cursed-core': { cost: stock({ bloodsteel: 1, silver: 1 }), makes: 1, opens: 'build:anvil', anvil: true },
   'watering-can': { cost: stock({ iron: 2, bone: 1 }), makes: 1, opens: 'build:oven' },
+  'holy-water': { cost: stock({ silver: 1, blood: 4 }), makes: 1, opens: 'build:sifter' },
 };
 
 /**

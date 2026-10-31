@@ -1,7 +1,9 @@
 // Types
 import type { GearKind } from '@halloween/shared/gear/types/gear-def';
+import type { WeaponStats } from '@halloween/shared/gear/types/weapon-stats';
 import type { ShotState } from '@halloween/shared/protocol/state/world-state';
 import type { Player } from '../players/player';
+import type { GlaiveFlight } from '../ranged/types/glaive-flight';
 
 /**
  * A bolt or gob of blood in flight: tiles of range left, and who shot it
@@ -69,4 +71,37 @@ export interface Shot extends ShotState {
    * The monsters a piercing bolt already hit.
    */
   struck?: number[];
+
+  /**
+   * The shooter's weapon stats as they fired (tree and infusion), for
+   * what it does to each monster and the tricks its hits carry (see
+   * `HitEffects`). Without it, `weapon`'s base stats count.
+   */
+  stats?: WeaponStats;
+
+  /**
+   * It flies through walls, structures, trees, and cliffs (Wraithstring
+   * at full draw, the Ephemeral Musket).
+   */
+  phasing?: boolean;
+
+  /**
+   * Times it still bounces off a wall instead of stopping (Bone Choir).
+   */
+  bounces?: number;
+
+  /**
+   * Tiles flown since it last left fire behind (Pyre Bow).
+   */
+  trail?: number;
+
+  /**
+   * A thrown glaive's way out and back.
+   */
+  glaive?: GlaiveFlight;
+
+  /**
+   * Sent back off a Mirror Shield: it hits monsters, never players.
+   */
+  reflected?: boolean;
 }

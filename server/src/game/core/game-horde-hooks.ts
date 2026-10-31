@@ -3,6 +3,7 @@ import { GameSystem } from './game-system';
 
 // Types
 import type { GameEvent } from '@halloween/shared/protocol/game-events';
+import type { MonsterDeath } from '../horde/types/death';
 import type { HordeHooks, HostileShot } from '../horde/types/hooks';
 import type { Player } from '../players/player';
 
@@ -21,6 +22,16 @@ export class GameHordeHooks extends GameSystem implements HordeHooks<Player> {
    */
   shoot(x: number, y: number, angle: number, shot: HostileShot): void {
     this._game.shots.fireHostile(x, y, angle, shot);
+  }
+
+  /**
+   * A bloater burst, leaving a puddle of bile.
+   * @param x Where (tiles across).
+   * @param y Where (tiles down).
+   * @param by The monster's name for the kill feed.
+   */
+  spill(x: number, y: number, by: string): void {
+    this._game.puddles.spill(x, y, by, true);
   }
 
   /**
@@ -45,5 +56,14 @@ export class GameHordeHooks extends GameSystem implements HordeHooks<Player> {
    */
   event(e: GameEvent, bled?: Player): void {
     this._game.spoils.onEvent(e, bled);
+  }
+
+  /**
+   * A monster died, however it happened: its killer's infused weapon does
+   * what it does on a kill.
+   * @param death The death.
+   */
+  died(death: MonsterDeath<Player>): void {
+    this._game.infusions.onDeath(death);
   }
 }

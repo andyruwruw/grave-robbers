@@ -13,7 +13,6 @@ import { MAP_HEIGHT, MAP_WIDTH } from '@halloween/shared/world/dimensions';
 
 // Local Imports
 import {
-  BLOOD_FOG_COLOR,
   CELLS_PER_TILE,
   FOG_COLOR,
   LAYER_HEIGHTS,
@@ -88,9 +87,19 @@ export class Fog {
   private _thickness = 1;
 
   /**
-   * How blood red the moon is, 0..1.
+   * A world event's fog color, or null.
    */
-  private _blood = 0;
+  private _tint: Color | null = null;
+
+  /**
+   * How far toward the tint, 0..1.
+   */
+  private _tintAmount = 0;
+
+  /**
+   * How much thicker the tint makes it at full strength.
+   */
+  private _thicken = 0;
 
   /**
    * How bright day it is, 0..1.
@@ -195,11 +204,15 @@ export class Fog {
   }
 
   /**
-   * 0..1: under a blood moon the fog thickens and turns red.
-   * @param amount How blood red the moon is, 0..1.
+   * A world event tints the fog and thickens it.
+   * @param tint The fog's color at full strength, or null.
+   * @param amount How far toward it, 0..1.
+   * @param thicken How much thicker at full strength (0.6: 60%).
    */
-  setBloodMoon(amount: number): void {
-    this._blood = amount;
+  setTint(tint: Color | null, amount: number, thicken: number): void {
+    this._tint = tint;
+    this._tintAmount = amount;
+    this._thicken = thicken;
   }
 
   /**
@@ -225,8 +238,8 @@ export class Fog {
     }
     for (const m of this._materials) {
       m.uniforms.time.value = this._time;
-      m.uniforms.density.value = this._thickness * (1 + this._blood * 0.6) * (1 - this._day * 0.8);
-      (m.uniforms.fogColor.value as Color).copy(FOG_COLOR).lerp(BLOOD_FOG_COLOR, this._blood);
+      m.uniforms.density.value = this._thickness * (1 + this._tintAmount * this._thicken) * (1 - this._day * 0.8);
+      (m.uniforms.fogColor.value as Color).copy(FOG_COLOR).lerp(this._tint ?? FOG_COLOR, this._tintAmount);
     }
   }
 

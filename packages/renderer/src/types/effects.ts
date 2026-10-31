@@ -227,4 +227,24 @@ export interface ShotSlot {
    * A witch's potion.
    */
   potion: Group;
+
+  /**
+   * A thrown Soulbound or Wraith Glaive, spinning.
+   */
+  glaive: Group;
+
+  /**
+   * A Flame or Pyre Bow's burning arrow, trailing fire.
+   */
+  fireArrow: Group;
+
+  /**
+   * A Spirit Bow or Wraithstring's see-through green arrow.
+   */
+  spiritArrow: Group;
+
+  /**
+   * An Ephemeral Musket or Ghostlock's ghostly shot.
+   */
+  ghostBullet: Group;
 }

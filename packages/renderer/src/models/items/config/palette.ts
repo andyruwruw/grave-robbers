@@ -149,9 +149,19 @@ export const HEART_RED = '#e5484d';
 export const HEART_SHINE = '#ff9a9c';
 
 /**
- * A heart lost to a fresh wound.
+ * A heart a fresh wound has locked away: a dark scab.
  */
-export const HEART_GREY = '#6e6e76';
+export const HEART_WOUND = '#8a2430';
+
+/**
+ * The crack across a wound heart.
+ */
+export const HEART_CRACK = '#1c070b';
+
+/**
+ * The cells (row, column of HEART_ROWS) the crack runs through.
+ */
+export const HEART_CRACK_CELLS: [number, number][] = [[1, 3], [2, 2], [3, 3], [4, 3]];
 
 /**
  * An empty heart.

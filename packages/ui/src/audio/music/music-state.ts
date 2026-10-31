@@ -63,7 +63,7 @@ export abstract class MusicState {
   /**
    * What the game is doing, for songs split into parts.
    */
-  protected _mood: MusicMood = { players: false, fight: false, bloodMoon: false };
+  protected _mood: MusicMood = { players: false, fight: false, drums: 0 };
 
   /**
    * Whether the music should play (false once paused from the Music tab).

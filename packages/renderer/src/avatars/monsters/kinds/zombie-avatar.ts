@@ -4,6 +4,7 @@ import { seededRandom } from '@halloween/shared/helpers/seeded-random';
 // Local Imports
 import { ArmedMonsterAvatar } from '../armed-monster-avatar';
 import {
+  ARM_ARMED,
   ARM_DOWN,
   ARM_HALF,
   ARM_OUT,
@@ -109,7 +110,7 @@ export class ZombieAvatar extends ArmedMonsterAvatar {
      * @returns The one picked.
      */
     const pick = <T>(list: T[]): T => list[Math.floor(rand() * list.length)];
-    const { box } = this._parts;
+    const { box, eye } = this._parts;
     const skin = pick(ZOMBIE_SKINS);
     const shirt = pick(ZOMBIE_SHIRTS);
     const pants = pick(ZOMBIE_PANTS);
@@ -150,8 +151,8 @@ export class ZombieAvatar extends ArmedMonsterAvatar {
       ...this._parts.roundedBox([0.3, 0.3, 0.3], [0, 0.14, 0], skin),
       box([0.02, 0.07, 0.07], [0.16, 0.16, -0.07], '#1a1a12'),
       box([0.02, 0.07, 0.07], [0.16, 0.16, 0.07], '#1a1a12'),
-      box([0.03, 0.07, 0.07], [0.17, 0.16, -0.07], ZOMBIE_EYE, true),
-      box([0.03, 0.05, 0.06], [0.17, 0.17, 0.08], ZOMBIE_EYE, true),
+      eye([0.03, 0.07, 0.07], [0.17, 0.16, -0.07], ZOMBIE_EYE),
+      eye([0.03, 0.05, 0.06], [0.17, 0.17, 0.08], ZOMBIE_EYE),
       rand() < 0.25
         ? box([0.03, 0.09, 0.14], [0.16, 0.01, 0.01], '#2a1a12')
         : box([0.02, 0.04, 0.14], [0.16, 0.05, 0.01], '#2a1a12'),
@@ -262,6 +263,9 @@ export class ZombieAvatar extends ArmedMonsterAvatar {
      * @returns The shoulder angle.
      */
     const pose = (side: number): number => {
+      if (this.target.held && side === (this._oneArmed ? 1 : -1)) {
+        return ARM_ARMED;
+      }
       switch (this._mood) {
         case 'slack': return ARM_DOWN;
         case 'look': return ARM_HALF;

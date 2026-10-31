@@ -28,11 +28,17 @@ classDiagram
   GameSystem <|-- PanicSystem
   GameSystem <|-- ActionSystem
   GameSystem <|-- MeleeSystem
+  GameSystem <|-- MeleeTricksSystem
+  GameSystem <|-- InfusionSystem
   GameSystem <|-- DamageSystem
   GameSystem <|-- TurretSystem
+  GameSystem <|-- PatchSystem
   GameSystem <|-- RangedSystem
+  GameSystem <|-- FlameSpraySystem
   GameSystem <|-- AimingSystem
   GameSystem <|-- ShotSystem
+  GameSystem <|-- GlaiveSystem
+  GameSystem <|-- MirrorShieldSystem
   GameSystem <|-- PuddleSystem
   GameSystem <|-- TileJobSystem
   GameSystem <|-- BagSystem
@@ -41,9 +47,10 @@ classDiagram
   GameSystem <|-- DropSystem
   GameSystem <|-- MonsterSpoilsSystem
   GameSystem <|-- StashSystem
+  GameSystem <|-- UseSystem
   GameSystem <|-- BuildSystem
   GameSystem <|-- CraftSystem
-  GameSystem <|-- BloodMoonSystem
+  GameSystem <|-- WorldEventSystem
   GameSystem <|-- LevelSystem
   GameSystem <|-- GameTabSystem
   GameSystem <|-- ConjureSystem
@@ -52,6 +59,8 @@ classDiagram
   GameSystem <|-- TileJob
   GameSystem <|-- TurretFire
 ```
+
+- Infusion parts: `MeleeTricksSystem` (swing tricks) and `InfusionSystem` (on-kill effects) live in `game/combat/infusions/`, `PatchSystem` in `game/combat/patches/`. `RangedSystem` owns `FlameSpraySystem` (`spray`); `ShotSystem` owns `GlaiveSystem` (`glaives`) and `MirrorShieldSystem` (`shields`).
 
 ## Player
 
@@ -84,7 +93,7 @@ The test player's steps are a small family too: `BotTask` (`game/bots/tasks/`) w
 
 ## TileJob and TurretFire
 
-`TileJobSystem` asks each `TileJob` in turn to `tryStrike` the facing tile. `TurretSystem.fireTurrets` hands each ready turret to its `TurretFire`.
+`TileJobSystem` asks each `TileJob` in turn to `tryStrike` the facing tile on a swing; `UseSystem` does the same with its own (chest, altar, turret load, watering) on USE. `TurretSystem.fireTurrets` hands each ready turret to its `TurretFire`.
 
 ```mermaid
 classDiagram
@@ -161,6 +170,12 @@ classDiagram
     def
     toState()
   }
+  class Afflicted {
+    <<abstract>>
+    statuses: burning, poisoned, cursed, slowed, pinned, turned
+    afflict()
+    status()
+  }
   class Monster {
     <<abstract>>
     update()
@@ -176,7 +191,8 @@ classDiagram
     <<abstract>>
     wind-up and strike
   }
-  MonsterCore <|-- Monster
+  MonsterCore <|-- Afflicted
+  Afflicted <|-- Monster
   Monster <|-- Walker
   Monster <|-- Ghost
   Walker <|-- Fighter
@@ -185,14 +201,30 @@ classDiagram
   Shambler <|-- Zombie
   Zombie <|-- Brute
   Shambler <|-- Ghoul
+  Shambler <|-- Bloater
+  Shambler <|-- Werewolf
   Shambler <|-- Kiter
   Kiter <|-- Skeleton
   Kiter <|-- Witch
+  Kiter <|-- Necromancer
   ShadowWalker <|-- Vampire
   ShadowWalker <|-- Demon
 ```
 
-Per-monster state helpers (`monsters/state/`: `Bleeding`, `Knockback`, `LastSeen`) are composed, not inherited.
+Per-monster state helpers (`monsters/state/`) are composed, not inherited: `Knockback`, `LastSeen`, `Slowed`, `Pinned`, `Turned`, and the `Wound` family (refresh, never stack; see [monsters.md](monsters.md#statuses)).
+
+```mermaid
+classDiagram
+  class Wound {
+    rate, until, by
+    refresh()
+    active()
+  }
+  Wound <|-- Bleeding
+  Wound <|-- Burning
+  Wound <|-- Poisoned
+  Wound <|-- Cursed
+```
 
 ## HordePart and WorldFeature
 
@@ -207,6 +239,8 @@ classDiagram
   HordePart <|-- Spawner
   HordePart <|-- Sight
   HordePart <|-- Wards
+  HordePart <|-- Bursts
+  HordePart <|-- Afflictions
   class WorldFeature {
     <<abstract>>
     #_site: WorldSite
@@ -260,11 +294,13 @@ classDiagram
     reserved, fill, perimeter, shuffle
   }
   GenPass <|-- ClassicPass
-  GenPass <|-- DistrictPass
-  GenPass <|-- WildsPass
+  GenPass <|-- SitePass
+  GenPass <|-- HeightPass
   GenPass <|-- ChasmPass
+  GenPass <|-- HubPass
   GenPass <|-- RoadPass
-  GenPass <|-- SealPass
+  GenPass <|-- SiteBuildPass
+  GenPass <|-- WildsPass
   ClassicPass <|-- CryptPass
   ClassicPass <|-- PathPass
   ClassicPass <|-- LandmarkPass
@@ -280,7 +316,14 @@ classDiagram
   Landmark <|-- CourtyardLandmark
   CourtyardLandmark <|-- Chapel
   CourtyardLandmark <|-- WellPlaza
+  CourtyardLandmark <|-- StoneCircle
+  Landmark <|-- Graveyard
+  Landmark <|-- LoneCrypt
+  Landmark <|-- Ruins
+  Landmark <|-- PumpkinPatch
 ```
+
+- The classic passes and landmarks work on any map size: a landmark turns its door toward `GenCanvas.center` (the map's middle, or the huge-world site being built). Huge worlds reuse them; their own landmarks live in `world-gen/huge/landmarks/`.
 
 ## Shared families
 

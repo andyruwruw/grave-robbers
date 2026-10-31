@@ -144,7 +144,7 @@ SPOTIFY_REDIRECT_URI=https://203-0-113-5.sslip.io/auth/spotify/callback
 |---|---|---|
 | `PORT` | Port the game listens on (Caddy forwards to it) | 3021 |
 | `WORLD_PRESET` | Map a new world starts from (`server/presets/<id>.json`) | `king-of-the-hill` |
-| `WORLD_SAVE` | Where the world is saved | `server/data/world.json` |
+| `SAVE_DIR` | Where world slots, characters, and backups are saved | `server/data/saves` |
 | `MEDIA_DIR` | Music, SFX, ambience | `server/media` |
 | `PRESET_DIR` | Map presets | `server/presets` |
 | `SPOTIFY_*` | See [audio.md](audio.md); `SPOTIFY_REDIRECT_URI` must also be added under **Redirect URIs** in your app on the Spotify developer dashboard | |
@@ -247,8 +247,8 @@ Then as root: `systemctl restart graveyard`. Players' phones reconnect on their 
 |---|---|
 | Live server logs | `journalctl -u graveyard -f` |
 | Caddy logs (certificates, proxy errors) | `journalctl -u caddy -f` |
-| Back up the world | `scp graveyard@203.0.113.5:app/server/data/world.json .` (from your computer) |
-| Start a fresh world | TV sidebar → Game → Regenerate Map, or stop the service and delete `server/data/world.json` |
+| Back up the saves | `scp -r graveyard@203.0.113.5:app/server/data/saves .` (from your computer); the server also keeps 24 hourly backups per world in `saves/backups/` |
+| Start a fresh world | TV sidebar → Game → Regenerate Map, or a new slot on the admin's Worlds page |
 
 ## Troubleshooting
 

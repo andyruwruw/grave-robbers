@@ -14,7 +14,7 @@ export const RANGED_WEAPONS = {
     wear: 1,
     cost: stock({ wood: 2, planks: 3 }),
     loot: 1,
-    weapon: { damage: 7, cooldown: 0.4, reach: 7.5, arcCos: 1, knockback: 1.2, ranged: true, ammo: 'bolts', holy: 3, hands: 2, sight: 0.35, pierce: 1, burst: 1, reload: 1.4 },
+    weapon: { damage: 10, cooldown: 0.4, reach: 7.5, arcCos: 1, knockback: 1.2, ranged: true, ammo: 'bolts', holy: 3, hands: 2, sight: 0.35, pierce: 1, burst: 1, reload: 1.4 },
   },
   'blood-gun': {
     label: 'Nightmare blunderbuss',
@@ -31,7 +31,7 @@ export const RANGED_WEAPONS = {
     wear: 1,
     cost: stock({ wood: 2 }),
     loot: 2,
-    weapon: { damage: 2.5, cooldown: 0.45, reach: 7, arcCos: 1, knockback: 0.6, ranged: true, ammo: 'arrows', hands: 2, draw: 0.8 },
+    weapon: { damage: 4.5, cooldown: 0.45, reach: 7, arcCos: 1, knockback: 0.6, ranged: true, ammo: 'arrows', hands: 2, draw: 0.8 },
   },
   'repeating-crossbow': {
     label: 'Rattlebones',
@@ -40,7 +40,7 @@ export const RANGED_WEAPONS = {
     anvil: true,
     cost: stock({ planks: 5, iron: 4, chain: 1 }),
     loot: 1,
-    weapon: { damage: 3, cooldown: 0.2, reach: 7, arcCos: 1, knockback: 0.6, ranged: true, ammo: 'bolts', holy: 2, hands: 2, burst: 3, reload: 1 },
+    weapon: { damage: 5, cooldown: 0.2, reach: 7, arcCos: 1, knockback: 0.6, ranged: true, ammo: 'bolts', holy: 2, hands: 2, burst: 3, reload: 1 },
   },
   'musket': {
     label: 'Blood Lust Musket',

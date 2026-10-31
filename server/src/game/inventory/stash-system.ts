@@ -8,6 +8,7 @@ import { putInto } from './helpers/slots';
 // Types
 import type { BagItem } from '@halloween/shared/inventory/bag-items';
 import type { Player } from '../players/player';
+import type { PlayerSave } from '../storage/types/save';
 
 /**
  * Storage chests: moving items in and out of the open one, closing and
@@ -85,12 +86,26 @@ export class StashSystem extends GameSystem {
   }
 
   /**
+   * Shows anyone with a storage chest open what a belt took out of it.
+   */
+  refreshTouched(): void {
+    const width = this.world.map.width;
+    for (const i of this.world.takeTouchedStashes()) {
+      for (const p of this.players.values()) {
+        if (p.stashAt && p.stashAt.ty * width + p.stashAt.tx === i) {
+          this.outbox.stashChanged.add(p.token);
+        }
+      }
+    }
+  }
+
+  /**
    * Scatters the bags of storage chests that were broken last tick over
    * their tiles, kept for their keepers.
    */
   returnSpilled(): void {
     for (const spill of this.world.structureDamage.takeSpilledStashes()) {
-      const keeper = [...this.players.values()].find((o: Player): boolean => o.name.toLowerCase() === spill.keeper)?.id ?? this._game.roster.departed.get(spill.keeper)?.id ?? null;
+      const keeper = [...this.players.values()].find((o: Player): boolean => o.name.toLowerCase() === spill.keeper)?.id ?? [...this._game.roster.away.values()].find((s: PlayerSave): boolean => s.name.toLowerCase() === spill.keeper)?.id ?? null;
       spill.items.forEach((item: BagItem, i: number): void => {
         const angle = (i / spill.items.length) * Math.PI * 2;
         this.world.items.addHeld(spill.x + Math.cos(angle) * 0.4, spill.y + Math.sin(angle) * 0.4, item, null, keeper);

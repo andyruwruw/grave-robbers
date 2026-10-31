@@ -10,6 +10,11 @@ export const BUTTON_ACT = 7;
 export const BUTTON_PANIC = 1;
 
 /**
+ * A: USE on the facing tile (opens or works it without hurting it).
+ */
+export const BUTTON_USE = 0;
+
+/**
  * The west face button: opens the bag on the phone.
  */
 export const BUTTON_BAG = 2;

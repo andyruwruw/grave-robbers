@@ -3,6 +3,9 @@ import React from 'react';
 import { Gamepad2 } from 'lucide-react';
 import JoinForm from '@halloween/game-ui/components/screens/join-form';
 
+// Local Imports
+import BindingGlyph from './bindings/binding-glyph';
+
 /**
  * Props for JoinOverlay.
  */
@@ -28,9 +31,15 @@ interface JoinOverlayProps {
   joining: boolean;
 
   /**
-   * Joins with a name and a color.
+   * Whether the name belongs to a character on another device, so the
+   * form asks for its transfer code.
    */
-  onJoin: (name: string, color: string) => void;
+  needsCode: boolean;
+
+  /**
+   * Joins with a name, a color, and any transfer code.
+   */
+  onJoin: (name: string, color: string, code: string) => void;
 
   /**
    * The pad being played, if any.
@@ -45,7 +54,7 @@ interface JoinOverlayProps {
  * @param {JoinOverlayProps} props - Component props.
  * @returns {React.JSX.Element} The rendered overlay.
  */
-function JoinOverlay({ joinRef, welcomed, joinError, joining, onJoin, padName }: JoinOverlayProps): React.JSX.Element {
+function JoinOverlay({ joinRef, welcomed, joinError, joining, needsCode, onJoin, padName }: JoinOverlayProps): React.JSX.Element {
   return (
     <div
       ref={joinRef}
@@ -55,9 +64,26 @@ function JoinOverlay({ joinRef, welcomed, joinError, joining, onJoin, padName }:
           <JoinForm
             error={joinError}
             joining={joining}
+            needsCode={needsCode}
             onJoin={onJoin}
             defaultName='Gamer'
-            blurb='Pick a name and a color. With a controller, the D-pad moves and A presses.' />
+            blurb={(
+              <>
+                Pick a name and a color. With a controller,
+                {' '}
+                <BindingGlyph
+                  binding={{ dpad: 'any' }}
+                  size={14} />
+                {' '}
+                moves and
+                {' '}
+                <BindingGlyph
+                  binding={{ button: 0 }}
+                  size={14} />
+                {' '}
+                presses.
+              </>
+            )} />
         )}
         <span className='flex items-center justify-center gap-xsm font-medium text-xs text-foreground-muted'>
           <Gamepad2 size={12} />

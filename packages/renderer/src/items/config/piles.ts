@@ -5,7 +5,7 @@ import type { Material } from '@halloween/shared/goods/goods';
  * Materials a pile shows as their bag model, since they have no heap of
  * their own.
  */
-export const MODELED: Material[] = ['ectoplasm', 'chain', 'cursed-core', 'pumpkin', 'watering-can'];
+export const MODELED: Material[] = ['ectoplasm', 'chain', 'cursed-core', 'pumpkin', 'watering-can', 'holy-water', 'brute-tendon', 'ghoul-fang', 'hex-shard', 'brimstone'];
 
 /**
  * Most pieces of one resource a pile shows.

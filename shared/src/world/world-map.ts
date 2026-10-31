@@ -1,6 +1,11 @@
 // Local Imports
 import { LEVEL_HEIGHT, MAP_HEIGHT, MAP_WIDTH, MIN_LEVEL, STEP_UP } from './dimensions';
-import { CARDINAL_DIRS, RAMPS, RAMP_DIRS } from './ramps';
+import {
+  CARDINAL_DIRS,
+  MAX_TURN_CODE,
+  RAMPS,
+  RAMP_DIRS,
+} from './ramps';
 import { TILE_BY_CHAR } from './tile-codec';
 import { TileGrid } from './tile-grid';
 import { PASSABLE } from './tiles';
@@ -14,7 +19,8 @@ import type { Tile } from './tiles';
  * mirror and use the same changes as a rebuild signal. Levels come from the
  * generator (or a preset) and only change in the map editor, which resends
  * the whole map. Stairs can be turned to climb a set way (`ramps`: 0 picks
- * the way by itself, else 1 + an index into RAMP_DIRS).
+ * the way by itself, else 1 + an index into RAMP_DIRS); walls keep a way
+ * and a look the same way (see `turnCode`).
  *
  * Storage and encoding live in `TileGrid`; this class adds the factories
  * and the height geometry walkers move over.
@@ -44,11 +50,25 @@ export class WorldMap extends TileGrid {
   }
 
   /**
+   * A map made from its raw cells, row-major (as a save's chunks rebuild
+   * it).
+   * @param width Tiles across.
+   * @param height Tiles down.
+   * @param tiles Every tile.
+   * @param levels Every terrain level.
+   * @param ramps Every turn code (see `TileGrid.rampAt`).
+   * @returns The map.
+   */
+  static fromCells(width: number, height: number, tiles: Tile[], levels: Int8Array, ramps: Int8Array): WorldMap {
+    return new WorldMap(width, height, tiles, levels, ramps);
+  }
+
+  /**
    * Parses an encoded map and its levels `width` tiles across (the height
    * follows from the length), or null if they don't fit together.
    * @param encoded One character per tile (see `encode`).
    * @param levels One digit per tile (see `encodeLevels`).
-   * @param ramps One digit per tile (see `encodeRamps`), if saved.
+   * @param ramps One base-36 digit per tile (see `encodeRamps`), if saved.
    * @param width Tiles across.
    * @returns The map, or null when the parts don't fit or a tile is unknown.
    */
@@ -60,7 +80,7 @@ export class WorldMap extends TileGrid {
     const tiles = [...encoded].map((ch: string): Tile | undefined => TILE_BY_CHAR[ch]);
     const heights = Int8Array.from([...levels], (ch: string): number => Number(ch) + MIN_LEVEL);
     const turns = ramps?.length === encoded.length
-      ? Int8Array.from([...ramps], (ch: string): number => Math.min(RAMP_DIRS.length, Math.max(0, Number(ch) || 0)))
+      ? Int8Array.from([...ramps], (ch: string): number => Math.min(MAX_TURN_CODE, Math.max(0, parseInt(ch, 36) || 0)))
       : undefined;
     return tiles.every(Boolean) ? new WorldMap(width, height, tiles as Tile[], heights, turns) : null;
   }
@@ -92,7 +112,7 @@ export class WorldMap extends TileGrid {
     const own = this.base(tx, ty);
     const turned = this._ramps[ty * this.width + tx];
     if (turned > 0) {
-      const [dx, dy] = RAMP_DIRS[turned - 1];
+      const [dx, dy] = RAMP_DIRS[(turned - 1) % RAMP_DIRS.length];
       if (!this.isSolid(tx + dx, ty + dy) && this.base(tx + dx, ty + dy) > own) {
         return [dx, dy];
       }

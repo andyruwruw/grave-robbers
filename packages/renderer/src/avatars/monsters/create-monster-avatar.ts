@@ -1,10 +1,13 @@
 // Local Imports
+import { BloaterAvatar } from './kinds/bloater-avatar';
 import { BruteAvatar } from './kinds/brute-avatar';
 import { DemonAvatar } from './kinds/demon-avatar';
 import { GhostAvatar } from './kinds/ghost-avatar';
 import { GhoulAvatar } from './kinds/ghoul-avatar';
+import { NecromancerAvatar } from './kinds/necromancer-avatar';
 import { SkeletonAvatar } from './kinds/skeleton-avatar';
 import { VampireAvatar } from './kinds/vampire-avatar';
+import { WerewolfAvatar } from './kinds/werewolf-avatar';
 import { WitchAvatar } from './kinds/witch-avatar';
 import { ZombieAvatar } from './kinds/zombie-avatar';
 
@@ -25,6 +28,9 @@ const MONSTER_AVATARS: Record<MonsterKind, new (state: MonsterState) => MonsterA
   witch: WitchAvatar,
   ghoul: GhoulAvatar,
   demon: DemonAvatar,
+  bloater: BloaterAvatar,
+  necromancer: NecromancerAvatar,
+  werewolf: WerewolfAvatar,
 };
 
 /**

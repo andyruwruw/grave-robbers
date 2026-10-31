@@ -53,9 +53,9 @@ export interface MusicMood {
   fight: boolean;
 
   /**
-   * The blood moon is up.
+   * Least drums level outside a fight, 0..1 (world events raise it).
    */
-  bloodMoon: boolean;
+  drums: number;
 }
 
 /**

@@ -1,3 +1,6 @@
+// Types
+import type { RegrowthTile } from '../world/regrowth';
+
 /**
  * Server health for the TV's Overview tab, averaged over the last second.
  */
@@ -27,4 +30,9 @@ export interface ServerStats {
    * in KB before compression.
    */
   displayKBps: number;
+
+  /**
+   * How many of each regrowing tile the map has now.
+   */
+  stocked: Record<RegrowthTile, number>;
 }

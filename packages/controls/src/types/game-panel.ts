@@ -2,6 +2,7 @@
 import type { LucideIcon } from 'lucide-react';
 import type { GameSettings } from '@halloween/shared/protocol/game-settings';
 import type { SpawnKind } from '@halloween/shared/protocol/tv-tools';
+import type { IconKey } from '@halloween/renderer/types/icons';
 
 /**
  * One spawn button: what it spawns, its label, and its icon.
@@ -18,9 +19,9 @@ export interface Spawn {
   label: string;
 
   /**
-   * Its icon.
+   * Its icon: the thing's own 3D model.
    */
-  icon: LucideIcon;
+  icon: IconKey;
 }
 
 /**
@@ -30,7 +31,7 @@ export interface GameSwitch {
   /**
    * The setting it flips.
    */
-  key: Exclude<keyof GameSettings, 'daytime' | 'levelBoost'>;
+  key: Exclude<keyof GameSettings, 'daytime' | 'levelBoost' | 'difficulty'>;
 
   /**
    * Its name.

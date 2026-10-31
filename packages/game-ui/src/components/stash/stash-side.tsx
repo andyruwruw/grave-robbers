@@ -1,9 +1,9 @@
 // Packages
 import React from 'react';
 import { isGearItem } from '@halloween/shared/inventory/bag-items';
-import { itemKey, itemLabel } from '@halloween/shared/inventory/item-keys';
 
 // Local Imports
+import { bagItemIcon, bagItemLabel } from '../../helpers/gear-icons';
 import ItemIcon from '../items/item-icon';
 
 // Types
@@ -46,12 +46,12 @@ function StashSide({ title, items, onTap }: StashSideProps): React.JSX.Element {
             key={i}
             type='button'
             disabled={!item}
-            aria-label={item ? itemLabel(itemKey(item)) : 'Empty'}
+            aria-label={item ? bagItemLabel(item) : 'Empty'}
             className={`relative flex aspect-square items-center justify-center rounded-[2px] border ${item ? 'border-border bg-surface active:border-brand' : 'border-border bg-background'}`}
             onClick={(): void => onTap(i)}>
             {item && (
               <ItemIcon
-                item={itemKey(item)}
+                item={bagItemIcon(item)}
                 size={34} />
             )}
             {item && !isGearItem(item) && <span className='absolute bottom-0 right-0.5 font-medium text-xs text-foreground'>{item.count}</span>}

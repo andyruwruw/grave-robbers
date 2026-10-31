@@ -1,6 +1,7 @@
 // Packages
 import React from 'react';
 import { TICK_RATE } from '@halloween/shared/protocol/network';
+import { WORLD_EVENTS } from '@halloween/shared/world-events/world-event-catalog';
 import Card from '@halloween/ui/components/ui/primitives/card';
 
 // Local Imports
@@ -38,7 +39,7 @@ function ServerStats({ stats }: ServerStatsProps): React.JSX.Element {
     { label: 'World level', value: stats.worldLevel.toFixed(1) },
     { label: 'Monsters', value: String(stats.monsters) },
     { label: 'Ground items', value: String(stats.items) },
-    { label: 'Blood moon', value: stats.bloodMoon ? 'Rising' : 'No' },
+    { label: 'World events', value: stats.worldEvents.map((kind): string => WORLD_EVENTS[kind].name).join(', ') || 'None' },
   ];
 
   return (

@@ -3,6 +3,7 @@ import { TURRETS } from '@halloween/shared/structures/turrets';
 
 // Local Imports
 import {
+  BILE_SPLASH,
   BLADE_GLINT,
   CANDLE_SPARK,
   CHEST_SPLINTER,
@@ -11,11 +12,13 @@ import {
   GOLD_SPARK,
   POTION_SPLASH,
   PUMPKIN_FLESH,
+  RAISE_GLOW,
   SHADOW_SMOKE,
   SMOKE,
 } from '../config/effect-colors';
 import { ScenePart } from '../scene-part';
 import { DIRT_TOSS_DELAY, TILE_BAR_LIFT } from './config/events';
+import { InfusionEventEffects } from './infusion-event-effects';
 
 // Types
 import type { GameEvent } from '@halloween/shared/protocol/game-events';
@@ -23,14 +26,17 @@ import type { StructureKind } from '@halloween/shared/structures/types/structure
 import type { PlayerAvatar } from '../../avatars/player/player-avatar';
 import type { MonsterAvatars } from '../actors/monster-avatars';
 import type { PlayerAvatars } from '../actors/player-avatars';
+import type { CameraRig } from '../camera/camera-rig';
 import type { TileAnimations } from '../chunks/tile-animations';
 import type { WorldContext } from '../world-context';
 
 /**
  * Plays a tick's one-off events: chips, dust and dirt, turret fire,
- * monster deaths, snuffed lights, splashes, blinks, things growing in,
+ * monster deaths, snuffed lights, splashes, bloaters bursting, the dead
+ * rising, blinks, things growing in,
  * pickups, and smashed pumpkins and chests. A dig's dirt is tossed a beat
- * later, from a queue.
+ * later, from a queue. The infused weapons' events go to
+ * `InfusionEventEffects`.
  */
 export class EventEffects extends ScenePart {
   /**
@@ -40,14 +46,21 @@ export class EventEffects extends ScenePart {
   private _tosses: { at: number; tx: number; ty: number; dx: number; dy: number; count: number }[] = [];
 
   /**
+   * The infused weapons' events (chain lightning, blasts, slams, ...).
+   */
+  private _infusions: InfusionEventEffects;
+
+  /**
    * Starts with nothing queued.
    * @param ctx What every part of the scene shares.
    * @param _monsters The monsters, torn apart when they die.
    * @param _tiles Things growing in.
    * @param _players The players, the nearest digger tosses the dirt.
+   * @param rig The camera rig, shaken by the infused weapons' heavier hits.
    */
-  constructor(ctx: WorldContext, private _monsters: MonsterAvatars, private _tiles: TileAnimations, private _players: PlayerAvatars) {
+  constructor(ctx: WorldContext, private _monsters: MonsterAvatars, private _tiles: TileAnimations, private _players: PlayerAvatars, rig: CameraRig) {
     super(ctx);
+    this._infusions = new InfusionEventEffects(ctx, rig);
   }
 
   /**
@@ -56,6 +69,7 @@ export class EventEffects extends ScenePart {
    */
   play(events: GameEvent[]): void {
     for (const e of events) {
+      this._infusions.play(e);
       if (e.t === 'chips' || e.t === 'dig' || e.t === 'smash') {
         this._ctx.healthBars.hit(`t${e.tx},${e.ty}`, e.health, e.tx + 0.5, e.ty + 0.5, this._ctx.elevation(e.tx + 0.5, e.ty + 0.5), TILE_BAR_LIFT);
       }
@@ -77,6 +91,13 @@ export class EventEffects extends ScenePart {
       } else if (e.t === 'splash') {
         this._ctx.chips.puff(e.x, e.y, POTION_SPLASH, 26);
         this._ctx.gore.spatter(e.x, e.y, POTION_SPLASH, 18, null, 1.1);
+        this._ctx.lightMap.darken(this._ctx.chips.group);
+      } else if (e.t === 'burst') {
+        this._ctx.chips.puff(e.x, e.y, BILE_SPLASH, 30);
+        this._ctx.lightMap.darken(this._ctx.chips.group);
+      } else if (e.t === 'raise') {
+        this._ctx.chips.puff(e.x, e.y, DIRT, 16);
+        this._ctx.chips.spark(e.x, e.y, RAISE_GLOW, 12);
         this._ctx.lightMap.darken(this._ctx.chips.group);
       } else if (e.t === 'blink') {
         this._ctx.chips.puff(e.fromX, e.fromY, SHADOW_SMOKE, 22);

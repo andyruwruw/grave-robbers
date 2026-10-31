@@ -98,7 +98,7 @@ export class DemonAvatar extends ChargingMonsterAvatar {
      * @returns The eye.
      */
     const eye = (side: number): Mesh => {
-      const mesh = box([0.02, 0.022, 0.055], [0.095, 0.1, 0.045 * side], DEMON_EYE, true);
+      const mesh = this._parts.eye([0.02, 0.022, 0.055], [0.095, 0.1, 0.045 * side], DEMON_EYE);
       mesh.rotation.x = -0.35 * side;
       return mesh;
     };

@@ -1,8 +1,5 @@
-// Packages
-import { MAP_WIDTH } from '@halloween/shared/world/dimensions';
-
 // Local Imports
-import { CENTER_X, CENTER_Y, DIRS } from '../../config/classic';
+import { DIRS } from '../../config/classic';
 import { ClassicPass } from '../classic-pass';
 
 // Types
@@ -54,17 +51,18 @@ export abstract class Landmark extends ClassicPass {
    */
   private linkToPath([fx, fy]: Point, own: Rect): void {
     const inside = (x: number, y: number): boolean => x >= own.x && x < own.x + own.w && y >= own.y && y < own.y + own.h;
+    const width = this.map.width;
     const prev = new Map<number, number>();
-    const start = fy * MAP_WIDTH + fx;
+    const start = fy * width + fx;
     prev.set(start, -1);
     const queue = [start];
     let goal = -1;
     while (queue.length > 0 && goal < 0) {
       const i = queue.shift()!;
       for (const [dx, dy] of DIRS) {
-        const nx = (i % MAP_WIDTH) + dx;
-        const ny = Math.floor(i / MAP_WIDTH) + dy;
-        const ni = ny * MAP_WIDTH + nx;
+        const nx = (i % width) + dx;
+        const ny = Math.floor(i / width) + dy;
+        const ni = ny * width + nx;
         const tile = this.map.get(nx, ny);
         if (prev.has(ni)) {
           continue;
@@ -81,22 +79,23 @@ export abstract class Landmark extends ClassicPass {
       }
     }
     for (let i = goal; i >= 0 && i !== start; i = prev.get(i)!) {
-      if (this.map.get(i % MAP_WIDTH, Math.floor(i / MAP_WIDTH)) === 'grass') {
-        this.map.set(i % MAP_WIDTH, Math.floor(i / MAP_WIDTH), 'path');
+      if (this.map.get(i % width, Math.floor(i / width)) === 'grass') {
+        this.map.set(i % width, Math.floor(i / width), 'path');
       }
     }
   }
 
   /**
-   * The middle of the rectangle's side that faces the map center.
+   * The middle of the rectangle's side that faces the canvas's center (the
+   * map's middle, or the site being built).
    * @param r The rectangle.
    * @returns That tile.
    */
   protected doorTowardCenter(r: Rect): Point {
     const cx = r.x + r.w / 2;
     const cy = r.y + r.h / 2;
-    const dx = CENTER_X - cx;
-    const dy = CENTER_Y - cy;
+    const dx = this._canvas.center[0] - cx;
+    const dy = this._canvas.center[1] - cy;
     if (Math.abs(dx) / r.w > Math.abs(dy) / r.h) {
       return [dx > 0 ? r.x + r.w - 1 : r.x, r.y + Math.floor(r.h / 2)];
     }

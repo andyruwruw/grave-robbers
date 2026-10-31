@@ -13,7 +13,8 @@ export const STATIONS: Partial<Record<StructureKind, Station>> = {
   'furnace': { input: stock({ stone: 1 }), output: stock({ iron: 1 }), seconds: 6, queue: 5 },
   'sifter': { input: stock({ stone: 2 }), output: stock({ silver: 1 }), seconds: 7, queue: 5 },
   'bloodforge': { input: stock({ iron: 1, blood: 2 }), output: stock({ bloodsteel: 1 }), seconds: 8, queue: 5 },
-  'cauldron': { input: stock({ blood: 2, bone: 1 }), output: stock({ tonic: 1 }), seconds: 6, queue: 5 },
+  'quarry': { input: stock(), output: stock({ stone: 1 }), seconds: 30, queue: 5 },
+  'cauldron': { input: stock({ candy: 3, blood: 1, bone: 1 }), output: stock({ tonic: 1 }), seconds: 6, queue: 5 },
   'oven': { input: stock({ pumpkin: 1, bone: 2, blood: 1 }), output: stock({ candy: 4 }), seconds: 10, queue: 5 },
 };
 

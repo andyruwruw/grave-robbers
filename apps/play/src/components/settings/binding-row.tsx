@@ -14,9 +14,9 @@ interface BindingRowProps {
   label: string;
 
   /**
-   * The bound key or button's name.
+   * The bound key or button, drawn.
    */
-  value: string;
+  value: React.ReactNode;
 
   /**
    * Whether it's waiting for a new key or button.
@@ -43,7 +43,7 @@ function BindingRow({ label, value, waiting, onPress }: BindingRowProps): React.
       <button
         type='button'
         aria-pressed={waiting}
-        className={`${SETTINGS_BUTTON} w-28 ${waiting ? 'border-brand bg-brand-muted text-foreground' : 'border-border bg-muted text-foreground'}`}
+        className={`${SETTINGS_BUTTON} flex w-28 items-center justify-center ${waiting ? 'border-brand bg-brand-muted text-foreground' : 'border-border bg-muted text-foreground'}`}
         onClick={onPress}>
         {waiting ? 'Press...' : value}
       </button>

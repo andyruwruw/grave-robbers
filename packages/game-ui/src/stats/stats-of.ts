@@ -12,6 +12,7 @@ import { WeaponStatSheet } from './weapon-stat-sheet';
 // Types
 import type { RecipeId } from '@halloween/shared/crafting/recipes';
 import type { GearKind } from '@halloween/shared/gear/types/gear-def';
+import type { Infusion } from '@halloween/shared/gear/types/infusion';
 import type { StructureKind } from '@halloween/shared/structures/types/structures';
 import type { TreeState } from '@halloween/shared/skill-tree/types/skill-tree';
 import type { Stat } from '../types/stats';
@@ -21,9 +22,11 @@ import type { Stat } from '../types/stats';
  *
  * @param recipe - The recipe.
  * @param tree - The player's skill tree.
+ * @param infusion - A weapon's or torch's infusion, if any, so its bars
+ * show the variant.
  * @returns A fresh list of stats (none for materials).
  */
-export function statsOf(recipe: RecipeId, tree: TreeState): Stat[] {
+export function statsOf(recipe: RecipeId, tree: TreeState, infusion: Infusion | null = null): Stat[] {
   if (isMatRecipe(recipe)) {
     return [];
   }
@@ -32,12 +35,12 @@ export function statsOf(recipe: RecipeId, tree: TreeState): Stat[] {
     const kind = recipe.slice(5) as GearKind;
     const def = GEAR[kind];
     if (def.weapon) {
-      return new WeaponStatSheet(kind, tree, level).stats();
+      return new WeaponStatSheet(kind, tree, level, infusion).stats();
     }
     if (def.guard) {
       return new GuardStatSheet(kind, tree, level).stats();
     }
-    return new GearLightStatSheet(kind, tree, level).stats();
+    return new GearLightStatSheet(kind, tree, level, infusion).stats();
   }
   return new StructureStatSheet(recipe.slice(6) as StructureKind, tree, level).stats();
 }

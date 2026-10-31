@@ -58,7 +58,7 @@ export class PadHandler extends MessageHandler<PadMessage> {
 
   /**
    * Plays a claimed pad's state into its player: sticks, action and
-   * block, placing and turning while building, panic, and the menu
+   * block, placing and turning while building, USE, panic, and the menu
    * buttons (which open on the phone).
    * @param pad The pad.
    * @param token The token of the player who claimed it.
@@ -67,7 +67,7 @@ export class PadHandler extends MessageHandler<PadMessage> {
   private relay(pad: Pad, token: string, s: PadState): void {
     const phone = this.sessions.controllers.get(token);
     const building = this.game.building.isBuilding(token);
-    const presses = { panic: Number(s.panic) || 0, bag: Number(s.bag) || 0, craft: Number(s.craft) || 0, tree: Number(s.tree) || 0, turnLeft: Number(s.turnLeft) || 0, turnRight: Number(s.turnRight) || 0 };
+    const presses = { use: Number(s.use) || 0, panic: Number(s.panic) || 0, bag: Number(s.bag) || 0, craft: Number(s.craft) || 0, tree: Number(s.tree) || 0, turnLeft: Number(s.turnLeft) || 0, turnRight: Number(s.turnRight) || 0 };
     const act = s.act === true;
     this.game.controls.setInput(token, Number(s.x) || 0, Number(s.y) || 0);
     this.game.controls.setAim(token, Number(s.aimX) || 0, Number(s.aimY) || 0);
@@ -90,6 +90,9 @@ export class PadHandler extends MessageHandler<PadMessage> {
     pad.act = act;
     if (presses.panic !== pad.presses.panic) {
       this.game.panics.panic(token);
+    }
+    if (presses.use !== pad.presses.use && !building) {
+      this.game.use.use(token);
     }
     const menu = (['bag', 'craft', 'tree'] as const).find((m): boolean => presses[m] !== pad.presses[m]);
     if (phone && menu) {

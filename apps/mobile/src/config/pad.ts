@@ -10,4 +10,4 @@ export const BAG_SLOT_SIZE = 'min(56px, calc((100dvh - 96px) / 3.8))';
 /**
  * The panel toggles, in order, with their names.
  */
-export const PANEL_TABS = [['bag', 'Bag'], ['craft', 'Craft'], ['tree', 'Skill tree']] as const satisfies readonly (readonly [Panel, string])[];
+export const PANEL_TABS = [['bag', 'Bag'], ['craft', 'Craft'], ['armory', 'Armory'], ['tree', 'Skill tree']] as const satisfies readonly (readonly [Panel, string])[];

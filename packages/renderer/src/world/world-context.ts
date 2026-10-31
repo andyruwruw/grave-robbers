@@ -7,25 +7,35 @@ import {
   WebGLRenderer,
 } from 'three';
 import { MAP_HEIGHT, MAP_WIDTH } from '@halloween/shared/world/dimensions';
+import { resolveEffects } from '@halloween/shared/world-events/helpers/resolve-effects';
 
 // Local Imports
 import { AltarGauges } from '../effects/altar-gauges';
+import { ChainBolts } from '../effects/chain-bolts';
 import { ChipBursts } from '../effects/chip-bursts';
+import { Fissures } from '../effects/fissures';
 import { Flames } from '../effects/flames';
+import { FountainVictims } from '../effects/fountain-victims';
 import { Gore } from '../effects/gore/gore';
+import { GroundPatches } from '../effects/ground-patches';
 import { HealthBars } from '../effects/health-bars';
 import { PickupPopups } from '../effects/pickup-popups';
 import { Puddles } from '../effects/puddles';
+import { ShockRings } from '../effects/shock-rings';
 import { TreeSway } from '../effects/tree-sway';
 import { ItemPiles } from '../items/item-piles';
 import { Fog } from '../lighting/fog/fog';
 import { LightMap } from '../lighting/light-map';
+import { DEFAULT_DISPLAY_SETTINGS } from './config/display-settings';
 import { ProjectileMaterials } from './effects/projectile-materials';
 
 // Types
 import type { ItemState } from '@halloween/shared/goods/ground-items';
-import type { LightState } from '@halloween/shared/protocol/state/world-state';
+import type { LightState, VictimState } from '@halloween/shared/protocol/state/world-state';
 import type { WorldMap } from '@halloween/shared/world/world-map';
+import type { EventModifiers } from '@halloween/shared/world-events/types/event-effects';
+import type { DisplaySettings } from '../types/display-settings';
+import type { LightFlash } from './effects/types/light-flash';
 
 /**
  * What every part of the TV's scene shares: the three.js renderer, scene,
@@ -67,6 +77,12 @@ export class WorldContext {
   lightsOff = false;
 
   /**
+   * How the world events that are up look this frame, eased in and out
+   * (set by `WorldEventLook`).
+   */
+  look: EventModifiers = resolveEffects([]);
+
+  /**
    * Monsters and their shots are hidden (the map editor's view).
    */
   monstersHidden = false;
@@ -75,6 +91,17 @@ export class WorldContext {
    * The map editor's x-ray: trees, structures, and landmarks left out.
    */
   xray = false;
+
+  /**
+   * How this screen draws the world (see `DisplayApplier`); parts read it
+   * live.
+   */
+  display: DisplaySettings = { ...DEFAULT_DISPLAY_SETTINGS };
+
+  /**
+   * This screen's own player's id (/play), or null (the TV).
+   */
+  localPlayer: string | null = null;
 
   /**
    * The light the TV's right mouse button carries, or null.
@@ -107,6 +134,11 @@ export class WorldContext {
   lights: LightState[] = [];
 
   /**
+   * Monsters blood fountains hold this tick.
+   */
+  victims: VictimState[] = [];
+
+  /**
    * Darkness and colored light over the whole scene.
    */
   readonly lightMap = new LightMap();
@@ -137,6 +169,11 @@ export class WorldContext {
   readonly altarGauges = new AltarGauges();
 
   /**
+   * Blood and floating heads in fountains that caught a monster.
+   */
+  readonly fountainVictims = new FountainVictims(this.lightMap);
+
+  /**
    * The materials of shots in flight (made here, between the altar gauges
    * and the fog, to keep the old material creation order).
    */
@@ -156,6 +193,32 @@ export class WorldContext {
    * Witches' puddles on the ground.
    */
   readonly puddles = new Puddles();
+
+  /**
+   * Scorched ground, fire trails, and incense infused weapons leave.
+   */
+  readonly patches = new GroundPatches();
+
+  /**
+   * Chain lightning arcs.
+   */
+  readonly bolts = new ChainBolts();
+
+  /**
+   * Shockwave rings on the ground (wails, slams, novas, blasts).
+   */
+  readonly rings = new ShockRings();
+
+  /**
+   * Earthshaker fissures.
+   */
+  readonly cracks = new Fissures();
+
+  /**
+   * Short bursts of light from effects, lit and pruned by
+   * `LightCollector`.
+   */
+  flashes: LightFlash[] = [];
 
   /**
    * Health bars over hit tiles and monsters.

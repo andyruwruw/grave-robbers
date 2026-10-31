@@ -6,8 +6,9 @@ import type { Tile } from '@halloween/shared/world/tiles';
 import type { Player } from '../players/player';
 
 /**
- * One kind of thing a swing can do to the facing tile. `TileJobSystem`
- * tries each job in order until one takes the swing.
+ * One kind of thing that can be done to the facing tile. `TileJobSystem`
+ * tries its jobs on a swing, and `UseSystem` its own on USE, each in order
+ * until one takes it.
  */
 export abstract class TileJob extends GameSystem {
   /**

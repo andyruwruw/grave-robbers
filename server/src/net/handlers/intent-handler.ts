@@ -9,7 +9,7 @@ import type { ControllerSession } from '../types/session';
 /**
  * Messages this family handles.
  */
-type IntentMessage = 'input' | 'action' | 'block' | 'aim' | 'turn' | 'panic' | 'drop';
+type IntentMessage = 'input' | 'action' | 'block' | 'aim' | 'turn' | 'build-style' | 'panic' | 'drop';
 
 /**
  * What a joined phone's controls ask for: moving, acting, blocking,
@@ -35,7 +35,7 @@ export class IntentHandler extends ControllerHandler<IntentMessage> {
         this.game.controls.setBlock(token, msg.down === true);
         return;
       case 'aim':
-        this.game.controls.setAim(token, msg.x, msg.y);
+        this.game.controls.setAim(token, msg.x, msg.y, msg.free === true);
         return;
       case 'drop':
         this.game.drops.drop(token, msg.resource);
@@ -46,6 +46,11 @@ export class IntentHandler extends ControllerHandler<IntentMessage> {
       case 'turn':
         if (msg.dir === 1 || msg.dir === -1) {
           this.game.controls.turn(token, msg.dir);
+        }
+        return;
+      case 'build-style':
+        if (typeof msg.style === 'number') {
+          this.game.controls.pickStyle(token, msg.style);
         }
         return;
     }

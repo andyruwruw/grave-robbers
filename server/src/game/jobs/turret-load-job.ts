@@ -11,7 +11,7 @@ import type { Tile } from '@halloween/shared/world/tiles';
 import type { Player } from '../players/player';
 
 /**
- * A turret with room for ammo the player carries: it loads one. Falls
+ * A turret with room for ammo the player carries, on USE: it loads one. Falls
  * through to the other jobs when it doesn't load.
  */
 export class TurretLoadJob extends TileJob {

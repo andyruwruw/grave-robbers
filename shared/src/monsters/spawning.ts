@@ -1,7 +1,7 @@
 /**
  * Trickle spawning: a base number of monsters plus more per living player,
- * and seconds between spawns while under the cap. The blood moon raises
- * both.
+ * and seconds between spawns while under the cap. A world event's
+ * `spawning` effect can replace either.
  */
 export const BASE_MONSTERS = 2;
 
@@ -16,16 +16,6 @@ export const MONSTERS_PER_PLAYER = 4;
 export const SPAWN_INTERVAL = 4.5;
 
 /**
- * Monsters per living player during a blood moon.
- */
-export const BLOOD_MOON_MONSTERS_PER_PLAYER = 7;
-
-/**
- * Seconds between spawns during a blood moon.
- */
-export const BLOOD_MOON_SPAWN_INTERVAL = 1;
-
-/**
  * Most monsters out at once, however many play.
  */
 export const MAX_MONSTERS = 60;
@@ -37,15 +27,10 @@ export const MAX_MONSTERS = 60;
 export const IDLE_ZOMBIES = 10;
 
 /**
- * One ghost per this many burning built lights (fewer lights per ghost
- * during a blood moon), at most one new ghost every GHOST_SPAWN_INTERVAL.
+ * One ghost per this many burning built lights (a world event's
+ * `spawning` effect can change it), at most one new ghost every GHOST_SPAWN_INTERVAL.
  */
 export const LIGHTS_PER_GHOST = 3;
-
-/**
- * Burning built lights per ghost during a blood moon.
- */
-export const BLOOD_MOON_LIGHTS_PER_GHOST = 2;
 
 /**
  * Least seconds between new ghosts.
@@ -79,3 +64,13 @@ export const DESPAWN_DISTANCE = 44;
  * Seconds a monster stays that far off before it's gone.
  */
 export const DESPAWN_AFTER = 8;
+
+/**
+ * On a huge world each player has their own cap and spawn clock, so one
+ * far from the others still feels the horde: the cap counts the walkers
+ * within PRESSURE_RADIUS tiles of them, and is BASE_MONSTERS plus the
+ * per-player number for every player within that reach (them included),
+ * whose clocks slow to match, so a group together gets what it would on a
+ * small map. MAX_MONSTERS still holds across the world.
+ */
+export const PRESSURE_RADIUS = 30;

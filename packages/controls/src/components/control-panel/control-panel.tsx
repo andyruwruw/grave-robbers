@@ -17,6 +17,7 @@ import type { ClientMessage } from '@halloween/shared/protocol/messages/client-m
 import type { TvPadEntry } from '@halloween/shared/protocol/pads';
 import type { PlayerState } from '@halloween/shared/protocol/state/player-state';
 import type { SpawnKind } from '@halloween/shared/protocol/tv-tools';
+import type { WorldEventKind } from '@halloween/shared/world-events/types/world-events';
 import type { ControlTab, MusicControls } from '../../types/control-panel';
 import type { StatsSnapshot } from '../../types/stats';
 import type { TvView } from '../../types/tv-view';
@@ -88,9 +89,9 @@ interface ControlPanelProps {
   gameSettings: GameSettings;
 
   /**
-   * Whether a blood moon is up right now.
+   * The world events that are up right now.
    */
-  bloodMoon: boolean;
+  worldEvents: WorldEventKind[];
 
   /**
    * Saved map layouts a new world can start from.
@@ -131,7 +132,7 @@ function ControlPanel({
   tvView,
   onTvView,
   gameSettings,
-  bloodMoon,
+  worldEvents,
   presets,
   pads,
   send,
@@ -171,11 +172,11 @@ function ControlPanel({
       {tab === 'game' && (
         <GamePanel
           settings={gameSettings}
-          bloodMoon={bloodMoon}
+          worldEvents={worldEvents}
           worldLevel={stats.worldLevel}
           onChange={(settings: Partial<GameSettings>): void => send({ t: 'game-settings', settings })}
           onSpawn={(kind: SpawnKind): void => send({ t: 'spawn', kind })}
-          onBloodMoon={(): void => send({ t: 'force-blood-moon' })}
+          onStartEvent={(kind: WorldEventKind): void => send({ t: 'start-world-event', kind })}
           onKillMonsters={(): void => send({ t: 'kill-monsters' })}
           onEditMap={onEditMap}
           shortcuts={shortcuts}

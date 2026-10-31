@@ -2,35 +2,35 @@
 import React from 'react';
 
 // Types
-import type { ControlTab, ControlTabInfo } from '../../types/control-panel';
+import type { TabInfo } from '../../types/control-panel';
 
 /**
  * Props for the ControlTabs component.
  */
-interface ControlTabsProps {
+interface ControlTabsProps<K extends string> {
   /**
    * The tabs shown, in order.
    */
-  tabs: ControlTabInfo[];
+  tabs: TabInfo<K>[];
 
   /**
    * The open tab.
    */
-  tab: ControlTab;
+  tab: K;
 
   /**
    * Opens a tab.
    */
-  onTab: (tab: ControlTab) => void;
+  onTab: (tab: K) => void;
 }
 
 /**
- * The control panel's tab bar.
+ * A tab bar: the control panel's, and the admin's Map page.
  *
- * @param {ControlTabsProps} props - Component props.
+ * @param {ControlTabsProps<K>} props - Component props.
  * @returns {React.JSX.Element} The rendered tab bar.
  */
-function ControlTabs({ tabs, tab, onTab }: ControlTabsProps): React.JSX.Element {
+function ControlTabs<K extends string>({ tabs, tab, onTab }: ControlTabsProps<K>): React.JSX.Element {
   return (
     <div
       role='tablist'

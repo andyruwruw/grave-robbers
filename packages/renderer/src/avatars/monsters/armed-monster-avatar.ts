@@ -3,6 +3,7 @@ import { Group } from 'three';
 
 // Local Imports
 import { buildGearModel } from '../../models/gear/gear-model';
+import { HELD_TILT } from './config/monster-motion';
 import { MonsterAvatar } from './monster-avatar';
 
 // Types
@@ -23,7 +24,7 @@ export abstract class ArmedMonsterAvatar extends MonsterAvatar {
     const weapon = new Group();
     weapon.add(...buildGearModel(held, this._parts.box).parts);
     weapon.position.set(x, 0, 0);
-    weapon.rotation.z = Math.PI / 2 - 0.6;
+    weapon.rotation.z = HELD_TILT;
     weapon.scale.setScalar(0.85);
     arm.add(weapon);
   }

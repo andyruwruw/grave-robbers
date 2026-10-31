@@ -25,7 +25,7 @@ flowchart LR
 ```
 
 - **Candy** comes from graves, statues, crypts, and chests.
-- **Blood** comes from monsters (and the sacrificial altar).
+- **Blood** comes from monsters (more near an awake sacrificial altar).
 - Both are spent on skill tree upgrades, and on nothing else. Upgrades work anywhere; a research table makes them cheaper.
 
 ## Where to read more
@@ -37,6 +37,7 @@ flowchart LR
 | The map, terrain, and what grows back | [world.md](world.md) |
 | Health, death, PvP, melee, and blocking | [combat.md](combat.md) |
 | Every weapon and piece of armor | [weapons.md](weapons.md) |
+| Weapon infusions at the anvil | [infusions.md](infusions.md) |
 | Monsters, AI, and spawning | [monsters.md](monsters.md) |
 | Hidden player and world levels | [difficulty.md](difficulty.md) |
 | Inventory, resources, structures, stations | [building.md](building.md) |

@@ -109,6 +109,27 @@ body {
   animation: naughty-fade 3200ms ease-out forwards;
 }
 
+/* Hearts a fresh wound has locked away: a slow heartbeat until they can heal. */
+@keyframes wound-throb {
+  0%,
+  60%,
+  100% {
+    transform: scale(1);
+  }
+
+  15% {
+    transform: scale(0.78);
+  }
+
+  30% {
+    transform: scale(0.92);
+  }
+}
+
+.wound-throb {
+  animation: wound-throb 1100ms ease-in-out infinite;
+}
+
 /* Hearts healing back from the ritual knife's kills: they strobe until they're in. */
 @keyframes heal-strobe {
   0%,

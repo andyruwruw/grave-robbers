@@ -51,24 +51,26 @@ export class SpatialNav {
 
   /**
    * Keeps something selected in `root`: the current element if it's still
-   * there, else the first one.
+   * there (even disabled, so the next move starts from it), else the first
+   * one.
    *
    * @param root - The menu.
    */
   ensure(root: HTMLElement): void {
-    if (!this.focused(root)) {
+    if (!this.focused(root) && !this.origin(root)) {
       this.select(this.candidates(root)[0] ?? null);
     }
   }
 
   /**
-   * Moves the selection one step in a direction.
+   * Moves the selection one step in a direction (from where the selection
+   * was, even if it just turned disabled, like a reset button pressed).
    *
    * @param root - The menu.
    * @param dir - Which way.
    */
   move(root: HTMLElement, dir: NavDir): void {
-    const from = this.focused(root);
+    const from = this.focused(root) ?? this.origin(root);
     if (!from) {
       this.ensure(root);
       return;
@@ -97,6 +99,18 @@ export class SpatialNav {
     if (best) {
       this.select(best);
     }
+  }
+
+  /**
+   * The selected element if it's still in `root` and showing but can't be
+   * selected any more (disabled), to move on from.
+   *
+   * @param root - The menu.
+   * @returns The element, or null.
+   */
+  private origin(root: HTMLElement): HTMLElement | null {
+    const el = this._current;
+    return el && root.contains(el) && el.getClientRects().length > 0 ? el : null;
   }
 
   /**

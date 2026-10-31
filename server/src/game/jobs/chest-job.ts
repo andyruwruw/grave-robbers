@@ -1,10 +1,8 @@
 // Packages
-import { stock } from '@halloween/shared/goods/goods';
+import { playerLevel } from '@halloween/shared/difficulty/player-level';
 
 // Local Imports
-import { NO_TREE } from '../config/loot';
-import { randomLoot } from '../helpers/loot-rolls';
-import { CHEST_BOLTS, CHEST_BOLT_CHANCE, CHEST_CANDY, CHEST_WOOD } from './config/jobs';
+import { rollChest } from '../helpers/loot-rolls';
 import { TileJob } from './tile-job';
 
 // Types
@@ -12,7 +10,7 @@ import type { Tile } from '@halloween/shared/world/tiles';
 import type { Player } from '../players/player';
 
 /**
- * A chest: it breaks open in one hit.
+ * A chest: it breaks open in one hit, or on USE.
  */
 export class ChestJob extends TileJob {
   /**
@@ -36,19 +34,13 @@ export class ChestJob extends TileJob {
   }
 
   /**
-   * Scatters a chest's contents over its tile: a piece of gear and a pile
-   * of resources.
+   * Gives what was in a chest: raw goods, a little better for a stronger
+   * opener (see CHEST_LOOT).
    * @param p The player.
    * @param tx The tile's column.
    * @param ty The tile's row.
    */
   private spillChest(p: Player, tx: number, ty: number): void {
-    const roll = (most: number): number => 1 + Math.floor(Math.random() * most);
-    this._game.pickups.award(p, stock({
-      wood: roll(CHEST_WOOD),
-      candy: roll(CHEST_CANDY),
-      bolts: Math.random() < CHEST_BOLT_CHANCE ? roll(CHEST_BOLTS) : 0,
-    }), tx + 0.35, ty + 0.5);
-    this._game.pickups.pocket(p, randomLoot(NO_TREE), tx + 0.65, ty + 0.5);
+    this._game.pickups.award(p, rollChest(playerLevel(p.bag, p.tree, p.onlineSeconds).total), tx + 0.5, ty + 0.5);
   }
 }

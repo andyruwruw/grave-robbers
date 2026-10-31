@@ -11,12 +11,14 @@ The docs are split by topic so you can load only what a task needs. Read the rel
 | [docs/overview.md](docs/overview.md) | What the game is, the core loop, what isn't built yet |
 | [docs/architecture.md](docs/architecture.md) | Workspaces, module map per workspace, class hierarchies, tick loop, networking, identity, saves, running, conventions |
 | [docs/organization.md](docs/organization.md) | Where new code goes: folders (`config/`, `helpers/`, `types/`, `kinds/`), one class per file, part base classes, imports, size limit, traps |
-| [docs/class-hierarchies-server.md](docs/class-hierarchies-server.md) | Server and shared base classes and their subclasses (GameSystem, Player, TileJob, TurretFire, hub parts, Monster, HordePart, WorldFeature, GenPass, WeaponPerk, TileGrid) |
-| [docs/class-hierarchies-client.md](docs/class-hierarchies-client.md) | Client base classes and their subclasses (ScenePart, Avatar, MonsterAvatar, WeaponMotion, GroundDrop, EffectLayer, TilePainter, MusicSource, SoundWatcher, EditTool, InputMode, StatSheet) |
+| [docs/class-hierarchies-server.md](docs/class-hierarchies-server.md) | Server and shared base classes and their subclasses (GameSystem, Player, TileJob, TurretFire, hub parts, Monster, Wound, HordePart, WorldFeature, GenPass, WeaponPerk, TileGrid) |
+| [docs/class-hierarchies-client.md](docs/class-hierarchies-client.md) | Client base classes and their subclasses (ScenePart, Avatar, MonsterAvatar, WeaponMotion, GroundDrop, EssenceLook, EffectLayer, TilePainter, MusicSource, SoundWatcher, EditTool, InputMode, StatSheet) |
 | [docs/world.md](docs/world.md) | The map, sizes and huge worlds, chasms, terrain levels, height rules, collision, the generators, presets, regrowth, ground items |
-| [docs/combat.md](docs/combat.md) | Health, death, PvP, melee, what a swing is made with, blocking, armor, panic |
+| [docs/combat.md](docs/combat.md) | Health, healing, overheal, death, PvP, melee, what a swing is made with, blocking, armor, panic |
 | [docs/weapons.md](docs/weapons.md) | Every weapon, trick, and upgrade perk; ranged rules; `damageTo`; junk; off-hand; armor |
-| [docs/monsters.md](docs/monsters.md) | Monster stats, AI, attacks, sight, each kind, spawning, the blood moon, hit effects |
+| [docs/infusions.md](docs/infusions.md) | Weapon infusions at the anvil: essences, drop rates, costs, every variant with its rules and DPS estimates, infusing, models, the Armory, where the code is |
+| [docs/monsters.md](docs/monsters.md) | Monster stats, AI, attacks, sight, each kind, spawning, the blood moon, hit effects, statuses, turned monsters and risen allies |
+| [docs/world-events.md](docs/world-events.md) | World events (the blood moon): their effects list, how systems read `EventModifiers`, adding one |
 | [docs/difficulty.md](docs/difficulty.md) | Hidden player and world levels and what they do to the horde |
 | [docs/building.md](docs/building.md) | Goods, the bag, loot sources, crafting, every structure, lights, stations, automation |
 | [docs/skill-tree.md](docs/skill-tree.md) | Tree branches, unlocks, upgrade costs and effects, the phone's tree fog |
@@ -38,7 +40,7 @@ The docs are split by topic so you can load only what a task needs. Read the rel
 
 - `npm run dev`: server :3021, one Vite per app (mobile :5181 passes /tv, /play, /admin to :5182 to :5184). Open `http://localhost:5181/tv`.
 - `apps/` (mobile, tv, play, admin) never import each other; shared client code lives in `packages/` (ui, renderer, game-ui, controls), imported as `@halloween/<package>/<path>`.
-- `npm run typecheck`, `npm run build`, `npm start`, `npm run dev:fresh` (deletes the world save).
+- `npm run typecheck`, `npm run build`, `npm start`, `npm run dev:fresh` (deletes every save: all world slots, characters, and backups).
 - `shared/` is raw TS in topic folders, imported as `@halloween/shared/<folder>/<file>` by the server, packages, and apps. No barrel.
 - The server is authoritative: clients send intent, never positions. Everything acts on the facing tile.
 - kebab-case files, `// Packages` (npm and `@halloween/*`) / `// Local Imports` / `// Types` import groups, JSDoc on every function, class, method, and field, single-quoted JSX attributes. UI chrome uses theme token utilities; game colors live in `shared/` or the renderer.

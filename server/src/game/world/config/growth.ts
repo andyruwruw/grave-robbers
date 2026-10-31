@@ -47,6 +47,11 @@ export const INNER_TREE_CHANCE = 0.7;
 export const GRAVESIDE: ReadonlySet<Tile> = new Set<Tile>(['tombstone', 'cross', 'mausoleum', 'crypt', 'hedge']);
 
 /**
+ * What new hedges like to grow beside (so hedgerows fill back in).
+ */
+export const HEDGES: ReadonlySet<Tile> = new Set<Tile>(['hedge']);
+
+/**
  * Tiles a new tree likes to turn up beside.
  */
 export const TREES: ReadonlySet<Tile> = new Set<Tile>(['tree']);

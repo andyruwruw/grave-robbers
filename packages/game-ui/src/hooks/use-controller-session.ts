@@ -6,6 +6,7 @@ import {
 } from 'react';
 import { RESOURCES, stock } from '@halloween/shared/goods/goods';
 import { MAX_HP } from '@halloween/shared/players/health';
+import { MAX_KNOWN_TOKENS } from '@halloween/shared/players/roster';
 import { sfx } from '@halloween/ui/audio/sfx/sfx';
 import {
   readStorage,
@@ -29,6 +30,7 @@ import type { Inventory, Resource } from '@halloween/shared/goods/goods';
 import type { ControllerMessage } from '@halloween/shared/protocol/messages/controller-message';
 import type { PadInfo } from '@halloween/shared/protocol/pads';
 import type { PlayerIdentity } from '@halloween/shared/protocol/state/player-state';
+import type { UsePanel } from '@halloween/shared/protocol/state/use-panel';
 import type { Vitals } from '@halloween/shared/protocol/state/vitals';
 import type { TreeState } from '@halloween/shared/skill-tree/types/skill-tree';
 import type {
@@ -39,9 +41,26 @@ import type {
 } from '../types/session';
 
 /**
+ * The tokens of every character this device has played, newest first.
+ * @param key Where they're kept in localStorage.
+ * @returns The tokens.
+ */
+function readKnown(key: string): string[] {
+  try {
+    const known = JSON.parse(readStorage(key) ?? '[]');
+    return Array.isArray(known) ? known.filter((t: unknown): t is string => typeof t === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
  * A controller socket and the player state it hears about. Says hello with
  * the token saved under `tokenKey`; the server either resumes that player
- * or asks for a fresh join. Plays the player's own sounds and buzzes
+ * (or brings back their saved character) or asks for a fresh join. Every
+ * token it's given is also remembered under `<tokenKey>-known`, so joining
+ * again under a name it played (after Leave, or a world switch) proves the
+ * character is its own. Plays the player's own sounds and buzzes
  * (`rumble`, the phone's vibration by default) when hurt, killed, or
  * picking something up.
  *
@@ -56,6 +75,8 @@ export function useControllerSession(tokenKey: string, rumble: (pattern: Rumble)
   const [identity, setIdentity] = useState<PlayerIdentity | null>(null);
   const [joinError, setJoinError] = useState<string | null>(null);
   const [joining, setJoining] = useState(false);
+  const [needsCode, setNeedsCode] = useState(false);
+  const [transfer, setTransfer] = useState<{ code: string; until: number } | null>(null);
   const [inventory, setInventory] = useState<Inventory>(stock());
   const [gear, setGear] = useState<Gear>(EMPTY_GEAR);
   const [tree, setTree] = useState<TreeState>({ found: [], levels: {} });
@@ -69,6 +90,7 @@ export function useControllerSession(tokenKey: string, rumble: (pattern: Rumble)
   const [respawnAt, setRespawnAt] = useState(0);
   const [naughty, setNaughty] = useState<NaughtyNotice | null>(null);
   const [stash, setStash] = useState<(BagItem | null)[] | null>(null);
+  const [using, setUsing] = useState<UsePanel | null>(null);
   const [pads, setPads] = useState<PadInfo[]>([]);
   const [padMenu, setPadMenu] = useState<PadMenuRequest | null>(null);
   /**
@@ -87,7 +109,12 @@ export function useControllerSession(tokenKey: string, rumble: (pattern: Rumble)
   const applyIdentity = (next: PlayerIdentity | null): void => {
     lastInventory.current = null;
     setIdentity(next);
+    setTransfer(null);
     writeStorage(tokenKey, next?.token ?? null);
+    if (next) {
+      const known = [next.token, ...readKnown(`${tokenKey}-known`).filter((t: string): boolean => t !== next.token)];
+      writeStorage(`${tokenKey}-known`, JSON.stringify(known.slice(0, MAX_KNOWN_TOKENS)));
+    }
   };
 
   /**
@@ -105,11 +132,16 @@ export function useControllerSession(tokenKey: string, rumble: (pattern: Rumble)
       case 'joined':
         setJoining(false);
         setJoinError(null);
+        setNeedsCode(false);
         applyIdentity(msg.identity);
         return;
       case 'join-error':
         setJoining(false);
         setJoinError(msg.error);
+        setNeedsCode(msg.needsCode === true);
+        return;
+      case 'transfer-code':
+        setTransfer({ code: msg.code, until: msg.until });
         return;
       case 'left':
         applyIdentity(null);
@@ -140,6 +172,9 @@ export function useControllerSession(tokenKey: string, rumble: (pattern: Rumble)
         return;
       case 'stash':
         setStash(msg.items);
+        return;
+      case 'using':
+        setUsing(msg.panel);
         return;
       case 'pads':
         setPads(msg.pads);
@@ -182,15 +217,17 @@ export function useControllerSession(tokenKey: string, rumble: (pattern: Rumble)
   });
 
   /**
-   * Asks the server to join with a name and color.
+   * Asks the server to join with a name and color, offering the tokens of
+   * characters this device played and any transfer code typed.
    * @param name The player name.
    * @param color The player color.
+   * @param code A transfer code, for a name another device has.
    */
-  const join = useCallback((name: string, color: string): void => {
+  const join = useCallback((name: string, color: string, code = ''): void => {
     setJoining(true);
     setJoinError(null);
-    send({ t: 'join', name, color });
-  }, [send]);
+    send({ t: 'join', name, color, tokens: readKnown(`${tokenKey}-known`), code });
+  }, [send, tokenKey]);
 
-  return { welcomed, identity, joinError, joining, inventory, gear, tree, research, anvil, toasts, buildError, vitals, respawnAt, naughty, endNaughty, stash, pads, padMenu, send, join };
+  return { welcomed, identity, joinError, joining, needsCode, transfer, inventory, gear, tree, research, anvil, toasts, buildError, vitals, respawnAt, naughty, endNaughty, stash, using, pads, padMenu, send, join };
 }

@@ -1,10 +1,10 @@
 // Local Imports
 import {
   GRAVESIDE,
+  HEDGES,
   INNER_TREE_CHANCE,
   INNER_TREE_INSET,
   PATHS,
-  ROCK_TARGET,
   TREES,
 } from '../config/growth';
 import { inView } from '../helpers/tiles';
@@ -13,31 +13,30 @@ import { WorldFeature } from '../world-feature';
 
 // Types
 import type { Tile } from '@halloween/shared/world/tiles';
-import type { Occupied, StockedTile } from '../types/growth';
+import type { Occupied, RestockedTile } from '../types/growth';
 import type { TilePoint } from '../types/structures';
 
 /**
- * Finds room for new trees, pumpkins, chests, and rocks, and plants them
+ * Finds room for new trees, hedges, pumpkins, chests, and rocks, and plants them
  * only where they cut nothing off.
  */
 export class Planter extends WorldFeature {
   /**
    * Puts one `tile` on open grass, away from spawns, people, and items:
    * trees beside other trees (so the forest spreads; mostly in the middle
-   * of the map), pumpkins beside a
-   * path, chests beside graves or hedges, anywhere open when no such spot
-   * is left. A spot is only used if every tile reachable (there and back)
+   * of the map), hedges beside hedges, pumpkins beside a path, chests
+   * beside graves or hedges, anywhere open when no such spot is left. A spot is only used if every tile reachable (there and back)
    * before still is.
    * @param tile What to grow.
    * @param occupied Whether someone stands on or beside a tile.
    * @returns Where it grew, or null if there was no room.
    */
-  grow(tile: StockedTile, occupied: Occupied): TilePoint | null {
-    const likes = tile === 'tree' ? TREES : tile === 'pumpkin' ? PATHS : GRAVESIDE;
+  grow(tile: RestockedTile, occupied: Occupied): TilePoint | null {
+    const likes = tile === 'tree' ? TREES : tile === 'hedge' ? HEDGES : tile === 'pumpkin' ? PATHS : GRAVESIDE;
     const preferred: [number, number][] = [];
     const open: [number, number][] = [];
     for (const [tx, ty] of this.growSpots(occupied)) {
-      (this.beside(tx, ty, likes, tile !== 'pumpkin') ? preferred : open).push([tx, ty]);
+      (this.beside(tx, ty, likes, tile === 'tree' || tile === 'chest') ? preferred : open).push([tx, ty]);
     }
     let pool = preferred.length > 0 ? preferred : open;
     if (tile === 'tree' && Math.random() < INNER_TREE_CHANCE) {
@@ -96,15 +95,16 @@ export class Planter extends WorldFeature {
    * Adds one rock if the map is below target, on a grass tile whose eight
    * neighbors are all open so it can never seal off a passage.
    * @param occupied Whether someone stands on or beside a tile.
+   * @param target Rocks the map keeps topped up to.
    */
-  maybeGrowRock(occupied: Occupied): void {
+  maybeGrowRock(occupied: Occupied, target: number): void {
     let rocks = 0;
     for (let ty = 0; ty < this.map.height; ty++) {
       for (let tx = 0; tx < this.map.width; tx++) {
         rocks += this.map.get(tx, ty) === 'rock' ? 1 : 0;
       }
     }
-    if (rocks >= ROCK_TARGET) {
+    if (rocks >= target) {
       return;
     }
     for (let tries = 0; tries < 50; tries++) {

@@ -97,6 +97,13 @@ export class GroundItems {
   }
 
   /**
+   * Destroys every item on the ground (the admin's Manipulate section).
+   */
+  clear(): void {
+    this._byId.clear();
+  }
+
+  /**
    * Bag items on the ground under a player at (x, y), for walking over to
    * pick them up; what they dropped themselves waits a moment.
    * @param playerId The player.

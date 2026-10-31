@@ -2,13 +2,17 @@
 import type { TvControl, TvStatus } from '../../audio/tv-control';
 import type { RecipeId } from '../../crafting/recipes';
 import type { GearSlot } from '../../gear/types/gear-def';
+import type { Essence } from '../../gear/types/infusion';
 import type { Resource } from '../../goods/goods';
 import type { MapEdit } from '../../map-editor/map-edit';
 import type { MapGenSettings } from '../../map-gen/settings';
 import type { NodeId } from '../../skill-tree/types/skill-tree';
+import type { WorldEventKind } from '../../world-events/types/world-events';
 import type { GameSettings } from '../game-settings';
+import type { SortKey, SortSide } from '../../structures/sorting';
 import type { PadState } from '../pads';
 import type { LiftTarget, SpawnKind } from '../tv-tools';
+import type { RegrowthTile } from '../../world/regrowth';
 
 /**
  * Messages a client sends to the server.
@@ -24,9 +28,37 @@ export type ClientMessage =
    */
   | { t: 'hello-controller'; token?: string }
   /**
-   * Joins the game with a name and color.
+   * Joins the game with a name and color. A name that already has a
+   * character needs proof: a token this device held for it before
+   * (`tokens`), or a transfer code from the device that has it (`code`).
    */
-  | { t: 'join'; name: string; color: string }
+  | { t: 'join'; name: string; color: string; tokens?: string[]; code?: string }
+  /**
+   * Asks for a code that moves this phone's character to another device.
+   */
+  | { t: 'transfer-code' }
+  /**
+   * The admin asks for the saved worlds and the characters in this one.
+   */
+  | { t: 'world-slots' }
+  /**
+   * The admin makes a new, empty world slot.
+   */
+  | { t: 'slot-create'; name: string }
+  /**
+   * The admin plays another world slot (everyone goes back to the join
+   * form).
+   */
+  | { t: 'slot-open'; id: string }
+  /**
+   * The admin deletes a world slot that isn't being played (it's backed up
+   * first).
+   */
+  | { t: 'slot-delete'; id: string }
+  /**
+   * The admin deletes a character, freeing their name.
+   */
+  | { t: 'character-release'; id: string }
   /**
    * Leaves the game for good.
    */
@@ -44,9 +76,10 @@ export type ClientMessage =
    */
   | { t: 'block'; down: boolean }
   /**
-   * The aim stick, each axis -1 to 1.
+   * The aim stick, each axis -1 to 1. Snapped to eight ways like walking,
+   * unless `free` (/play's mouse and right stick aim any way).
    */
-  | { t: 'aim'; x: number; y: number }
+  | { t: 'aim'; x: number; y: number; free?: boolean }
   /**
    * Drops some candy or blood.
    */
@@ -76,6 +109,31 @@ export type ClientMessage =
    */
   | { t: 'move-item'; from: GearSlot | number; to: GearSlot | number }
   /**
+   * USE on the facing tile: opens what it can (a storage chest, a bone
+   * digger, a station, a research table's tree, an anvil's armory), or
+   * does what it can (relights, loads, offers, waters, opens a chest).
+   * Never hurts what's there. `at` (the mouse on /play) points the way
+   * to look for it (`useTarget`); without it, the player's facing.
+   */
+  | { t: 'use'; at?: { x: number; y: number } | null }
+  /**
+   * Closes the open digger or station panel.
+   */
+  | { t: 'use-close' }
+  /**
+   * Feeds the open station one batch from the bag (`all`: as many as fit).
+   */
+  | { t: 'use-feed'; all?: boolean }
+  /**
+   * Takes what the open bone digger dug up.
+   */
+  | { t: 'use-collect' }
+  /**
+   * Sends one thing out one side of the open belt sorter (null: nothing
+   * goes that way). Only things the player has unlocked (`sortableKeys`).
+   */
+  | { t: 'use-route'; side: SortSide; item: SortKey | null }
+  /**
    * Moves an item between the bag and the open storage chest.
    */
   | { t: 'stash-move'; from: 'bag' | 'stash'; index: number }
@@ -95,6 +153,12 @@ export type ClientMessage =
    * Upgrades a skill tree node.
    */
   | { t: 'upgrade'; node: NodeId }
+  /**
+   * Infuses a piece of gear at an anvil with an essence (its path's next
+   * level): an equipped slot, a bag index, or 'hammer' for the hammer
+   * everyone has (which makes an infused hammer).
+   */
+  | { t: 'infuse'; from: GearSlot | number | 'hammer'; essence: Essence }
   /**
    * Picks a bag slot's structure to place, or stops building (null).
    */
@@ -133,9 +197,9 @@ export type ClientMessage =
    */
   | { t: 'save-preset'; name: string }
   /**
-   * The TV summons a blood moon.
+   * The TV starts a world event.
    */
-  | { t: 'force-blood-moon' }
+  | { t: 'start-world-event'; kind: WorldEventKind }
   /**
    * The TV kills every monster.
    */
@@ -155,9 +219,18 @@ export type ClientMessage =
    */
   | { t: 'game-settings'; settings: Partial<GameSettings> }
   /**
-   * The TV conjures something next to a player.
+   * The TV or admin conjures something: at a random spot, or at `at` (tile
+   * space) when given (the admin's Spawn page, clicking the map).
    */
-  | { t: 'spawn'; kind: SpawnKind }
+  | { t: 'spawn'; kind: SpawnKind; at?: { x: number; y: number } }
+  /**
+   * The admin sets how many of a tile the map keeps growing back to.
+   */
+  | { t: 'regrowth-target'; tile: RegrowthTile; target: number }
+  /**
+   * The admin destroys every item on the ground.
+   */
+  | { t: 'clear-items' }
   /**
    * The TV lists the game controllers plugged into it.
    */
@@ -179,6 +252,10 @@ export type ClientMessage =
    * else the player.
    */
   | { t: 'turn'; dir: -1 | 1 }
+  /**
+   * Picks the look the next wall is built in (see `WALL_STYLES`).
+   */
+  | { t: 'build-style'; style: number }
   /**
    * A display watches these players (only nearby things are sent on a huge
    * world).

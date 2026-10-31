@@ -35,9 +35,9 @@ import type { Player } from '../players/player';
  */
 export class MeleeSystem extends GameSystem {
   /**
-   * Every living player and monster within the weapon's reach and arc in
-   * front, and not too far above or below (see MELEE_REACH_UP): one swing
-   * cleaves them all.
+   * Every living player and monster (not risen allies) within the
+   * weapon's reach and arc in front, and not too far above or below (see
+   * MELEE_REACH_UP): one swing cleaves them all.
    * @param p The player.
    * @param weapon The weapon's stats.
    * @param rewind How far back (seconds) to judge where monsters were.
@@ -92,13 +92,20 @@ export class MeleeSystem extends GameSystem {
 
   /**
    * Starts a melee swing with `kind` (null: the weapon), landing after its
-   * windup; a heavy one slows the swinger until it lands.
+   * windup (none for a Headsman's Axe swing after its multi-kill; any
+   * other weapon's swing spends the skip unused); a heavy one slows the
+   * swinger until it lands.
    * @param p The player.
    * @param stats The swing's weapon stats.
    * @param kind What the swing is made with (null: the weapon).
    */
   swing(p: Player, stats: WeaponStats, kind: GearKind | null): void {
-    const windup = stats.windup ?? STRIKE_DELAY;
+    const skip = !kind && p.skipWindup && !!stats.multiKillSkip;
+    const windup = skip ? 0 : stats.windup ?? STRIKE_DELAY;
+    if (!kind) {
+      p.skipWindup = false;
+    }
+    p.quickSwing = skip;
     p.nextActionAt = this.world.time + stats.cooldown;
     p.swings++;
     p.combo = -1;
@@ -118,7 +125,7 @@ export class MeleeSystem extends GameSystem {
     p.swingWith = kind;
     p.digUntil = 0;
     p.strikeAt = this.world.time + windup;
-    p.braceUntil = stats.windup ? p.strikeAt + HEAVY_FOLLOW_THROUGH : 0;
+    p.braceUntil = stats.windup && !skip ? p.strikeAt + HEAVY_FOLLOW_THROUGH : 0;
     if (kind) {
       this._game.actions.draw(p, kind);
     }
@@ -151,16 +158,26 @@ export class MeleeSystem extends GameSystem {
    * always go by the hammer (`chop`); a hit on a player or monster wears
    * down a weapon that breaks, unless it was the hammer's swing. Hitting a player ends spawn
    * protection. A glaive hits harder with its tip, and the weapon's other
-   * tricks ride along with the hit (see `HitEffects`).
+   * tricks ride along with the hit (see `HitEffects`); an infused weapon's
+   * swing tricks go off around it (see `MeleeTricksSystem`), and kills
+   * during it go through `InfusionSystem`.
    * @param p The player.
    */
   strike(p: Player): void {
-    const weapon = this.comboStats(p, p.swingWith ? weaponStats(p.swingWith, p.tree) : p.weapon());
+    const tricks = this._game.meleeTricks;
+    const weapon = tricks.wail(p, this.comboStats(p, p.swingWith ? weaponStats(p.swingWith, p.tree) : p.weapon()));
     const chop = p.hammer().chop!;
     const targets = this.meleeTargets(p, weapon, this.lagOf(p));
-    const cleave = 1 + (weapon.cleave ?? 0) * Math.max(0, targets.monsters.length - 1);
-    const blow = (x: number, y: number): number => (weapon.damage + this.highGround(p, x, y)) * cleave * (weapon.tip && Math.hypot(x - p.x, y - p.y) > weapon.reach * TIP_FROM ? weapon.tip : 1);
-    if (targets.players.length > 0 || targets.monsters.length > 0) {
+    const struck = targets.monsters.length;
+    const cleave = 1 + (weapon.cleave ?? 0) * Math.max(0, struck - 1);
+    const boost = weapon.overhealDamage && p.overheal > 0 ? weapon.overhealDamage : 1;
+    const blow = (x: number, y: number): number => (weapon.damage + this.highGround(p, x, y)) * cleave * boost * (weapon.tip && Math.hypot(x - p.x, y - p.y) > weapon.reach * TIP_FROM ? weapon.tip : 1);
+    const stun = weapon.stunPerExtra ? (weapon.stun ?? 0) + weapon.stunPerExtra * Math.max(0, struck - 1) : weapon.stun;
+    const hit = new Set<number>();
+    this._game.infusions.begin(p, weapon);
+    tricks.nova(p, weapon);
+    tricks.incense(p, weapon, targets.monsters);
+    if (targets.players.length > 0 || struck > 0) {
       if (targets.players.length > 0) {
         p.protectedUntil = 0;
         p.protected = false;
@@ -171,16 +188,28 @@ export class MeleeSystem extends GameSystem {
         }
       }
       for (const m of targets.monsters) {
+        hit.add(m.id);
+        this._game.infusions.before(m.id);
         this._game.spoils.killer = p;
-        const killed = this.horde.hit(m.id, damageTo(m.kind, weapon, blow(m.x, m.y)), p.x, p.y, this.world, weapon.knockback, { ...weapon, by: p });
-        if (killed && weapon.feast) {
-          p.feast += weapon.feast;
-        }
+        const tipped = Math.hypot(m.x - p.x, m.y - p.y) > weapon.reach * TIP_FROM;
+        const amount = tricks.slays(p, weapon, m) ? Infinity : damageTo(m.kind, weapon, blow(m.x, m.y));
+        const killed = this.horde.hit(m.id, amount, p.x, p.y, this.world, weapon.knockback, { ...weapon, stun, tipped, by: p });
+        this._game.infusions.after(m.id);
         if (killed && weapon.harvest) {
           this._game.bag.take(p, 'blood', weapon.harvest);
         }
+        if (!p.swingWith) {
+          this._game.patches.scorch(m.x, m.y, p, weapon);
+        }
       }
+      if (struck > 0) {
+        tricks.chain(p, weapon, targets.monsters, hit);
+        tricks.fissure(p, weapon, blow);
+        tricks.finish(p, weapon);
+      }
+      tricks.slam(p, weapon, hit, blow);
       this._game.spoils.killer = null;
+      this.settle(p, weapon);
       if (weapon.charge && p.combo !== SUPER_COMBO && targets.monsters.length > 0) {
         p.charge = Math.min(weapon.charge, p.charge + 1);
       }
@@ -196,6 +225,21 @@ export class MeleeSystem extends GameSystem {
       }
       return;
     }
+    tricks.slam(p, weapon, hit, blow);
+    this.settle(p, weapon);
     this._game.jobs.strikeTile(p, chop);
+  }
+
+  /**
+   * Ends the strike's kill count: a swing that killed `multiKillSkip` or
+   * more makes the next one skip its windup (Headsman's Axe).
+   * @param p The player.
+   * @param weapon The swing's stats.
+   */
+  private settle(p: Player, weapon: WeaponStats): void {
+    const kills = this._game.infusions.end();
+    if (weapon.multiKillSkip && !p.swingWith && kills >= weapon.multiKillSkip) {
+      p.skipWindup = true;
+    }
   }
 }

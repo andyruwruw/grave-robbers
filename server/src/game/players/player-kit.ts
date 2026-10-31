@@ -1,7 +1,7 @@
 // Packages
 import { bagCount, canAfford } from '@halloween/shared/inventory/affordability';
 import { emptyGear, isGearItem } from '@halloween/shared/inventory/bag-items';
-import { weaponStats } from '@halloween/shared/skill-tree/upgrades/gear-upgrades';
+import { itemStats, weaponStats } from '@halloween/shared/skill-tree/upgrades/gear-upgrades';
 
 // Local Imports
 import { emptyInventory } from '../helpers/inventory';
@@ -68,6 +68,12 @@ export class PlayerKit extends PlayerBody {
   buildFacing: number | null = null;
 
   /**
+   * The look picked for each wall, built in until changed (see
+   * `WALL_STYLES`).
+   */
+  buildStyles: Partial<Record<StructureKind, number>> = {};
+
+  /**
    * The bag slot whose structures are being placed, or null.
    */
   buildSlot: number | null = null;
@@ -89,6 +95,16 @@ export class PlayerKit extends PlayerBody {
   stashAt: { tx: number; ty: number } | null = null;
 
   /**
+   * The bone digger or station this player has open with USE, if any.
+   */
+  usingAt: { tx: number; ty: number } | null = null;
+
+  /**
+   * The open digger or station panel as last sent, to send only changes.
+   */
+  usingKey = '';
+
+  /**
    * Sets up empty pockets, or what they kept from last time.
    * @param init Who they are, where they start, and what they kept.
    */
@@ -101,11 +117,12 @@ export class PlayerKit extends PlayerBody {
   }
 
   /**
-   * The equipped weapon's stats (the hammer's with none).
+   * The equipped weapon's stats (the hammer's with none), with its
+   * infusion.
    * @returns Its stats at their tree's levels.
    */
   weapon(): WeaponStats {
-    return weaponStats(this.bag.equipped.weapon?.kind ?? null, this.tree);
+    return itemStats(this.bag.equipped.weapon, this.tree);
   }
 
   /**

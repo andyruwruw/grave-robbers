@@ -4,6 +4,8 @@ import { GRAVE_TILES } from '@halloween/shared/loot/graves';
 import { MONSTER_RADIUS } from '@halloween/shared/monsters/movement';
 import { PLAYER_RADIUS } from '@halloween/shared/players/movement';
 import { RAISED, TURNED, canBuildOn } from '@halloween/shared/structures/placement';
+import { wallStyles } from '@halloween/shared/structures/wall-styles';
+import { CARDINAL_DIRS } from '@halloween/shared/world/ramps';
 import { isStructure } from '@halloween/shared/structures/structure-catalog';
 import { LEVEL_HEIGHT } from '@halloween/shared/world/dimensions';
 import { buildTarget, facingTile } from '@halloween/shared/world/targeting';
@@ -69,7 +71,11 @@ export class BuildPreview extends ScenePart {
       const aim = this._localBuildAim?.id === p.id ? this._localBuildAim.at : p.buildAim;
       const at = buildTarget(p.x, p.y, p.facing, PLAYER_RADIUS, aim);
       const facing = p.buildFacing ?? p.facing;
-      avatar.showMarker(at, this.placePreview(p.building, at.tx, at.ty), this.map.level(at.tx, at.ty) * LEVEL_HEIGHT, TURNED.has(p.building) ? Math.round(facing / (Math.PI / 2)) * (Math.PI / 2) : null);
+      const place = this.placePreview(p.building, at.tx, at.ty);
+      if (wallStyles(p.building).length > 0) {
+        place.wall = { style: p.buildStyle ?? 0, beside: CARDINAL_DIRS.map(([dx, dy]: [number, number]) => this.map!.get(at.tx + dx, at.ty + dy)) };
+      }
+      avatar.showMarker(at, place, this.map.level(at.tx, at.ty) * LEVEL_HEIGHT, TURNED.has(p.building) ? Math.round(facing / (Math.PI / 2)) * (Math.PI / 2) : null);
       return;
     }
     avatar.showMarker(GATHERABLE[here] || GRAVE_TILES.has(here) || isStructure(here) || here === 'pumpkin' || here === 'chest' ? tile : null, null, this._ctx.elevation(tile.tx + 0.5, tile.ty + 0.5));

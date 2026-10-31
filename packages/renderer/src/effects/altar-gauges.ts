@@ -6,7 +6,7 @@ import {
   Mesh,
   MeshBasicMaterial,
 } from 'three';
-import { WORKING_GLOW } from '@halloween/shared/structures/lights';
+import { ALTAR_AWAKE_SECONDS } from '@halloween/shared/structures/occult';
 
 // Local Imports
 import { toWorld } from '../space/world-coords';
@@ -96,7 +96,7 @@ export class AltarGauges {
         this._gauges.set(key, gauge);
         this.group.add(gauge);
       }
-      const full = Math.max(0, Math.min(1, fuel / WORKING_GLOW));
+      const full = Math.max(0, Math.min(1, fuel / ALTAR_AWAKE_SECONDS));
       const { x, z } = toWorld(tx + 0.5, ty + 0.5);
       gauge.visible = full > 0;
       gauge.scale.set(Math.max(0.001, GAUGE_WIDTH * full), GAUGE_HEIGHT, GAUGE_DEPTH);

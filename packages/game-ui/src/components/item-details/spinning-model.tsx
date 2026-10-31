@@ -11,17 +11,16 @@ import { itemSpinUrls } from '@halloween/renderer/icons/item-icons';
 import { SPIN_FRAME_MS } from '../../config/item-details';
 
 // Types
-import type { RecipeId } from '@halloween/shared/crafting/recipes';
-import type { ItemKey } from '@halloween/shared/inventory/item-keys';
+import type { IconKey } from '@halloween/renderer/types/icons';
 
 /**
  * Props for the SpinningModel component.
  */
 interface SpinningModelProps {
   /**
-   * What to show.
+   * What to show (a material recipe shows its material).
    */
-  item: RecipeId | ItemKey;
+  item: IconKey;
 
   /**
    * Width and height in CSS pixels.
@@ -46,7 +45,7 @@ interface SpinningModelProps {
  * @returns {React.JSX.Element} The rendered model.
  */
 function SpinningModel({ item, size, dim, blur = false }: SpinningModelProps): React.JSX.Element {
-  const key = isMatRecipe(item) ? `mat:${item}` as const : item;
+  const key: IconKey = isMatRecipe(item) ? `mat:${item}` : item;
   const frames = useMemo((): string[] => itemSpinUrls(key), [key]);
   const [frame, setFrame] = useState(0);
   useEffect(() => {

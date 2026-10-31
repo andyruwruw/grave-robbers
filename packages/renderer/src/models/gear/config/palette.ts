@@ -84,14 +84,16 @@ export const FLAME_CORE = '#fff0a8';
 export const BLADE = '#34373e';
 
 /**
- * The lantern's frame.
+ * The lantern's frame: dark gunmetal, light enough to stand off the dark
+ * bag slots.
  */
-export const LANTERN_FRAME = '#15151b';
+export const LANTERN_FRAME = '#4a505c';
 
 /**
- * The lantern's glowing glass.
+ * The lantern's glowing glass: a deep amber, so the glow doesn't wash out
+ * the frame around it.
  */
-export const LANTERN_GLASS = '#ffcf6b';
+export const LANTERN_GLASS = '#f2b247';
 
 /**
  * Bone.

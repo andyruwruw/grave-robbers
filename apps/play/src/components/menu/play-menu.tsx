@@ -1,5 +1,6 @@
 // Packages
 import React from 'react';
+import ArmoryPanel from '@halloween/game-ui/components/armory/armory-panel';
 import BagPanel from '@halloween/game-ui/components/bag/bag-panel';
 import CraftPanel from '@halloween/game-ui/components/craft/craft-panel';
 import TreePanel from '@halloween/game-ui/components/tree/tree-panel';
@@ -24,6 +25,11 @@ import type {
  * Props for PlayMenu.
  */
 interface PlayMenuProps {
+  /**
+   * The menus offered (the Armory only once an anvil is available).
+   */
+  menus: Menu[];
+
   /**
    * The open menu.
    */
@@ -75,6 +81,11 @@ interface PlayMenuProps {
   anvil: number | null;
 
   /**
+   * Why the last build or infusion failed, shown briefly.
+   */
+  buildError: string | null;
+
+  /**
    * The player's commands.
    */
   commands: PlayerCommands;
@@ -108,17 +119,22 @@ interface PlayMenuProps {
    * Starts or stops waiting for a key or button.
    */
   onCapture: (capture: Capture | null) => void;
+
+  /**
+   * The last transfer code the server gave, or null.
+   */
+  transfer: { code: string; until: number } | null;
 }
 
 /**
  * The open /play menu over the world: a dimmed backdrop (clicking it
  * closes the menu), then a frame with the menu tabs and the Bag, Craft,
- * Skill tree, or Settings.
+ * Armory, Skill tree, or Settings.
  *
  * @param {PlayMenuProps} props - Component props.
  * @returns {React.JSX.Element} The rendered menu.
  */
-function PlayMenu({ menu, onMenu, menuRef, device, bound, inventory, gear, tree, research, anvil, commands, onPlace, onPanic, settings, onSettings, capturing, onCapture }: PlayMenuProps): React.JSX.Element {
+function PlayMenu({ menus, menu, onMenu, menuRef, device, bound, inventory, gear, tree, research, anvil, buildError, commands, onPlace, onPanic, settings, onSettings, capturing, onCapture, transfer }: PlayMenuProps): React.JSX.Element {
   return (
     <div className='absolute inset-0 z-10 flex items-center justify-center p-md'>
       <div
@@ -132,7 +148,8 @@ function PlayMenu({ menu, onMenu, menuRef, device, bound, inventory, gear, tree,
           menu={menu}
           device={device}
           bound={bound}
-          onMenu={onMenu} />
+          onMenu={onMenu}
+          menus={menus} />
         {menu === 'bag' ? (
           <div className='scrollbar-none flex min-h-0 flex-1 flex-col overflow-y-auto p-md'>
             <div className='mx-auto my-auto w-full max-w-[320px]'>
@@ -158,6 +175,17 @@ function PlayMenu({ menu, onMenu, menuRef, device, bound, inventory, gear, tree,
               anvil={anvil}
               onCraft={commands.craft} />
           </div>
+        ) : menu === 'armory' ? (
+          <div className='flex min-h-0 flex-1 p-md'>
+            <ArmoryPanel
+              embedded
+              inventory={inventory}
+              gear={gear}
+              tree={tree}
+              anvil={anvil}
+              error={buildError}
+              onInfuse={commands.infuse} />
+          </div>
         ) : menu === 'tree' ? (
           <div className='flex min-h-0 flex-1 flex-col p-md'>
             <TreePanel
@@ -172,18 +200,18 @@ function PlayMenu({ menu, onMenu, menuRef, device, bound, inventory, gear, tree,
               onPanic={onPanic} />
           </div>
         ) : (
-          <div className='scrollbar-none flex min-h-0 flex-1 flex-col overflow-y-auto p-md'>
-            <div className='my-auto'>
-              <SettingsPanel
-                settings={settings}
-                onChange={onSettings}
-                capturing={capturing}
-                onCapture={onCapture}
-                onLeave={(): void => {
-                  onMenu(null);
-                  commands.leave();
-                }} />
-            </div>
+          <div className='flex min-h-0 flex-1 p-md'>
+            <SettingsPanel
+              settings={settings}
+              onChange={onSettings}
+              capturing={capturing}
+              onCapture={onCapture}
+              transfer={transfer}
+              onTransfer={commands.transferCode}
+              onLeave={(): void => {
+                onMenu(null);
+                commands.leave();
+              }} />
           </div>
         )}
       </div>

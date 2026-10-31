@@ -1,6 +1,3 @@
-// Packages
-import { MAP_HEIGHT, MAP_WIDTH } from '@halloween/shared/world/dimensions';
-
 // Local Imports
 import { OPEN } from '../config/classic';
 import { GenPass } from '../gen-pass';
@@ -93,7 +90,7 @@ export abstract class ClassicPass extends GenPass {
    * @returns The distance in tiles (0 on the fence).
    */
   protected edge(tx: number, ty: number): number {
-    return Math.min(tx, ty, MAP_WIDTH - 1 - tx, MAP_HEIGHT - 1 - ty);
+    return Math.min(tx, ty, this.map.width - 1 - tx, this.map.height - 1 - ty);
   }
 
   /**

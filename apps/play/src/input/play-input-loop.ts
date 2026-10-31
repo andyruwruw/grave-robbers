@@ -12,6 +12,7 @@ import { CaptureMode } from './modes/capture-mode';
 import { FightMode } from './modes/fight-mode';
 import { IdleMode } from './modes/idle-mode';
 import { MenuMode } from './modes/menu-mode';
+import { UsePrompt } from './use-prompt';
 
 // Types
 import type React from 'react';
@@ -20,7 +21,7 @@ import type { WorldCache } from '@halloween/controls/display/world-cache';
 import type { WorldRenderer } from '@halloween/renderer/world/world-renderer';
 import type { SpatialNav } from '../nav/spatial-nav';
 import type { Predictor } from '../prediction/predictor';
-import type { LiveState } from '../types/play';
+import type { LiveState, UsePromptShown } from '../types/play';
 import type { FrameContext } from './frame-context';
 import type { KeyboardMouse } from './keyboard-mouse';
 import type { InputMode } from './modes/input-mode';
@@ -73,6 +74,16 @@ export interface PlayInputDeps {
    * The join screen's element.
    */
   joinRef: React.RefObject<HTMLDivElement | null>;
+
+  /**
+   * The USE prompt's element.
+   */
+  promptRef: React.RefObject<HTMLDivElement | null>;
+
+  /**
+   * Sets what the USE prompt shows (null: nothing), when it changes.
+   */
+  setUsePrompt: (prompt: UsePromptShown | null) => void;
 
   /**
    * Says which device was used last.
@@ -129,6 +140,11 @@ export class PlayInputLoop {
   private _frameId = 0;
 
   /**
+   * The prompt over what USE would act on.
+   */
+  private readonly _prompt: UsePrompt;
+
+  /**
    * When (ms) the last full frame ran.
    */
   private _lastFrame = performance.now();
@@ -139,6 +155,7 @@ export class PlayInputLoop {
    * @param _deps - What the loop reads from the page.
    */
   constructor(private readonly _deps: PlayInputDeps) {
+    this._prompt = new UsePrompt(_deps.promptRef, _deps.padIndex, _deps.setUsePrompt);
     this._ctx = buildFrameContext(_deps.keyboard, new GamepadFrame(), _deps.nav, _deps.rendererRef, _deps.predictor, new HeldInputs(), _deps.live.current);
   }
 
@@ -190,7 +207,8 @@ export class PlayInputLoop {
       }
     }
     ctx.root = !s.joined ? d.joinRef.current : d.menuRef.current;
-    if (this.mode(ctx).step(ctx) === 'halt') {
+    const mode = this.mode(ctx);
+    if (mode.step(ctx) === 'halt') {
       this.finish();
       return;
     }
@@ -207,6 +225,7 @@ export class PlayInputLoop {
       }
       r?.setPredicted(null);
     }
+    this._prompt.update(ctx, mode === this._fight && Boolean(me && !me.dead && !me.lifted));
     this._lastFrame = now;
     this.finish();
   };
@@ -224,7 +243,7 @@ export class PlayInputLoop {
     if (s.capturing?.device === 'pad') {
       return this._capture;
     }
-    const inMenu = !s.joined || s.menu !== null || s.stash;
+    const inMenu = !s.joined || s.menu !== null || s.stash || s.using;
     if (inMenu && ctx.root) {
       return this._menu;
     }

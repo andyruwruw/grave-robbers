@@ -21,28 +21,34 @@ interface PanelTabsProps {
    * Opens (or closes) a list.
    */
   onToggle: (panel: Panel) => void;
+
+  /**
+   * Whether the Armory tab shows (once an anvil is available, see
+   * `armoryOpen`).
+   */
+  armory: boolean;
 }
 
 /**
- * The big round Bag, Craft, and Skill tree buttons.
+ * The big round Bag, Craft, Armory, and Skill tree buttons.
  *
  * @param {PanelTabsProps} props - Component props.
  * @returns {React.JSX.Element} The rendered buttons.
  */
-function PanelTabs({ shown, onToggle }: PanelTabsProps): React.JSX.Element {
+function PanelTabs({ shown, onToggle, armory }: PanelTabsProps): React.JSX.Element {
   return (
-    <div className='flex shrink-0 flex-col items-center justify-center gap-md px-sm'>
-      {PANEL_TABS.map(([key, label]) => (
+    <div className='flex shrink-0 flex-col items-center justify-center gap-sm px-sm'>
+      {PANEL_TABS.filter(([key]): boolean => key !== 'armory' || armory).map(([key, label]) => (
         <button
           key={key}
           type='button'
           aria-label={label}
           aria-pressed={shown === key}
-          className={`flex h-16 w-16 items-center justify-center rounded-full border-2 ${shown === key ? 'border-brand bg-brand-muted text-foreground' : 'border-border bg-muted text-foreground-muted'}`}
+          className={`flex h-14 w-14 items-center justify-center rounded-full border-2 ${shown === key ? 'border-brand bg-brand-muted text-foreground' : 'border-border bg-muted text-foreground-muted'}`}
           onClick={(): void => onToggle(key)}>
           <ItemIcon
             item={`ui:${key}`}
-            size={40} />
+            size={36} />
         </button>
       ))}
     </div>

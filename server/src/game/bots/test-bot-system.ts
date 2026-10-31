@@ -43,6 +43,14 @@ export class TestBotSystem extends GameSystem {
   }
 
   /**
+   * The test player's token, so saves can leave it out.
+   * @returns The token, or null while it's off.
+   */
+  get token(): string | null {
+    return this._testPlayer?.token ?? null;
+  }
+
+  /**
    * Turns the test player on (joining it like a phone would) or off
    * (removing it); anything else leaves it be.
    * @param on True to turn it on, false off, undefined to leave it.
@@ -50,7 +58,7 @@ export class TestBotSystem extends GameSystem {
   toggle(on: boolean | undefined): void {
     if (on === true && !this._testPlayer) {
       const used = new Set([...this.players.values()].map((p: Player): string => p.color));
-      const joined = this._game.joining.join('Test Player', PLAYER_COLORS.find((c: string): boolean => !used.has(c)) ?? PLAYER_COLORS[0]);
+      const joined = this._game.joining.join('Test Player', PLAYER_COLORS.find((c: string): boolean => !used.has(c)) ?? PLAYER_COLORS[0], { tokens: [], code: '' });
       if (joined.ok) {
         const { token } = joined.identity;
         const hands: BotHands = {
@@ -65,7 +73,11 @@ export class TestBotSystem extends GameSystem {
         this._testPlayer = new TestPlayer(token, hands);
       }
     } else if (on === false && this._testPlayer) {
-      this._game.joining.leave(this._testPlayer.token);
+      const bot = this.players.get(this._testPlayer.token);
+      if (bot) {
+        this._game.joining.release(bot.id);
+      }
+      this._game.roster.released.delete(bot?.id ?? '');
       this._testPlayer = null;
     }
   }

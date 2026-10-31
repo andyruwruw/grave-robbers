@@ -19,6 +19,7 @@ classDiagram
   ScenePart <|-- CameraRig
   ScenePart <|-- CameraFollow
   ScenePart <|-- TerrainChunks
+  ScenePart <|-- MapOverview
   ScenePart <|-- Scenery
   ScenePart <|-- TileAnimations
   ScenePart <|-- PlayerAvatars
@@ -27,10 +28,12 @@ classDiagram
   ScenePart <|-- ActorLift
   ScenePart <|-- Projectiles
   ScenePart <|-- EventEffects
+  ScenePart <|-- InfusionEventEffects
   ScenePart <|-- CrossbowReticles
   ScenePart <|-- LightCollector
   ScenePart <|-- FogStampCollector
   ScenePart <|-- SkyLighting
+  ScenePart <|-- WorldEventLook
   ScenePart <|-- BuildPreview
   ScenePart <|-- EditCursor
   ScenePart <|-- StairsGhost
@@ -48,13 +51,18 @@ classDiagram
   EffectLayer <|-- Gore
   EffectLayer <|-- ChipBursts
   EffectLayer <|-- PickupPopups
+  EffectLayer <|-- ChainBolts
+  EffectLayer <|-- Fissures
+  EffectLayer <|-- ShockRings
 ```
 
-`WorldRenderer extends WorldScene` so the scene can be embedded without any input layer. `Flames`, `Puddles`, `HealthBars`, `AltarGauges`, and `TreeSway` keep their own update signatures and don't extend `EffectLayer`. `FogGrid extends FogField` (`lighting/fog/`).
+`WorldRenderer extends WorldScene` so the scene can be embedded without any input layer. `Flames`, `Puddles`, `GroundPatches`, `HealthBars`, `AltarGauges`, `FountainVictims`, and `TreeSway` keep their own update signatures and don't extend `EffectLayer`. `InfusionEventEffects` (`world/effects/`) draws the infusion events; `EventEffects` hands it every event. `FogGrid extends FogField` (`lighting/fog/`).
 
 ## Avatars
 
 `MonsterAvatar`'s constructor never calls the overridable `build`; `createMonsterAvatar` makes the kind and then calls `assemble()`.
+
+- **Composed parts** (not subclasses): `MonsterAvatar` owns `MonsterAfflictions` (status tints and pieces), `MonsterGlow` (hurt flash, ward pulse, afflictions tint), and `MonsterSwoosh` (the attack streak), with the flail motion in `helpers/flail-limbs.ts`. `PlayerGear` owns `HeldModels` (models built on first show, cached per kind and infusion) and `PlayerOffhand` (lantern, torches, shields).
 
 ```mermaid
 classDiagram
@@ -75,17 +83,20 @@ classDiagram
   MonsterAvatar <|-- ChargingMonsterAvatar
   MonsterAvatar <|-- GhostAvatar
   MonsterAvatar <|-- VampireAvatar
+  MonsterAvatar <|-- BloaterAvatar
   ArmedMonsterAvatar <|-- ZombieAvatar
   ArmedMonsterAvatar <|-- BruteAvatar
   ChargingMonsterAvatar <|-- SkeletonAvatar
   ChargingMonsterAvatar <|-- WitchAvatar
   ChargingMonsterAvatar <|-- GhoulAvatar
   ChargingMonsterAvatar <|-- DemonAvatar
+  ChargingMonsterAvatar <|-- NecromancerAvatar
+  ChargingMonsterAvatar <|-- WerewolfAvatar
 ```
 
 ## WeaponMotion and GroundDrop
 
-Motions are stateless, one shared instance per kind, picked by `pickMeleeMotion` (see [tv.md](tv.md#avatars)). `ReloadMotion` is a separate class with its own `apply(rig, age)`.
+Motions are stateless, one shared instance per kind, picked by `pickMeleeMotion` and `pickShotMotion` (see [tv.md](tv.md#avatars)). `ReloadMotion` is a separate class with its own `apply(rig, age)`.
 
 ```mermaid
 classDiagram
@@ -101,6 +112,8 @@ classDiagram
   WeaponMotion <|-- FistsMotion
   WeaponMotion <|-- DigMotion
   WeaponMotion <|-- ShotMotion
+  WeaponMotion <|-- ThrowMotion
+  WeaponMotion <|-- SprayMotion
   class GroundDrop {
     <<abstract>>
     one kind of thing on the ground
@@ -108,6 +121,25 @@ classDiagram
   GroundDrop <|-- ResourcePile
   GroundDrop <|-- GearDrop
   GroundDrop <|-- CrateDrop
+```
+
+## EssenceLook
+
+`infuseModel` (`models/gear/infusions/infuse-model.ts`) builds an infused model in three steps: the plain builder through a color-remapped box factory, the essence's `EssenceLook` (registered in `config/essence-looks.ts`), then the variant's own shape from `VARIANT_SHAPES`, which works through a `VariantDecor`. Level 2 builds on level 1.
+
+```mermaid
+classDiagram
+  class EssenceLook {
+    <<abstract>>
+    one essence's look at a level
+  }
+  EssenceLook <|-- HolyLook
+  EssenceLook <|-- TendonsLook
+  EssenceLook <|-- FangLook
+  EssenceLook <|-- EctoLook
+  EssenceLook <|-- HexLook
+  EssenceLook <|-- BrimstoneLook
+  EssenceLook <|-- SilverLook
 ```
 
 ## TilePainter
@@ -132,11 +164,11 @@ classDiagram
 | Folder | Painters |
 |---|---|
 | `landmarks/` | Tombstone, cross, crypt, mausoleum, statue, ruin, tower, well, tree, stump, rock, hedge, fence, lamp, pumpkin, chest |
-| `stations/` | Altar, anvil, bloodforge, cauldron, coffin, furnace, oven, research table, sawmill, sifter, stash |
+| `stations/` | Altar, anvil, bloodforge, cauldron, coffin, furnace, oven, quarry, research table, sawmill, sifter, stash |
 | `turrets/` | Bolt turret, swiper, flamethrower, ballista, sentry |
-| `wards/` | Bell, effigy, ghost lamp, mirror, obelisk, scarecrow, soul cage, soul fire |
+| `wards/` | Bell, effigy, ghost lamp, obelisk, scarecrow, soul cage, soul fire |
 | `traps/` | Spikes, iron spikes, barbed wire, blood fountain |
-| `lights/`, `floors/`, `farming/`, `automation/` | Torch, lantern, campfire; platform, steps; seeds, sprout; belt, digger |
+| `lights/`, `floors/`, `farming/`, `automation/` | Torch, lantern, campfire; platform, steps; seeds, sprout; belt, belt sorter, digger |
 
 ## Client families
 
@@ -187,6 +219,7 @@ classDiagram
     handlers built on first use
   }
   MapPointerMode <|-- PlayMouseMode
+  MapPointerMode <|-- SpawnMouseMode
   MapPointerMode <|-- MapEditController
   class InputMode {
     <<abstract>>
@@ -202,6 +235,6 @@ classDiagram
 
 - `MusicPlayer` (`packages/ui/src/audio/music/`) layers controls over `MusicPlayback` over `MusicState`, and plays through its two `MusicSource`s.
 - `SoundWatcher`s are the TV's sound parts (`apps/tv/src/audio/watchers/`), run by `SoundDirector`.
-- `StatSheet`s (`packages/game-ui/src/stats/`) draw the details' stat bars; `statsOf` picks one.
-- `EditTool`s (`packages/controls/src/editing/tools/`) are the map editor's tools, listed in `edit-tools.ts`. `MapPointerMode`s (`controls/src/mouse/`) are what the TV mouse does over the map.
+- `StatSheet`s (`packages/game-ui/src/stats/`) draw the details' stat bars; `statsOf(recipe, tree, infusion)` picks one. `WeaponStatSheet` and `GearLightStatSheet` take an optional infusion (the Brimstone Torch's Light bar includes its `lightMult`).
+- `EditTool`s (`packages/controls/src/editing/tools/`) are the map editor's tools, listed in `edit-tools.ts`. `MapPointerMode`s (`controls/src/mouse/`) are what the TV mouse does over the map; the admin's `SpawnMouseMode` lives in `apps/admin/src/mouse/`.
 - `InputMode`s are /play's input states (see [play.md](play.md#the-input-loop)).

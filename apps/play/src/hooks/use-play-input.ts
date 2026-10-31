@@ -11,7 +11,7 @@ import type { WorldCache } from '@halloween/controls/display/world-cache';
 import type { WorldRenderer } from '@halloween/renderer/world/world-renderer';
 import type { SpatialNav } from '../nav/spatial-nav';
 import type { Predictor } from '../prediction/predictor';
-import type { LiveState } from '../types/play';
+import type { LiveState, UsePromptShown } from '../types/play';
 
 /**
  * The page's parts the input reads.
@@ -51,6 +51,16 @@ export interface PlayInputParts {
    * The join screen's element.
    */
   joinRef: React.RefObject<HTMLDivElement | null>;
+
+  /**
+   * The USE prompt's element.
+   */
+  promptRef: React.RefObject<HTMLDivElement | null>;
+
+  /**
+   * Sets what the USE prompt shows (null: nothing), when it changes.
+   */
+  setUsePrompt: (prompt: UsePromptShown | null) => void;
 }
 
 /**

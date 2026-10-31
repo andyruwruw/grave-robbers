@@ -1,19 +1,26 @@
 // Local Imports
+import { HOLY_GOLD } from '../../models/gear/infusions/config/essence-palette';
 import { CHARGE_GLOW } from './config/player-look';
 
 // Types
-import type { Group, Mesh } from 'three';
+import type { Group, Mesh, MeshBasicMaterial } from 'three';
 import type { PlayerState } from '@halloween/shared/protocol/state/player-state';
 import type { BoxFactory } from '../../types/models';
 
 /**
- * The glow of a spiked gauntlet's charge on both fists.
+ * The glow of a spiked gauntlet's charge on both fists (gold for holy
+ * gauntlets).
  */
 export class ChargeGlows {
   /**
    * One glow per fist.
    */
   private _glows: Mesh[] = [];
+
+  /**
+   * Whether the glows are gold now.
+   */
+  private _holy = false;
 
   /**
    * Builds a hidden glow on each fist.
@@ -23,7 +30,7 @@ export class ChargeGlows {
    */
   build(box: BoxFactory, wrist: Group, lanternArm: Group): void {
     for (const [arm, y] of [[wrist, 0], [lanternArm, -0.25]] as const) {
-      const glow = box([0.2, 0.2, 0.2], [0.02, y - 0.02, 0], CHARGE_GLOW, true);
+      const glow = box([0.15, 0.15, 0.15], [0.02, y - 0.02, 0], CHARGE_GLOW, true);
       glow.visible = false;
       this._glows.push(glow);
       arm.add(glow);
@@ -36,9 +43,16 @@ export class ChargeGlows {
    * @param time Seconds since the renderer started.
    */
   update(target: PlayerState, time: number): void {
+    const holy = target.gearInfusion?.weapon?.essence === 'holy';
+    if (holy !== this._holy) {
+      this._holy = holy;
+      for (const glow of this._glows) {
+        (glow.material as MeshBasicMaterial).color.set(holy ? HOLY_GOLD : CHARGE_GLOW);
+      }
+    }
     for (const glow of this._glows) {
       glow.visible = target.charge > 0 && target.gear.weapon === 'spiked-gauntlet' && !target.drawn;
-      glow.scale.setScalar((0.4 + target.charge * 0.8) * (1 + Math.sin(time * 12) * 0.12 * target.charge));
+      glow.scale.setScalar((0.5 + target.charge * 0.5) * (1 + Math.sin(time * 12) * 0.08 * target.charge));
     }
   }
 }

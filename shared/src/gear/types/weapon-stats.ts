@@ -1,14 +1,15 @@
 // Types
+import type { InfusionTricks } from './infusion-tricks';
 import type { MeleeTricks } from './melee-tricks';
 import type { RangedTricks } from './ranged-tricks';
 import type { SwingStats } from './swing-stats';
 
 /**
  * Everything about how a weapon fights: its swing (`SwingStats`), its
- * melee trick (`MeleeTricks`) and, for a bow, crossbow or gun, how it
- * shoots (`RangedTricks`).
+ * melee trick (`MeleeTricks`), for a bow, crossbow or gun, how it
+ * shoots (`RangedTricks`), and what an infusion adds (`InfusionTricks`).
  */
-export interface WeaponStats extends SwingStats, MeleeTricks, RangedTricks {}
+export interface WeaponStats extends SwingStats, MeleeTricks, RangedTricks, InfusionTricks {}
 
 /**
  * One step of a weapon's combo (see `WeaponStats.combo`).

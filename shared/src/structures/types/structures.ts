@@ -1,4 +1,5 @@
 // Types
+import type { GearKind } from '../../gear/types/gear-def';
 import type { Bundle, Goods } from '../../goods/goods';
 
 /**
@@ -9,8 +10,8 @@ export type StructureKind =
   | 'torch' | 'lantern' | 'ghost-lamp' | 'campfire' | 'soul-fire' | 'platform' | 'steps'
   | 'research-table' | 'sawmill' | 'furnace' | 'stash'
   | 'effigy' | 'altar' | 'bloodforge' | 'sifter' | 'sentry' | 'digger' | 'bone-wall' | 'coffin' | 'bell' | 'cauldron'
-  | 'obelisk' | 'blood-fountain' | 'soul-cage' | 'mirror'
-  | 'anvil' | 'oven' | 'belt' | 'seeds' | 'sprout'
+  | 'obelisk' | 'blood-fountain' | 'soul-cage'
+  | 'anvil' | 'oven' | 'quarry' | 'belt' | 'sorter' | 'seeds' | 'sprout'
   | 'bolt-turret' | 'swiper' | 'flamethrower' | 'ballista';
 
 /**
@@ -73,6 +74,12 @@ export interface StructureDef {
    * Only crafted within ANVIL_RADIUS of an anvil.
    */
   anvil?: boolean;
+
+  /**
+   * Gear built into it, one plain (uninfused) item from the bag for each
+   * entry: a bolt turret takes a crossbow.
+   */
+  parts?: GearKind[];
 }
 
 /**

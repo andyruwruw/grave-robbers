@@ -72,7 +72,7 @@ export class WitchAvatar extends ChargingMonsterAvatar {
    * her right hand and a broom in her left.
    */
   protected build(): void {
-    const { box } = this._parts;
+    const { box, eye } = this._parts;
     const rand = seededRandom(this.target.id * 7919 + 13);
     const robe = WITCH_ROBES[Math.floor(rand() * WITCH_ROBES.length)];
     this._size = 1.1 + rand() * 0.1;
@@ -96,8 +96,8 @@ export class WitchAvatar extends ChargingMonsterAvatar {
       ...this._parts.roundedBox([0.19, 0.19, 0.19], [0, 0.1, 0], WITCH_SKIN),
       box([0.07, 0.035, 0.035], [0.12, 0.09, 0], WITCH_SKIN),
       box([0.03, 0.04, 0.035], [0.16, 0.07, 0], WITCH_SKIN),
-      box([0.03, 0.045, 0.06], [0.1, 0.13, -0.05], WITCH_EYE, true),
-      box([0.03, 0.045, 0.06], [0.1, 0.13, 0.05], WITCH_EYE, true),
+      eye([0.03, 0.045, 0.06], [0.1, 0.13, -0.05], WITCH_EYE),
+      eye([0.03, 0.045, 0.06], [0.1, 0.13, 0.05], WITCH_EYE),
       box([0.025, 0.02, 0.07], [0.1, 0.165, -0.05], WITCH_BROW),
       box([0.025, 0.02, 0.07], [0.1, 0.165, 0.05], WITCH_BROW),
       box([0.02, 0.035, 0.11], [0.1, 0.04, 0], '#1a0c08'),

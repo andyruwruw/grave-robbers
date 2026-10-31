@@ -32,9 +32,9 @@ export const SENTRY_DAMAGE = 3;
  * order).
  */
 export const TURRETS: Partial<Record<StructureKind, TurretDef>> = {
-  'bolt-turret': { fires: 'shot', ammo: 'bolts', shots: 1, most: 30, range: 6, cooldown: 1.5, damage: 2, knockback: 0.6 },
+  'bolt-turret': { fires: 'shot', ammo: 'bolts', shots: 1, most: 30, range: 6, cooldown: 1.5, damage: 4.5, knockback: 0.6 },
   'swiper': { fires: 'sweep', ammo: null, shots: 0, most: 0, range: 1.5, cooldown: 1, damage: 3, knockback: 0.9 },
   'sentry': { fires: 'shot', ammo: 'blood', shots: SENTRY_SHOTS_PER_BLOOD, most: SENTRY_MAX_SHOTS, range: SENTRY_RANGE, cooldown: SENTRY_COOLDOWN, damage: SENTRY_DAMAGE, knockback: 0.8 },
   'flamethrower': { fires: 'flame', ammo: 'wood', shots: 6, most: 48, range: 3.5, cooldown: 0.35, damage: 0.7, knockback: 0.1, cone: 0.45, burn: 1.5 },
-  'ballista': { fires: 'shot', ammo: 'bolts', shots: 1, most: 20, range: 9, cooldown: 2.5, damage: 12, knockback: 2, pierce: 3 },
+  'ballista': { fires: 'shot', ammo: 'bolts', shots: 1, most: 20, range: 9, cooldown: 2.5, damage: 18, knockback: 2, pierce: 3 },
 };

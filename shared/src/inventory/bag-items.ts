@@ -1,5 +1,6 @@
 // Types
 import type { GearKind, GearSlot } from '../gear/types/gear-def';
+import type { Infusion } from '../gear/types/infusion';
 import type { Material } from '../goods/goods';
 import type { StructureKind } from '../structures/types/structures';
 
@@ -28,6 +29,12 @@ export interface GearItem {
    * Whether the crossbow needs reloading before it can shoot again.
    */
   empty?: boolean;
+
+  /**
+   * What it's been infused with at an anvil, if anything (see
+   * `docs/infusions.md`): with `kind` it names its variant.
+   */
+  infusion?: Infusion;
 }
 
 /**

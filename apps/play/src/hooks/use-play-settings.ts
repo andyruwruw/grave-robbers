@@ -1,5 +1,6 @@
 // Packages
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { sfx } from '@halloween/ui/audio/sfx/sfx';
 
 // Local Imports
 import { loadPlaySettings, savePlaySettings } from '../helpers/play-settings';
@@ -23,7 +24,9 @@ export interface PlaySettingsState {
 }
 
 /**
- * The /play screen's settings, loaded once and saved on every change.
+ * The /play screen's settings, loaded once and saved on every change. The
+ * sound effects volume is applied here; the view's settings are applied by
+ * `usePlayView` and rumble by `padRumble`.
  *
  * @returns The settings and how to change them.
  */
@@ -39,6 +42,10 @@ export function usePlaySettings(): PlaySettingsState {
     setSettings(next);
     savePlaySettings(next);
   };
+
+  useEffect(() => {
+    sfx.setVolume(settings.sfxVolume);
+  }, [settings.sfxVolume]);
 
   return { settings, changeSettings };
 }

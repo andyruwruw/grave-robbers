@@ -32,10 +32,10 @@ export type Tile =
 const SOLID: ReadonlySet<Tile> = new Set<Tile>([
   'fence', 'tombstone', 'cross', 'tree', 'rock', 'pumpkin', 'chest', 'crypt',
   'mausoleum', 'ruin', 'well', 'statue', 'lamp', 'tower', 'hedge', 'chasm',
-  'wood-wall', 'stone-wall', 'torch', 'campfire', 'wood-fence', 'lantern', 'scarecrow', 'ghost-lamp', 'soul-fire', 'effigy', 'obelisk', 'soul-cage', 'mirror',
+  'wood-wall', 'stone-wall', 'torch', 'campfire', 'wood-fence', 'lantern', 'scarecrow', 'ghost-lamp', 'soul-fire', 'effigy', 'obelisk', 'soul-cage',
   'palisade', 'research-table', 'sawmill', 'furnace', 'stash',
   'altar', 'bloodforge', 'sifter', 'sentry', 'digger', 'bone-wall', 'coffin', 'bell', 'cauldron',
-  'anvil', 'oven', 'bolt-turret', 'swiper', 'flamethrower', 'ballista',
+  'anvil', 'oven', 'quarry', 'bolt-turret', 'swiper', 'flamethrower', 'ballista',
 ]);
 
 /**

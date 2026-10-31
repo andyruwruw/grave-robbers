@@ -11,6 +11,7 @@ import {
   BUTTON_BAG,
   BUTTON_CRAFT,
   BUTTON_PANIC,
+  BUTTON_USE,
   BUTTON_TREE,
   BUTTON_TURN_LEFT,
   BUTTON_TURN_RIGHT,
@@ -71,8 +72,8 @@ export class PadRelay {
        * @returns True when held.
        */
       const down = (i: number): boolean => buttonDown(gp, i);
-      const counts = this._presses.get(gp.index) ?? { panic: { count: 0, down: false }, bag: { count: 0, down: false }, craft: { count: 0, down: false }, tree: { count: 0, down: false }, turnLeft: { count: 0, down: false }, turnRight: { count: 0, down: false } };
-      for (const [key, button] of [['panic', BUTTON_PANIC], ['bag', BUTTON_BAG], ['craft', BUTTON_CRAFT], ['tree', BUTTON_TREE], ['turnLeft', BUTTON_TURN_LEFT], ['turnRight', BUTTON_TURN_RIGHT]] as const) {
+      const counts = this._presses.get(gp.index) ?? { use: { count: 0, down: false }, panic: { count: 0, down: false }, bag: { count: 0, down: false }, craft: { count: 0, down: false }, tree: { count: 0, down: false }, turnLeft: { count: 0, down: false }, turnRight: { count: 0, down: false } };
+      for (const [key, button] of [['use', BUTTON_USE], ['panic', BUTTON_PANIC], ['bag', BUTTON_BAG], ['craft', BUTTON_CRAFT], ['tree', BUTTON_TREE], ['turnLeft', BUTTON_TURN_LEFT], ['turnRight', BUTTON_TURN_RIGHT]] as const) {
         if (down(button) && !counts[key].down) {
           counts[key].count++;
         }
@@ -81,7 +82,7 @@ export class PadRelay {
       this._presses.set(gp.index, counts);
       const [x, y] = stick(gp.axes[0] ?? 0, gp.axes[1] ?? 0);
       const [aimX, aimY] = stick(gp.axes[2] ?? 0, gp.axes[3] ?? 0);
-      const state: PadState = { x, y, aimX, aimY, act: down(BUTTON_ACT), block: BUTTONS_BLOCK.some(down), panic: counts.panic.count, bag: counts.bag.count, craft: counts.craft.count, tree: counts.tree.count, turnLeft: counts.turnLeft.count, turnRight: counts.turnRight.count };
+      const state: PadState = { x, y, aimX, aimY, act: down(BUTTON_ACT), block: BUTTONS_BLOCK.some(down), use: counts.use.count, panic: counts.panic.count, bag: counts.bag.count, craft: counts.craft.count, tree: counts.tree.count, turnLeft: counts.turnLeft.count, turnRight: counts.turnRight.count };
       const stateKey = JSON.stringify(state);
       if (stateKey !== this._last.get(gp.index)) {
         this._last.set(gp.index, stateKey);

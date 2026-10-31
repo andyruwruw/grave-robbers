@@ -34,6 +34,9 @@ export function seenOf(node: TreeNode, tree: TreeState): Seen {
  */
 export function lockReason(node: TreeNode): string {
   const unlock = node.unlock;
+  if (unlock.by === 'upgrade' && unlock.level === 0) {
+    return `Opens with ${itemLabel(unlock.from)}`;
+  }
   if (unlock.by === 'upgrade') {
     return `Upgrade ${itemLabel(unlock.from)}${unlock.or ? ` or ${itemLabel(unlock.or)}` : ''} to Lv ${unlock.level}`;
   }

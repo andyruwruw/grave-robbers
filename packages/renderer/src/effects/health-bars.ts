@@ -79,6 +79,11 @@ export class HealthBars {
   private _projected = new Vector3();
 
   /**
+   * Whether bars show at all (the display's Show health bars).
+   */
+  private _shown = true;
+
+  /**
    * Starts with no bars.
    * @param _layer The element the bars are drawn in, over the canvas.
    */
@@ -96,7 +101,7 @@ export class HealthBars {
    * @param lift How far above the ground the bar floats.
    */
   hit(key: string, health: number, x: number, y: number, ground: number, lift: number): void {
-    if (health <= 0 || health >= 1) {
+    if (!this._shown || health <= 0 || health >= 1) {
       this.remove(key);
       return;
     }
@@ -130,6 +135,17 @@ export class HealthBars {
       bar.x = x;
       bar.y = y;
       bar.ground = ground;
+    }
+  }
+
+  /**
+   * Turns every bar on or off; off takes away the ones showing.
+   * @param on Whether bars show.
+   */
+  setShown(on: boolean): void {
+    this._shown = on;
+    if (!on) {
+      this.dispose();
     }
   }
 

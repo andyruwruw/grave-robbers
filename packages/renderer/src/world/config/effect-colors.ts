@@ -4,7 +4,7 @@ import type { MonsterKind } from '@halloween/shared/monsters/monster-kinds';
 /**
  * Puff colors when a monster dies.
  */
-export const DEATH_PUFF: Record<MonsterKind, string> = { zombie: '#7fa36a', vampire: '#8a1022', ghost: '#cfe3ff', brute: '#6f7f62', skeleton: '#e6e0cc', witch: '#5a3a7a', ghoul: '#8a8a7a', demon: '#24141c' };
+export const DEATH_PUFF: Record<MonsterKind, string> = { zombie: '#7fa36a', vampire: '#8a1022', ghost: '#cfe3ff', brute: '#6f7f62', skeleton: '#e6e0cc', witch: '#5a3a7a', ghoul: '#8a8a7a', demon: '#24141c', bloater: '#a8c24a', necromancer: '#2a4a32', werewolf: '#4a3a2c' };
 
 /**
  * Smoke from a snuffed light.
@@ -39,12 +39,22 @@ export const DIRT = '#3a2e24';
 /**
  * Blood: dark and old for zombies, bright for vampires.
  */
-export const BLOOD: Record<MonsterKind, string> = { zombie: '#b0221a', vampire: '#e8142c', ghost: '#9fb8d8', brute: '#8f1a14', skeleton: '#cfc8b0', witch: '#4f8a2a', ghoul: '#6a7a3a', demon: '#8a0a1e' };
+export const BLOOD: Record<MonsterKind, string> = { zombie: '#b0221a', vampire: '#e8142c', ghost: '#9fb8d8', brute: '#8f1a14', skeleton: '#cfc8b0', witch: '#4f8a2a', ghoul: '#6a7a3a', demon: '#8a0a1e', bloater: '#8aa82a', necromancer: '#7a1a20', werewolf: '#a8141a' };
 
 /**
  * A witch's potion bursting.
  */
 export const POTION_SPLASH = '#b04aff';
+
+/**
+ * A bloater's bile bursting.
+ */
+export const BILE_SPLASH = '#a8d42a';
+
+/**
+ * The green fire a necromancer raises the dead with.
+ */
+export const RAISE_GLOW = '#6aff9a';
 
 /**
  * Earth a brute's fists throw up when they hit the ground.

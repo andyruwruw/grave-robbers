@@ -9,14 +9,14 @@ import type { ControllerSession } from '../types/session';
 /**
  * Messages this family handles.
  */
-type BagMessage = 'equip' | 'drink' | 'unequip' | 'drop-gear' | 'move-item' | 'craft' | 'upgrade';
+type BagMessage = 'equip' | 'drink' | 'unequip' | 'drop-gear' | 'move-item' | 'craft' | 'upgrade' | 'infuse';
 
 /**
  * A joined phone's bag, crafting and skill tree.
  */
 export class BagHandler extends ControllerHandler<BagMessage> {
   /**
-   * Hands a bag, craft or upgrade request to the game.
+   * Hands a bag, craft, infuse or upgrade request to the game.
    * @param _ws The phone's socket.
    * @param _session Its session.
    * @param token Its player's token.
@@ -44,6 +44,9 @@ export class BagHandler extends ControllerHandler<BagMessage> {
         return;
       case 'upgrade':
         this.game.crafting.upgrade(token, msg.node);
+        return;
+      case 'infuse':
+        this.game.crafting.infuse(token, msg.from, msg.essence);
         return;
     }
   }

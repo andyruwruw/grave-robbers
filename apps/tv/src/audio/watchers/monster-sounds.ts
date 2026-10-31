@@ -1,5 +1,4 @@
 // Packages
-import { WITCH_SWIPE } from '@halloween/shared/monsters/kinds/witch';
 import { MONSTERS } from '@halloween/shared/monsters/monster-stats';
 
 // Local Imports
@@ -7,8 +6,6 @@ import { MONSTER_VOICES } from '../../config/monster-voices';
 import {
   GROWL_EVERY,
   SPOT_GAP,
-  SWIPE_STRIKE,
-  SWIPE_WINDUP,
   VOICE_GAP,
   VOICE_MIN,
   VOICE_SPREAD,
@@ -20,7 +17,7 @@ import type { StateMessage } from '../../types/sound';
 
 /**
  * Sounds for monsters: getting hurt, attacks winding up and landing, a
- * witch's swipe, spotting someone, growls while hunting, and an idle noise
+ * witch's swipe or a werewolf's pounce, spotting someone, growls while hunting, and an idle noise
  * now and then (spaced out across the whole horde).
  */
 export class MonsterSounds extends EntityWatcher<number> {
@@ -60,8 +57,8 @@ export class MonsterSounds extends EntityWatcher<number> {
       if (m.attacks > seen.attacks) {
         this._stage.attackCues(voice.windup, voice.strike, MONSTERS[m.kind].windup, m.x);
       }
-      if (m.swipes > seen.swipes) {
-        this._stage.attackCues(SWIPE_WINDUP, [SWIPE_STRIKE], WITCH_SWIPE.windup, m.x);
+      if (m.swipes > seen.swipes && voice.swipe) {
+        this._stage.attackCues(voice.swipe.windup, voice.swipe.strike, voice.swipe.time, m.x);
       }
       if (m.hunting && !seen.hunting && now - this._lastSpotAt >= SPOT_GAP) {
         this._lastSpotAt = now;

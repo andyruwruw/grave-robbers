@@ -28,7 +28,7 @@ export const MOUND_REFILL_SPREAD = 120;
  * some candy (what the skill tree runs on), maybe wood or bones, maybe a
  * blueprint (never gear: that only comes from chests and pumpkins).
  */
-export const DIG_CANDY: [number, number] = [2, 5];
+export const DIG_CANDY: [number, number] = [2, 3];
 
 /**
  * Wood a dug-up grave can give (min, max).
@@ -48,7 +48,7 @@ export const DIG_BLUEPRINT_CHANCE = 0.25;
 /**
  * Bones a dug-up grave can give (min, max).
  */
-export const DIG_BONES: [number, number] = [1, 3];
+export const DIG_BONES: [number, number] = [1, 4];
 
 /**
  * Landmarks that can be robbed like graves but stay standing: statues (the
@@ -75,11 +75,6 @@ export const ROB_REFILL = 600;
 export const ROB_CANDY: Record<'statue' | 'crypt' | 'mausoleum', [number, number]> = { statue: [6, 10], crypt: [8, 14], mausoleum: [4, 8] };
 
 /**
- * Chance a robbed landmark gives a piece of gear.
- */
-export const ROB_GEAR_CHANCE = 0.3;
-
-/**
  * Chance a robbed landmark gives a blueprint.
  */
 export const ROB_BLUEPRINT_CHANCE = 0.5;
@@ -87,4 +82,14 @@ export const ROB_BLUEPRINT_CHANCE = 0.5;
 /**
  * Chance a dug-up grave gives bones.
  */
-export const DIG_BONE_CHANCE = 0.6;
+export const DIG_BONE_CHANCE = 0.8;
+
+/**
+ * Chance a dug-up grave leaves headstone rubble, and how much stone it gives.
+ */
+export const DIG_STONE_CHANCE = 0.25;
+
+/**
+ * Stone from a grave's headstone rubble, least to most.
+ */
+export const DIG_STONE: [number, number] = [1, 2];

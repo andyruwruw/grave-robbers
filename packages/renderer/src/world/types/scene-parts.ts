@@ -5,9 +5,11 @@ import type { PlayerAvatars } from '../actors/player-avatars';
 import type { SnapshotInterpolator } from '../actors/snapshot-interpolator';
 import type { BuildPreview } from '../build/build-preview';
 import type { CameraRig } from '../camera/camera-rig';
+import type { MapOverview } from '../chunks/map-overview';
 import type { Scenery } from '../chunks/scenery';
 import type { TerrainChunks } from '../chunks/terrain-chunks';
 import type { TileAnimations } from '../chunks/tile-animations';
+import type { DisplayApplier } from '../display/display-applier';
 import type { CrossbowReticles } from '../effects/crossbow-reticles';
 import type { EventEffects } from '../effects/event-effects';
 import type { Projectiles } from '../effects/projectiles';
@@ -15,6 +17,7 @@ import type { FrameStats } from '../frame-stats';
 import type { FogStampCollector } from '../lights/fog-stamp-collector';
 import type { LightCollector } from '../lights/light-collector';
 import type { SkyLighting } from '../lights/sky-lighting';
+import type { WorldEventLook } from '../lights/world-event-look';
 
 /**
  * The parts of the TV's scene the frame loop steps each frame.
@@ -34,6 +37,11 @@ export interface SceneParts {
    * The world's voxels.
    */
   chunks: TerrainChunks;
+
+  /**
+   * The flat map drawn instead of the voxels when zoomed far out.
+   */
+  overview: MapOverview;
 
   /**
    * The outskirts and the watchtower.
@@ -59,6 +67,11 @@ export interface SceneParts {
    * The moon and the sky.
    */
   sky: SkyLighting;
+
+  /**
+   * How the world events that are up look.
+   */
+  look: WorldEventLook;
 
   /**
    * Where everyone is drawn in the past.
@@ -99,4 +112,9 @@ export interface SceneParts {
    * The post-processing that draws the frame.
    */
   post: PostEffects;
+
+  /**
+   * Applies the look and the display settings.
+   */
+  display: DisplayApplier;
 }

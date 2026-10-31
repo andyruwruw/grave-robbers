@@ -1,10 +1,10 @@
 // Packages
 import React from 'react';
-import { Lock, ScrollText } from 'lucide-react';
 
 // Local Imports
 import ItemIcon from '../items/item-icon';
 import DetailPips from './detail-pips';
+import StatGlyph from './stat-glyph';
 
 // Types
 import type { Unlock } from '@halloween/shared/skill-tree/types/skill-tree';
@@ -29,8 +29,14 @@ interface UnlockHintProps {
 function UnlockHint({ unlock }: UnlockHintProps): React.JSX.Element {
   return (
     <div className='flex items-center gap-1.5 text-foreground'>
-      <Lock size={14} />
-      {unlock.by === 'blueprint' && <ScrollText size={16} />}
+      <StatGlyph
+        icon='lock'
+        size={16} />
+      {unlock.by === 'blueprint' && (
+        <StatGlyph
+          icon='scroll'
+          size={18} />
+      )}
       {unlock.by === 'upgrade' && (
         <>
           <ItemIcon

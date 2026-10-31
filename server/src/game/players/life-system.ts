@@ -2,6 +2,7 @@
 import { RESOURCES } from '@halloween/shared/goods/goods';
 import { emptyGear, isMaterialItem } from '@halloween/shared/inventory/bag-items';
 import {
+  CAMPFIRE_HEAL_PER_LEVEL,
   CAMPFIRE_HEAL_PER_SECOND,
   CAMPFIRE_HEAL_RADIUS,
   DEATH_TOLL,
@@ -19,6 +20,7 @@ import { isSolidTile } from '@halloween/shared/world/tiles';
 import { GameSystem } from '../core/game-system';
 
 // Types
+import type { OverhealTrick } from '@halloween/shared/gear/types/special-tricks';
 import type { Player } from './player';
 
 /**
@@ -71,6 +73,7 @@ export class LifeSystem extends GameSystem {
     p.bag.bag = emptyGear().bag;
     this.outbox.inventoryChanged.add(p.token);
     p.hp = 0;
+    p.overheal = 0;
     p.dead = true;
     p.moving = false;
     p.building = null;
@@ -96,6 +99,13 @@ export class LifeSystem extends GameSystem {
     p.hp = MAX_HP;
     p.wounds = [];
     p.feast = 0;
+    p.overheal = 0;
+    p.overhealUntil = 0;
+    p.wailKills = 0;
+    p.wailCharged = false;
+    p.fissureHits = 0;
+    p.skipWindup = false;
+    p.blastTimes = [];
     p.dead = false;
     p.strikeAt = null;
     p.drawFrom = null;
@@ -110,23 +120,66 @@ export class LifeSystem extends GameSystem {
   /**
    * Mends a player resting beside a burning campfire, and pays out what
    * their kills with a feeding weapon are owed (held back by fresh wounds,
-   * wasted at full health). Health comes back no other way on its own.
+   * wasted at full health unless the weapon overheals). Overheal runs out
+   * `seconds` after its last top-up. Health comes back no other way on
+   * its own.
    * @param p The player.
    * @param dt Seconds since the last step.
    */
   rest(p: Player, dt: number): void {
     const time = this.world.time;
     p.wounds = p.wounds.filter((w): boolean => time - w.at < FRESH_WOUND_SECONDS);
+    if (p.overheal > 0 && time >= p.overhealUntil) {
+      p.overheal = 0;
+    }
     if (p.dead) {
       return;
     }
-    if (this.world.lights.nearLitCampfire(p.x, p.y, CAMPFIRE_HEAL_RADIUS)) {
-      this.heal(p, CAMPFIRE_HEAL_PER_SECOND * dt);
+    const fire = this.world.lights.litCampfireLevel(p.x, p.y, CAMPFIRE_HEAL_RADIUS);
+    if (fire !== null) {
+      this.heal(p, CAMPFIRE_HEAL_PER_SECOND * (1 + CAMPFIRE_HEAL_PER_LEVEL * fire) * dt);
     }
     if (p.feast > 0) {
       const due = Math.min(p.feast, FEAST_HEAL_PER_SECOND * dt);
-      p.feast -= p.hp >= MAX_HP ? due : this.heal(p, due);
+      if (p.hp >= MAX_HP) {
+        this.overheal(p, due, p.weapon().overheal);
+        p.feast -= due;
+      } else {
+        p.feast -= this.heal(p, due);
+      }
     }
+  }
+
+  /**
+   * Heals up to `amount` at once (a kill, a combo's last hit), never into
+   * fresh wounds; with an `overheal`, what's left past full health tops
+   * up their overheal instead of going to waste.
+   * @param p The player.
+   * @param amount The most to heal.
+   * @param overheal The weapon's overheal, if it has one.
+   * @returns How much it healed (overheal not counted).
+   */
+  mend(p: Player, amount: number, overheal?: OverhealTrick): number {
+    const healed = this.heal(p, amount);
+    if (p.hp >= MAX_HP) {
+      this.overheal(p, amount - healed, overheal);
+    }
+    return healed;
+  }
+
+  /**
+   * Tops up a player's overheal, up to the weapon's `max`, and restarts
+   * its timer.
+   * @param p The player.
+   * @param amount How much.
+   * @param trick The weapon's overheal (nothing without one).
+   */
+  private overheal(p: Player, amount: number, trick: OverhealTrick | undefined): void {
+    if (!trick || amount <= 0) {
+      return;
+    }
+    p.overheal = Math.min(trick.max, p.overheal + amount);
+    p.overhealUntil = this.world.time + trick.seconds;
   }
 
   /**

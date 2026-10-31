@@ -3,6 +3,12 @@ import { MONSTER_RADIUS } from '@halloween/shared/monsters/movement';
 import { KNOCKBACK_DISTANCE } from '@halloween/shared/players/combat';
 
 // Local Imports
+import { MONSTER_FAULTS } from '../../config/server';
+import { guard } from '../helpers/guard';
+
+// Local Imports
+import { Afflictions } from './afflictions';
+import { Bursts } from './bursts';
 import { separateWalkers } from './helpers/separate';
 import { HordeContext } from './horde-context';
 import { RewindBuffer } from './rewind-buffer';
@@ -10,20 +16,22 @@ import { Spawner } from './spawner';
 
 // Types
 import type { MonsterKind } from '@halloween/shared/monsters/monster-kinds';
+import type { EventModifiers } from '@halloween/shared/world-events/types/event-effects';
 import type { MonsterState } from '@halloween/shared/protocol/state/monster-state';
 import type { World } from '../world/world';
 import type { Monster } from './monsters/monster';
 import type { HitEffects, HordeHooks, Target } from './types/hooks';
 
 /**
- * Every monster on the map: trickle and blood-moon spawning, and the three
+ * Every monster on the map: trickle spawning (paced by world events), and the three
  * behaviors. Zombies and vampires only notice players in sight range with a
  * clear line of sight, chase them, head for where they last saw them for a
  * few seconds after losing them, and otherwise wander: zombies shamble with
  * pauses (drifting toward the graves), vampires prowl between dark spots.
  * Chasing zombies (or ones that spot a scarecrow) chew through structures
  * in the way; vampires only move through unlit tiles and wait at the edge
- * of the light. Ghosts meander through walls to snuff burning lights unless
+ * of the light. Ghosts float to burning lights (blocked by walls and
+ * terrain like anything else) to snuff them unless
  * a player is standing in them. This is what the game talks to; the
  * monsters themselves are the `Monster` classes.
  */
@@ -42,6 +50,17 @@ export class Horde<P extends Target> {
    * Brings monsters in.
    */
   private readonly _spawner: Spawner<P>;
+
+  /**
+   * Bursts the bloaters that died.
+   */
+  private readonly _bursts: Bursts<P>;
+
+  /**
+   * Statuses, damage over time, turning and raising monsters, and incense,
+   * for the game's infusion effects (see `Afflictions`).
+   */
+  readonly afflictions: Afflictions<P>;
 
   /**
    * Zombies and vampires leave players alone (the TV's Game tab).
@@ -65,6 +84,29 @@ export class Horde<P extends Target> {
   spawning = true;
 
   /**
+   * Sets the share of the usual monster caps spawning fills (see
+   * `HordeContext.loadScale`).
+   * @param scale The share, 0 to 1.
+   */
+  setLoadScale(scale: number): void {
+    this._ctx.loadScale = scale;
+  }
+
+  /**
+   * How many times each monster's update has thrown (see MONSTER_FAULTS).
+   */
+  private _faults = new Map<number, number>();
+
+  /**
+   * What all damage monsters take is multiplied by (the server's
+   * difficulty).
+   * @param scale The multiplier.
+   */
+  setDealt(scale: number): void {
+    this._ctx.dealt = scale;
+  }
+
+  /**
    * The monster the TV's mouse is holding, which does nothing until
    * dropped.
    */
@@ -82,6 +124,9 @@ export class Horde<P extends Target> {
   constructor(hooks: HordeHooks<P>) {
     this._ctx = new HordeContext(hooks);
     this._spawner = new Spawner(this._ctx);
+    this._bursts = new Bursts(this._ctx);
+    this.afflictions = new Afflictions(this._ctx);
+    this._ctx.raise = (kind: MonsterKind, x: number, y: number): number | null => this._spawner.raise(kind, x, y, this.level);
   }
 
   /**
@@ -139,23 +184,24 @@ export class Horde<P extends Target> {
   }
 
   /**
-   * Monsters a swing or a shot can hit, ghosts included.
+   * Monsters a player's swing, shot, aim, blast or spray can hit, ghosts
+   * included: everything but risen allies, which only other monsters hurt.
    * @returns A new list of them.
    */
   targets(): { id: number; kind: MonsterKind; x: number; y: number }[] {
-    return [...this._ctx.roster.values()];
+    return [...this._ctx.roster.values()].filter((m: Monster<P>): boolean => !m.turned.ally);
   }
 
   /**
-   * Every monster as it stood `back` seconds ago (at most REWIND_KEEP;
-   * one too new for that keeps where it is now), for judging a laggy
-   * player's melee against what their screen showed.
+   * The monsters `targets` gives, as they stood `back` seconds ago (at
+   * most REWIND_KEEP; one too new for that keeps where it is now), for
+   * judging a laggy player's melee against what their screen showed.
    * @param back How far back (seconds).
    * @param now The game clock.
    * @returns Each monster's id, kind and position then.
    */
   targetsAt(back: number, now: number): { id: number; kind: MonsterKind; x: number; y: number }[] {
-    return this._rewind.at(this._ctx.roster, back, now);
+    return this._rewind.at(this._ctx.roster, back, now).filter((m): boolean => !this._ctx.roster.get(m.id)?.turned.ally);
   }
 
   /**
@@ -210,31 +256,76 @@ export class Horde<P extends Target> {
    * @param dt Seconds since the last tick.
    * @param world The world.
    * @param players Every player.
-   * @param bloodMoon Whether a blood moon is up.
+   * @param mods The world events' effects.
    */
-  step(dt: number, world: World, players: P[], bloodMoon: boolean): void {
+  step(dt: number, world: World, players: P[], mods: EventModifiers): void {
     const { roster, light, heat, sight, wards } = this._ctx;
+    this._ctx.mods = mods;
+    this._ctx.now = world.time;
     light.fit(world.map);
     heat.fit(world.map);
     this._rewind.remember(roster, world.time);
-    light.update(world, players, this.dark, this.cursorLight);
+    light.update(world, players, this.dark, this.cursorLight, roster.values());
     const present = players.filter((p: P): boolean => !p.dead);
     heat.update(dt, world, present);
     const prey = this.passive ? [] : present.filter((p: P): boolean => !p.protected);
-    this._spawner.spawn(world, present, bloodMoon, this.spawning, this.level);
+    this._spawner.spawn(world, present, this.spawning, this.level);
     this._spawner.despawnStrays(world, present);
     sight.look(world, prey);
     wards.update(world);
     wards.catchGhosts(world);
 
     for (const m of roster.values()) {
+      m.warded = false;
+    }
+    for (const m of roster.values()) {
       if (m.id === this.liftedId) {
         m.moving = false;
         continue;
       }
-      m.update(dt, world, present, prey);
+      if (!guard(`monster ${m.kind}`, (): void => m.update(dt, world, present, prey))) {
+        this.fault(m);
+      }
     }
+    this._bursts.update(world, prey);
     separateWalkers(world, roster);
+  }
+
+  /**
+   * Counts a monster's update throwing; one that keeps throwing
+   * (MONSTER_FAULTS times) is removed, so a monster in a bad state can't
+   * spoil every tick.
+   * @param m The monster.
+   */
+  private fault(m: Monster<P>): void {
+    const faults = (this._faults.get(m.id) ?? 0) + 1;
+    this._faults.set(m.id, faults);
+    if (faults >= MONSTER_FAULTS) {
+      console.error(`[guard] removed a ${m.kind} (#${m.id}) whose update kept throwing`);
+      this._ctx.roster.delete(m.id);
+      this._faults.delete(m.id);
+    }
+  }
+
+  /**
+   * Removes up to `count` monsters, the farthest from every living player
+   * first (out of sight, so it doesn't look like anything vanished), to
+   * lighten a tick that's running slow (`LoadGovernor`).
+   * @param count How many to remove.
+   * @param players Every player.
+   * @returns How many it removed.
+   */
+  shed(count: number, players: P[]): number {
+    if (count <= 0) {
+      return 0;
+    }
+    const present = players.filter((p: P): boolean => !p.dead);
+    const away = (m: Monster<P>): number => Math.min(Infinity, ...present.map((p: P): number => Math.hypot(p.x - m.x, p.y - m.y)));
+    const farthest = [...this._ctx.roster.values()].filter((m: Monster<P>): boolean => m.id !== this.liftedId).sort((a: Monster<P>, b: Monster<P>): number => away(b) - away(a)).slice(0, count);
+    for (const m of farthest) {
+      this._ctx.roster.delete(m.id);
+    }
+    return farthest.length;
   }
 
   /**
@@ -246,5 +337,17 @@ export class Horde<P extends Target> {
    */
   summon(kind: MonsterKind, world: World, away: { x: number; y: number }[]): void {
     this._spawner.summon(kind, world, away, this.level);
+  }
+
+  /**
+   * Summons a monster right at (x, y) for the admin's cursor, past the
+   * usual rules, if the tile isn't solid.
+   * @param kind What to summon.
+   * @param world The world.
+   * @param x Where (tiles).
+   * @param y Where (tiles).
+   */
+  summonAt(kind: MonsterKind, world: World, x: number, y: number): void {
+    this._spawner.summonAt(kind, world, x, y, this.level);
   }
 }

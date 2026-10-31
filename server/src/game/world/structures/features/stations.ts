@@ -1,11 +1,13 @@
 // Packages
 import { GOODS } from '@halloween/shared/goods/goods';
+import { OUTPUT_HOLD } from '@halloween/shared/structures/automation';
 import { WORKING_GLOW } from '@halloween/shared/structures/lights';
 import { STATIONS, STATION_REACH } from '@halloween/shared/structures/stations';
 import { isStructure } from '@halloween/shared/structures/structure-catalog';
 import { stationSeconds } from '@halloween/shared/skill-tree/upgrades/structure-upgrades';
 
 // Local Imports
+import { heldFor } from '../../helpers/held-output';
 import { TickingFeature } from './ticking-feature';
 
 // Types
@@ -40,7 +42,8 @@ export class Stations extends TickingFeature {
   tick(tx: number, ty: number, s: StructureState, dt: number): void {
     const kind = this.map.get(tx, ty) as StructureKind;
     this.supply(tx, ty, s, STATIONS[kind]!);
-    s.progress = s.queue! > 0 ? (s.progress ?? 0) + dt : 0;
+    const waiting = heldFor(s) >= OUTPUT_HOLD;
+    s.progress = s.queue! > 0 ? (s.progress ?? 0) + (waiting ? 0 : dt) : 0;
     if (s.queue! > 0 && s.progress >= stationSeconds(kind, s.level ?? 0)) {
       s.queue!--;
       s.progress = 0;

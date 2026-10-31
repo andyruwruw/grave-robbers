@@ -2,6 +2,7 @@
 import { createMonsterAvatar } from '../../avatars/monsters/create-monster-avatar';
 import { SHAKE_TIME } from '../camera/config/camera';
 import {
+  BILE_SPLASH,
   BLOOD,
   DEATH_PUFF,
   DEMON_BURST,
@@ -9,6 +10,7 @@ import {
   SLAM_DIRT,
   SLAM_MARK,
 } from '../config/effect-colors';
+import { bloodCount } from '../helpers/blood-count';
 import { ScenePart } from '../scene-part';
 import {
   LIFT_HEIGHT,
@@ -66,6 +68,7 @@ export class MonsterAvatars extends ScenePart {
   set(monsters: MonsterState[]): void {
     const seen = new Set<number>();
     const now = performance.now() / 1000;
+    const blood = this._ctx.display.blood;
     for (const m of monsters) {
       seen.add(m.id);
       this._interp.record(`m${m.id}`, m.x, m.y, now);
@@ -74,8 +77,8 @@ export class MonsterAvatars extends ScenePart {
         if (m.hurts > existing.target.hurts) {
           const angle = this.knockFromNearestPlayer(existing, m);
           this._rig.shake = SHAKE_TIME;
-          this._ctx.chips.puff(m.x, m.y, BLOOD[m.kind], 30);
-          this._ctx.gore.spatter(m.x, m.y, BLOOD[m.kind], 12, angle, 1.4);
+          this._ctx.chips.puff(m.x, m.y, BLOOD[m.kind], bloodCount(30, blood));
+          this._ctx.gore.spatter(m.x, m.y, BLOOD[m.kind], bloodCount(12, blood), angle, 1.4);
           this._ctx.healthBars.hit(`m${m.id}`, m.health, m.x, m.y, this._ctx.elevation(m.x, m.y), MONSTER_BAR_LIFT);
           this._ctx.lightMap.darken(this._ctx.chips.group);
         }
@@ -101,7 +104,8 @@ export class MonsterAvatars extends ScenePart {
 
   /**
    * A monster died at (x, y): the avatar that just vanished nearest there
-   * bursts apart along `angle` in a spray of blood.
+   * bursts apart along `angle` in a spray of blood (with no blood at all,
+   * it just vanishes in a puff).
    * @param x Tile-space x.
    * @param y Tile-space y.
    * @param kind The monster's kind.
@@ -117,17 +121,23 @@ export class MonsterAvatars extends ScenePart {
         bestDist = d;
       }
     });
-    this._ctx.chips.puff(x, y, BLOOD[kind], 40);
-    this._ctx.gore.spatter(x, y, BLOOD[kind], 22, angle, 1.8);
-    this._ctx.gore.spatter(x, y, BLOOD[kind], 8, null, 0.8);
+    const blood = this._ctx.display.blood;
+    this._ctx.chips.puff(x, y, BLOOD[kind], bloodCount(40, blood));
+    this._ctx.gore.spatter(x, y, BLOOD[kind], bloodCount(22, blood), angle, 1.8);
+    this._ctx.gore.spatter(x, y, BLOOD[kind], bloodCount(8, blood), null, 0.8);
     if (kind === 'demon') {
-      this._ctx.chips.puff(x, y, DEMON_BURST, 90);
-      this._ctx.gore.spatter(x, y, DEMON_BURST, 40, null, 2.8);
-      this._ctx.gore.spatter(x, y, BLOOD[kind], 20, null, 1.6);
+      this._ctx.chips.puff(x, y, DEMON_BURST, bloodCount(90, blood));
+      this._ctx.gore.spatter(x, y, DEMON_BURST, bloodCount(40, blood), null, 2.8);
+      this._ctx.gore.spatter(x, y, BLOOD[kind], bloodCount(20, blood), null, 1.6);
       this._rig.shake = SHAKE_TIME * 2;
+    } else if (kind === 'bloater') {
+      this._ctx.chips.puff(x, y, BILE_SPLASH, bloodCount(70, blood));
+      this._ctx.gore.spatter(x, y, BILE_SPLASH, bloodCount(36, blood), null, 2.4);
+      this._rig.shake = SHAKE_TIME;
     }
-    if (best >= 0) {
+    if (best >= 0 && blood > 0) {
       const [avatar] = this._dying.splice(best, 1);
+      avatar.group.visible = !this._ctx.monstersHidden;
       this._ctx.gore.tearApart(avatar.group, avatar.body, angle, (): void => avatar.dispose());
     } else {
       this._ctx.chips.puff(x, y, DEATH_PUFF[kind], 10);
@@ -147,8 +157,10 @@ export class MonsterAvatars extends ScenePart {
 
   /**
    * Places every monster for this frame (interpolated or eased toward the
-   * snapshot; lifted and dangling if the TV's mouse holds them), throws up
-   * dirt where a slam lands, and keeps health bars over their heads.
+   * snapshot; lifted and dangling if the TV's mouse holds them; hidden while
+   * a blood fountain holds it, where `FountainVictims` floats its head),
+   * throws up dirt where a slam lands, and keeps health bars over their
+   * heads.
    * @param dt Seconds since the last frame.
    * @param time Clock seconds.
    * @param drawnAt The moment interpolated monsters are drawn at.
@@ -162,7 +174,8 @@ export class MonsterAvatars extends ScenePart {
       }
       const mLift = this._lift.height(`m${monster.target.id}`, monster.target.lifted, dt);
       monster.update(dt, time, this._ctx.elevation(monster.target.x, monster.target.y) + mLift);
-      monster.group.visible = !this._ctx.monstersHidden;
+      monster.tintEyes(this._ctx.look.eyes);
+      monster.group.visible = !this._ctx.monstersHidden && (mLift > 0 || !this.caught(monster.target.id));
       this._lift.dangle(`m${monster.target.id}`, monster.group, mLift, MONSTER_PIVOT, dt, time);
       monster.flail(mLift / LIFT_HEIGHT, time);
       if (monster.impactCount !== (this._ctx.impacts.get(`m${monster.target.id}`) ?? 0)) {
@@ -190,6 +203,20 @@ export class MonsterAvatars extends ScenePart {
    */
   quakeSources(): ShakeSource[] {
     return [...this.monsters.values()].filter((m: MonsterAvatar): boolean => m.quake > 0 && !this._ctx.monstersHidden).map((m: MonsterAvatar): ShakeSource => ({ x: m.group.position.x, z: m.group.position.z, strength: m.quake }));
+  }
+
+  /**
+   * Whether a blood fountain holds a monster.
+   * @param id The monster's id.
+   * @returns True if it's some fountain's victim.
+   */
+  private caught(id: number): boolean {
+    for (const v of this._ctx.victims) {
+      if (v.id === id) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

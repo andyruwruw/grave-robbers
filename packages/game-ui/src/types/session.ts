@@ -4,6 +4,7 @@ import type { Inventory } from '@halloween/shared/goods/goods';
 import type { ClientMessage } from '@halloween/shared/protocol/messages/client-message';
 import type { PadInfo } from '@halloween/shared/protocol/pads';
 import type { PlayerIdentity } from '@halloween/shared/protocol/state/player-state';
+import type { UsePanel } from '@halloween/shared/protocol/state/use-panel';
 import type { Vitals } from '@halloween/shared/protocol/state/vitals';
 import type { TreeState } from '@halloween/shared/skill-tree/types/skill-tree';
 import type { PickupToast } from './toasts';
@@ -20,7 +21,7 @@ export interface PadMenuRequest {
   /**
    * The menu to open.
    */
-  menu: 'bag' | 'craft' | 'tree';
+  menu: 'bag' | 'craft' | 'tree' | 'armory';
 
   /**
    * When it was asked (ms), so asking twice opens it again.
@@ -66,6 +67,18 @@ export interface ControllerSession {
    * Whether a join request is in flight.
    */
   joining: boolean;
+
+  /**
+   * Whether the last join was for a name that has a character, so the form
+   * asks for a transfer code.
+   */
+  needsCode: boolean;
+
+  /**
+   * The last transfer code the server gave, and when it stops working (ms
+   * since the epoch), or null.
+   */
+  transfer: { code: string; until: number } | null;
 
   /**
    * Candy and blood carried.
@@ -128,12 +141,18 @@ export interface ControllerSession {
   stash: (BagItem | null)[] | null;
 
   /**
+   * The digger or station panel USE opened, null when none is open.
+   */
+  using: UsePanel | null;
+
+  /**
    * The TV controllers the player can claim.
    */
   pads: PadInfo[];
 
   /**
-   * The menu a held TV controller last asked to open.
+   * The menu a held TV controller (or USE on a table or anvil) last asked
+   * to open.
    */
   padMenu: PadMenuRequest | null;
 
@@ -145,5 +164,5 @@ export interface ControllerSession {
   /**
    * Asks to join with a name and color.
    */
-  join: (name: string, color: string) => void;
+  join: (name: string, color: string, code?: string) => void;
 }

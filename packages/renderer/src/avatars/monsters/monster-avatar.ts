@@ -4,23 +4,23 @@ import { MONSTERS } from '@halloween/shared/monsters/monster-stats';
 
 // Local Imports
 import { NO_BLOOM_LAYER } from '../../effects/post/config/post';
+import { hexColor } from '../../helpers/colors';
 import { angleDelta } from '../../helpers/angles';
 import { Avatar } from '../avatar';
-import { FOLLOW_RATE, HURT_COLOR } from '../config/avatar';
-import { SwooshTrail } from '../shared/swoosh-trail';
+import { FOLLOW_RATE } from '../config/avatar';
 import { VoxelParts } from '../shared/voxel-parts';
 import {
   MONSTER_SCALE,
   SWOOSH_TIME,
-  TRAIL_LIFE,
-  TRAIL_POOL,
-  TRAIL_STEPS,
   TURN_RATE,
   ZOMBIE_ATTACK_TIME,
 } from './config/monster-motion';
 import { AttackClock } from './attack-clock';
+import { flailLimbs } from './helpers/flail-limbs';
 import { HitKick } from './hit-kick';
 import { MonsterGait } from './monster-gait';
+import { MonsterGlow } from './monster-glow';
+import { MonsterSwoosh } from './monster-swoosh';
 import { ShadowBlink } from './shadow-blink';
 import { Stumble } from './stumble';
 
@@ -33,9 +33,10 @@ import type { TrailStyle } from './types/trail-style';
  * A voxel monster, facing +x in its local space. Smooths toward the server
  * state and animates walking, attacking, hits, and stumbling; each kind
  * builds its own body and animates it. Most are lit by the light map (with
- * glowing eyes); ghosts glow on their own. Always made through
- * `createMonsterAvatar`, which calls `assemble()` once the subclass's
- * fields exist.
+ * glowing eyes); ghosts glow on their own. One a necromancer wards pulses
+ * green, and what's afflicting it shows (`MonsterGlow`). Always made
+ * through `createMonsterAvatar`, which calls `assemble()` once the
+ * subclass's fields exist.
  */
 export abstract class MonsterAvatar extends Avatar<MonsterState> {
   /**
@@ -113,7 +114,12 @@ export abstract class MonsterAvatar extends Avatar<MonsterState> {
   /**
    * The streak its attack leaves, if its kind has one.
    */
-  private _swoosh: SwooshTrail | null = null;
+  private _swoosh = new MonsterSwoosh();
+
+  /**
+   * Its hurt flash, ward, and afflictions' glow.
+   */
+  private _glow = new MonsterGlow();
 
   /**
    * Starts a monster at the state's position (call `assemble()` next).
@@ -132,14 +138,7 @@ export abstract class MonsterAvatar extends Avatar<MonsterState> {
   assemble(): void {
     this.build();
     this._attack.setDuration(this.attackDuration());
-    const style = this.trailStyle();
-    if (style) {
-      const swoosh = new SwooshTrail(this.trail, { poolPerSource: TRAIL_POOL, life: TRAIL_LIFE, steps: TRAIL_STEPS, size: style.size, opacity: style.opacity, color: style.color });
-      for (const [parent, at] of style.points) {
-        swoosh.addPoint(parent, at);
-      }
-      this._swoosh = swoosh;
-    }
+    this._swoosh.build(this.trail, this.trailStyle());
     this.group.add(this.body);
     this.group.scale.setScalar(MONSTER_SCALE * this._size);
   }
@@ -220,16 +219,7 @@ export abstract class MonsterAvatar extends Avatar<MonsterState> {
    * @param time Seconds since the renderer started.
    */
   flail(amount: number, time: number): void {
-    const kick = Math.sin(time * 13 + this._gait.phase) * 0.6 * amount;
-    if (this._limbs.length === 2) {
-      this._limbs[0].rotation.z = kick;
-      this._limbs[1].rotation.z = -kick;
-    }
-    if (amount > 0) {
-      this._armL.rotation.z += Math.sin(time * 9) * 0.6 * amount;
-      this._armR.rotation.z += Math.sin(time * 9 + 2.5) * 0.6 * amount;
-      this._head.rotation.z += Math.sin(time * 5) * 0.25 * amount;
-    }
+    flailLimbs(this._limbs, this._armL, this._armR, this._head, this._gait.phase, amount, time);
   }
 
   /**
@@ -272,12 +262,9 @@ export abstract class MonsterAvatar extends Avatar<MonsterState> {
     this.applyKick();
 
     this.placeGroup();
-    this._swoosh?.update(dt, this.swinging(), this.group);
+    this._swoosh.update(dt, this.swinging(), this.group);
 
-    const flash = this.advanceHurt(dt);
-    for (const m of this._parts.lit) {
-      m.emissive.set(HURT_COLOR).multiplyScalar(flash);
-    }
+    this._glow.update(dt, time, this.advanceHurt(dt), t, this._gait.phase, this.group, this._parts.lit);
   }
 
   /**
@@ -291,10 +278,19 @@ export abstract class MonsterAvatar extends Avatar<MonsterState> {
   }
 
   /**
-   * Disposes its materials and its swoosh's.
+   * Tints its eyes for a world event (see `EventModifiers.eyes`).
+   * @param eyes The color and how far toward it, or null.
+   */
+  tintEyes(eyes: { color: string; amount: number } | null): void {
+    this._parts.tintEyes(eyes ? hexColor(eyes.color) : null, eyes?.amount ?? 0);
+  }
+
+  /**
+   * Disposes its materials, its swoosh's, and its afflictions'.
    */
   dispose(): void {
     super.dispose();
-    this._swoosh?.dispose();
+    this._swoosh.dispose();
+    this._glow.dispose();
   }
 }

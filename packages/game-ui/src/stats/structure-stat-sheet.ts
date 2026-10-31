@@ -1,16 +1,4 @@
 // Packages
-import {
-  Droplet,
-  Flame,
-  Gauge,
-  Ghost,
-  Heart,
-  MoveHorizontal,
-  Pickaxe,
-  Sun,
-  Swords,
-  Timer,
-} from 'lucide-react';
 import { DIGGER_SECONDS } from '@halloween/shared/structures/automation';
 import { STATIONS } from '@halloween/shared/structures/stations';
 import { STRUCTURES } from '@halloween/shared/structures/structure-catalog';
@@ -19,7 +7,7 @@ import { TURRETS } from '@halloween/shared/structures/turrets';
 import { SPIKE_DAMAGE_PER_SECOND } from '@halloween/shared/players/health';
 import { MAX_UPGRADE_LEVEL } from '@halloween/shared/skill-tree/upgrade-cost';
 import {
-  altarBlood,
+  altarBleed,
   bellRadius,
   diggerSeconds,
   lightIntensity,
@@ -73,7 +61,7 @@ export class StructureStatSheet extends StatSheet {
    * @returns A fresh list of stats.
    */
   stats(): Stat[] {
-    const stats: Stat[] = [{ icon: Heart, label: 'Toughness', fill: structureHp(this._kind, this._level) / STAT_MAX_HP }];
+    const stats: Stat[] = [{ icon: 'toughness', color: 'green', label: 'Toughness', fill: structureHp(this._kind, this._level) / STAT_MAX_HP }];
     this._trapStats(stats);
     this._turretStats(stats);
     this._helperStats(stats);
@@ -91,10 +79,10 @@ export class StructureStatSheet extends StatSheet {
     const kind = this._kind;
     const level = this._level;
     if (kind === 'spikes') {
-      stats.push({ icon: Swords, label: 'Damage to walkers', fill: spikeDamage(SPIKE_DAMAGE_PER_SECOND, level) / (SPIKE_DAMAGE_PER_SECOND * TOP) });
+      stats.push({ icon: 'spikes', color: 'red', label: 'Damage to walkers', fill: spikeDamage(SPIKE_DAMAGE_PER_SECOND, level) / (SPIKE_DAMAGE_PER_SECOND * TOP) });
     }
     if (kind === 'palisade') {
-      stats.push({ icon: Swords, label: 'Thorns', fill: PALISADE_THORNS / (SPIKE_DAMAGE_PER_SECOND * TOP) });
+      stats.push({ icon: 'spikes', color: 'red', label: 'Thorns', fill: PALISADE_THORNS / (SPIKE_DAMAGE_PER_SECOND * TOP) });
     }
   }
 
@@ -108,9 +96,9 @@ export class StructureStatSheet extends StatSheet {
     const turret = TURRETS[kind];
     if (turret) {
       stats.push(
-        { icon: Swords, label: 'Damage a second', fill: turretDamage(kind, this._level) / turret.cooldown / STAT_MAX_TURRET_DPS },
-        { icon: Gauge, label: 'Fire rate', fill: 1 / turret.cooldown / STAT_MAX_TURRET_RATE },
-        { icon: MoveHorizontal, label: 'Range', fill: turret.range / STAT_MAX_TURRET_RANGE },
+        { icon: 'damage', color: 'red', label: 'Damage a second', fill: turretDamage(kind, this._level) / turret.cooldown / STAT_MAX_TURRET_DPS },
+        { icon: 'speed', color: 'yellow', label: 'Fire rate', fill: 1 / turret.cooldown / STAT_MAX_TURRET_RATE },
+        { icon: 'reach', color: 'blue', label: 'Range', fill: turret.range / STAT_MAX_TURRET_RANGE },
       );
     }
   }
@@ -124,13 +112,13 @@ export class StructureStatSheet extends StatSheet {
     const kind = this._kind;
     const level = this._level;
     if (kind === 'altar') {
-      stats.push({ icon: Droplet, label: 'Blood per offering', fill: altarBlood(level) / altarBlood(MAX_UPGRADE_LEVEL) });
+      stats.push({ icon: 'blood', color: 'blood', label: 'Kill blood', fill: altarBleed(level) / altarBleed(MAX_UPGRADE_LEVEL) });
     }
     if (kind === 'digger') {
-      stats.push({ icon: Pickaxe, label: 'Dig speed', fill: DIGGER_SECONDS / diggerSeconds(level) / 2.5 });
+      stats.push({ icon: 'dig', color: 'brown', label: 'Dig speed', fill: DIGGER_SECONDS / diggerSeconds(level) / 2 });
     }
     if (kind === 'bell') {
-      stats.push({ icon: Ghost, label: 'Ghost ward', fill: bellRadius(level) / bellRadius(MAX_UPGRADE_LEVEL) });
+      stats.push({ icon: 'ghost', color: 'ecto', label: 'Ghost ward', fill: bellRadius(level) / bellRadius(MAX_UPGRADE_LEVEL) });
     }
   }
 
@@ -144,9 +132,9 @@ export class StructureStatSheet extends StatSheet {
     const level = this._level;
     if (def.light) {
       const lit = def.light.burn === Infinity;
-      stats.push({ icon: Sun, label: 'Light', fill: (lit ? lightRadius(def.light.radius, level) : def.light.radius) / STAT_MAX_RADIUS });
+      stats.push({ icon: 'light', color: 'sun', label: 'Light', fill: (lit ? lightRadius(def.light.radius, level) : def.light.radius) / STAT_MAX_RADIUS });
       if (lit) {
-        stats.push({ icon: Flame, label: 'Brightness', fill: lightIntensity(def.light.intensity, level) / STAT_MAX_BRIGHTNESS });
+        stats.push({ icon: 'flame', color: 'orange', label: 'Brightness', fill: lightIntensity(def.light.intensity, level) / STAT_MAX_BRIGHTNESS });
       }
     }
   }
@@ -159,7 +147,7 @@ export class StructureStatSheet extends StatSheet {
   private _stationStats(stats: Stat[]): void {
     const kind = this._kind;
     if (STATIONS[kind]) {
-      stats.push({ icon: Timer, label: 'Work speed', fill: STATIONS[kind]!.seconds / stationSeconds(kind, this._level) / 2.5 });
+      stats.push({ icon: 'gear', color: 'yellow', label: 'Work speed', fill: STATIONS[kind]!.seconds / stationSeconds(kind, this._level) / 2.5 });
     }
   }
 }

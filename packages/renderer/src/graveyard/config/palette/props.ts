@@ -89,6 +89,11 @@ export const BLOOD_STAIN = ['#5a0e12', '#6e1218', '#4a0a0e'];
 export const BLOOD_POOL = '#8a0c18';
 
 /**
+ * The glow on a blood fountain's blood, and the trickle from its spout.
+ */
+export const FOUNTAIN_GLOW = '#c8141f';
+
+/**
  * The trough cut along the front of an altar's top.
  */
 export const ALTAR_TROUGH = '#160608';
@@ -122,16 +127,6 @@ export const OBELISK_STONE = ['#1c1a22', '#24212c', '#18161e'];
  * Glowing violet runes.
  */
 export const RUNE = '#b04aff';
-
-/**
- * Mirror glass.
- */
-export const MIRROR_GLASS = '#a9b6c2';
-
-/**
- * Mirror frames.
- */
-export const MIRROR_FRAME = ['#2a1a20', '#331f27'];
 
 /**
  * Silver: the bell and sifted nuggets.
@@ -202,6 +197,11 @@ export const BELT_RUBBER = '#1e1c1f';
  * The arrows painted on a conveyor belt.
  */
 export const BELT_ARROW = '#c9a94a';
+
+/**
+ * The glowing eye on a belt sorter's gate post.
+ */
+export const SORTER_EYE = '#e07a3a';
 
 /**
  * A swiper's blades.

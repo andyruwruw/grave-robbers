@@ -12,7 +12,7 @@ export class StatsWindow extends HubPart {
   /**
    * The stats from the last full second.
    */
-  current: ServerStats = { tps: 0, stepMs: 0, worldLevel: 0, levels: {}, displayKBps: 0 };
+  current: ServerStats = { tps: 0, stepMs: 0, worldLevel: 0, levels: {}, displayKBps: 0, stocked: { tree: 0, hedge: 0, pumpkin: 0, chest: 0, rock: 0 } };
 
   /**
    * Bytes sent to displays this second.
@@ -59,6 +59,7 @@ export class StatsWindow extends HubPart {
         worldLevel: Math.round(this.game.levels.worldLevel * 10) / 10,
         levels: this.game.levels.playerLevels(),
         displayKBps: Math.round((this._sentBytes / 1024 / ((now - this._windowStart) / 1000)) * 10) / 10,
+        stocked: this.game.world.growth.stocked(),
       };
       this._ticks = 0;
       this._stepTotal = 0;

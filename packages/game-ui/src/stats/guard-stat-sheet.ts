@@ -1,5 +1,4 @@
 // Packages
-import { ShieldHalf } from 'lucide-react';
 import { gearGuard } from '@halloween/shared/skill-tree/upgrades/gear-upgrades';
 
 // Local Imports
@@ -36,7 +35,7 @@ export class GuardStatSheet extends StatSheet {
    */
   stats(): Stat[] {
     return [
-      { icon: ShieldHalf, label: 'Damage blocked', fill: (1 - gearGuard(this._kind, this._tree)) / 0.75 },
+      { icon: 'shield', color: 'steel', label: 'Damage blocked', fill: (1 - gearGuard(this._kind, this._tree)) / 0.75 },
     ];
   }
 }

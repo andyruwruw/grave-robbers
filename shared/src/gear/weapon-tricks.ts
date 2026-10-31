@@ -5,6 +5,7 @@ import type { GearKind } from './types/gear-def';
  * One line on each weapon's trick, for the phone.
  */
 export const WEAPON_TRICKS: Partial<Record<GearKind, string>> = {
+  'infused-hammer': 'The hammer, infused: hits more than twice as hard but needs both hands, and still does every job',
   'spear': 'Stabs straight ahead: hits everything in a line, nothing beside it',
   'scythe': 'A flat sweep nearly all the way around: hits everything near you at once',
   'battle-axe': 'Slow, crushing swings that cleave: harder for every monster caught in one',

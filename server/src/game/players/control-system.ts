@@ -1,11 +1,13 @@
 // Packages
 import { steerOf } from '@halloween/shared/players/walk';
+import { clampStyle } from '@halloween/shared/structures/wall-styles';
 
 // Local Imports
 import { GameSystem } from '../core/game-system';
 
 /**
- * A phone's raw intent: the sticks, the buttons, turning, and its ping.
+ * A phone's raw intent: the sticks, the buttons, turning, the look of the
+ * wall being built, and its ping.
  */
 export class ControlSystem extends GameSystem {
   /**
@@ -54,13 +56,15 @@ export class ControlSystem extends GameSystem {
 
   /**
    * Where the Action stick points, snapped to one of eight directions like
-   * movement, or (0, 0) when centered. While aiming, the player faces the
-   * aim instead of where they walk, so they can strike behind themselves.
+   * movement (or any way at all when `free`, /play's mouse and right
+   * stick), or (0, 0) when centered. While aiming, the player faces the aim
+   * instead of where they walk, so they can strike behind themselves.
    * @param token The player's token.
    * @param x The stick across (-1 to 1).
    * @param y The stick down (-1 to 1).
+   * @param free Whether to keep the exact direction instead of snapping.
    */
-  setAim(token: string, x: number, y: number): void {
+  setAim(token: string, x: number, y: number, free = false): void {
     const player = this.players.get(token);
     if (!player || !Number.isFinite(x) || !Number.isFinite(y)) {
       return;
@@ -70,7 +74,8 @@ export class ControlSystem extends GameSystem {
       player.aimY = 0;
       return;
     }
-    const angle = Math.round(Math.atan2(y, x) / (Math.PI / 4)) * (Math.PI / 4);
+    const exact = Math.atan2(y, x);
+    const angle = free ? exact : Math.round(exact / (Math.PI / 4)) * (Math.PI / 4);
     player.aimX = Math.cos(angle);
     player.aimY = Math.sin(angle);
   }
@@ -105,5 +110,18 @@ export class ControlSystem extends GameSystem {
       return;
     }
     p.facing = (Math.round(p.facing / (Math.PI / 2)) + dir) * (Math.PI / 2);
+  }
+
+  /**
+   * Picks the look the wall being built goes down in (see `WALL_STYLES`),
+   * kept for that wall until changed.
+   * @param token The player's token.
+   * @param style The look, kept to the ones the wall has.
+   */
+  pickStyle(token: string, style: number): void {
+    const p = this.players.get(token);
+    if (p?.building) {
+      p.buildStyles[p.building] = clampStyle(p.building, style);
+    }
   }
 }

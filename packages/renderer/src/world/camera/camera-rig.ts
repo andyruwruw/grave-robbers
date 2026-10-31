@@ -3,16 +3,20 @@ import { Vector3 } from 'three';
 
 // Local Imports
 import { toWorld } from '../../space/world-coords';
+import { OVERVIEW_TALL } from '../chunks/config/overview';
 import { ScenePart } from '../scene-part';
 import { CameraFollow } from './camera-follow';
 import {
   CAMERA_DISTANCE,
   CAMERA_ELEVATION,
   CAMERA_TILT_RATE,
+  FAR,
   FOLLOW_EDGE,
+  NEAR,
   SHAKE_AMOUNT,
   SHAKE_TIME,
   TOP_VIEW_ELEVATION,
+  VIEW_DEPTH_SLACK,
   VIEW_MARGIN,
 } from './config/camera';
 
@@ -50,6 +54,11 @@ export class CameraRig extends ScenePart {
   cameraAngle = CAMERA_ELEVATION;
 
   /**
+   * The elevation this view rests at (the editor's top view aside).
+   */
+  elevation = CAMERA_ELEVATION;
+
+  /**
    * Whether the camera tilts over to the map editor's top-down view.
    */
   topView = false;
@@ -85,7 +94,7 @@ export class CameraRig extends ScenePart {
    * @param dt Seconds since the last frame.
    */
   tilt(dt: number): void {
-    const target = this.topView ? TOP_VIEW_ELEVATION : CAMERA_ELEVATION;
+    const target = this.topView ? TOP_VIEW_ELEVATION : this.elevation;
     if (this.cameraAngle === target) {
       return;
     }
@@ -138,7 +147,13 @@ export class CameraRig extends ScenePart {
     this.camera.right = halfH * aspect;
     this.camera.top = halfH;
     this.camera.bottom = -halfH;
+    const depth = (halfH / Math.sin(this.cameraAngle)) * Math.cos(this.cameraAngle) + VIEW_DEPTH_SLACK;
+    this.camera.near = Math.min(NEAR, CAMERA_DISTANCE - depth);
+    this.camera.far = Math.max(FAR, CAMERA_DISTANCE + depth);
     this.camera.updateProjectionMatrix();
+    if ((2 * halfH) / Math.sin(this.cameraAngle) > OVERVIEW_TALL) {
+      return;
+    }
     this._scenery.fitSpan(this.follow.target ? {
       x: FOLLOW_EDGE + 1 + Math.max(0, Math.ceil(halfH * aspect - this._ctx.mapWidth / 2)),
       y: FOLLOW_EDGE + 3 + Math.max(0, Math.ceil(halfH / Math.sin(this.cameraAngle) - this._ctx.mapHeight / 2)),
@@ -149,13 +164,27 @@ export class CameraRig extends ScenePart {
   }
 
   /**
+   * Sets the elevation this view rests at, in radians, taking effect at
+   * once unless the map editor's top view is on.
+   * @param angle The elevation.
+   */
+  setElevation(angle: number): void {
+    this.elevation = angle;
+    if (!this.topView) {
+      this.cameraAngle = angle;
+      this.aim();
+      this.fit();
+    }
+  }
+
+  /**
    * Lets the shake die down and puts the camera at home, jolted by what's
-   * left of it.
+   * left of it (scaled by the display's Screen shake).
    * @param dt Seconds since the last frame.
    */
   applyShake(dt: number): void {
     this.shake = Math.max(0, this.shake - dt);
-    const jolt = (this.shake / SHAKE_TIME) * SHAKE_AMOUNT;
+    const jolt = (this.shake / SHAKE_TIME) * SHAKE_AMOUNT * this._ctx.display.shake;
     this.camera.position.set(this.home.x + (Math.random() - 0.5) * 2 * jolt, this.home.y, this.home.z + (Math.random() - 0.5) * 2 * jolt);
   }
 }

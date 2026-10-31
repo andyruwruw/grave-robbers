@@ -1,5 +1,6 @@
 // Types
 import type { GearKind, GearSlot } from '../../gear/types/gear-def';
+import type { Infusion } from '../../gear/types/infusion';
 import type { StructureKind } from '../../structures/types/structures';
 
 /**
@@ -85,6 +86,12 @@ export interface PlayerState {
   buildFacing: number | null;
 
   /**
+   * The look the wall being built goes down in (see `WALL_STYLES`), 0 for
+   * anything else.
+   */
+  buildStyle: number;
+
+  /**
    * Health, 0..MAX_HP (fractional while regenerating).
    */
   hp: number;
@@ -166,6 +173,37 @@ export interface PlayerState {
    * armor).
    */
   gear: Record<GearSlot, GearKind | null>;
+
+  /**
+   * The infusion of what's equipped in each slot, for slots holding an
+   * infused item (absent for plain ones): with `gear` it names each
+   * variant, for its model.
+   */
+  gearInfusion: Partial<Record<GearSlot, Infusion>>;
+
+  /**
+   * Their glaive is out, thrown (Soulbound and Wraith Glaive): the avatar
+   * hides it until it's back. Absent until the server sets it.
+   */
+  thrown?: boolean;
+
+  /**
+   * Extra health above full from overheal (Heart Devourer, Death's
+   * Harvest). Absent or 0 for none.
+   */
+  overheal?: number;
+
+  /**
+   * Their Moonsilver Saber is recharging its one-shot (the blade dims).
+   * Absent until the server sets it.
+   */
+  dimmed?: boolean;
+
+  /**
+   * Their latest melee swing skipped its windup (Headsman's Axe after a
+   * multi-kill): the avatar plays it at the plain pace. Absent otherwise.
+   */
+  quickSwing?: boolean;
 }
 
 /**

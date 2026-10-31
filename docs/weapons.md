@@ -6,44 +6,47 @@ All stats live in `shared/src/gear/` (`GEAR` in `gear-catalog.ts`, built from `d
 
 - **Only the stake wears out** (`GearDef.breaks`, `wearsOut`). Nothing else ever breaks.
 - **Only the battle axe and warhammer gain damage from upgrades** (+20% a level). Every other upgrade sharpens the weapon's own trick (`WEAPON_PERKS` in `gear/perks/weapon-perks.ts`, each a `WeaponPerk`: `AddedPerk`, `ScaledPerk`, or `CustomPerk`).
-- **Two-handed weapons** (`hands: 2`) can't be held with a shield (`twoHanded`, `HandsSystem.settleHands`).
+- **Two-handed weapons** (`hands: 2`) can't be held with a shield, and the infused hammer can't be held with a torch either (`twoHanded`, `handsClash` in `server/src/game/inventory/helpers/hands-clash.ts`, used by `HandsSystem.settleHands` and `BagSystem.store`).
 - **The hammer** does every job (gathering, digging, building) whatever is equipped, and is the weapon when none is. See [combat.md](combat.md#what-a-swing-is-made-with).
 - **A bagged stake** is drawn automatically for a swing at a vampire in reach, so crafted and found stakes stay in the bag.
 - **Anvil gear:** late weapons and the iron plate (`GearDef.anvil`, marked "(anvil)" below) are only crafted within `ANVIL_RADIUS` (2.5) of an anvil, and each anvil level takes 15% off their materials (`craftCost`). See [building.md](building.md#crafting).
-- **Haunted names:** the spear is the Ghoul Poker, the crossbow CrossBones, the greatsword Hell's Greatsword, the repeating crossbow Rattlebones, the morning star the Mourning Star, the quarterstaff the Holy Quarterstaff, the glaive the Cursed Glaive, and the musket the Blood Lust Musket (`GearDef.label`; the code keys keep the plain names).
+- **Haunted names:** the crossbow is CrossBones, the repeating crossbow Rattlebones, the morning star the Mourning Star, the quarterstaff the Holy Quarterstaff, the glaive the Cursed Glaive, and the musket the Blood Lust Musket (`GearDef.label`; the code keys keep the plain names).
+- **Infusions:** at an anvil, silver and an essence turn a weapon (or the hammer, the shield, or the torch) into a named variant with its own model and ability (`GearItem.infusion`, stats through `weaponStats(kind, tree, infusion)` and `itemStats`). Infusing the hammer makes a new infused hammer item; the plain hammer stays the always-there tool. See [infusions.md](infusions.md).
+- **Plain names:** the base spear is **Spear** and the base greatsword **Greatsword** (Ghoul Poker and Hell's Edge are now their infusions).
 - **The first real weapon** you craft, pick up, or find goes straight into an empty hand (`BagSystem.takeIn`); a shield it can't be held with goes to the bag. Junk and stakes don't.
 
 ## Melee
 
 | Weapon | Dmg | Cooldown | DPS | Reach | Arc | Knockback | Hands | Cost |
 |---|---|---|---|---|---|---|---|---|
-| Hammer | 2 | 0.55s | 3.6 | 1.8 | 157° | 0.5 | 1 | always have it |
-| Ghoul Poker | 1.5 | 0.55s | 2.7 | 2.7 | a line | 1.2 | 1 | 2 wood |
-| Stake | 1 | 0.4s | - | 1.4 | 145° | 0.6 | 1 | 1 wood |
+| Hammer | 2 | 0.55s | 3.6 | 1.8 | 157° | 0.25 | 1 | always have it |
+| Infused hammer | 4.5 | 0.55s | 8.2 | 1.8 | 157° | 0.25 | 2 | only by infusing the hammer ([infusions.md](infusions.md)) |
+| Spear | 1.5 | 0.55s | 2.7 | 2.7 | a line | 1.2 | 1 | 6 wood, 4 stone |
+| Stake | 1 | 0.4s | - | 1.4 | 145° | 0.6 | 1 | 3 wood |
 | Ritual knife | 4 | 0.35s | 11.4 | 1.5 | 133° | 0.5 | 1 | 2 silver, 3 bone (anvil) |
-| Scythe | 2.8 | 0.8s | 3.5 | 2.4 | 271° | 1.6 | 2 | 3 planks, 3 iron (anvil) |
+| Scythe | 2.8 | 0.8s | 3.5 | 2.4 | 271° | 1.6 | 2 | 16 wood, 6 stone, 10 blood |
 | Battle axe | 12 | 1.6s | 7.5 | 1.9 | 203° | 1.8 | 2 | 3 wood, 2 stone |
-| Short sword | 3 | 0.4s | 7.5 | 1.7 | 157° | 0.8 | 1 | 1 planks, 2 iron (anvil) |
-| Hell's Greatsword | 8 | 0.95s | 8.4 | 2.2 | 215° | 1.6 | 2 | 2 planks, 6 iron, 1 bloodsteel (anvil) |
+| Short sword | 3 | 0.4s | 7.5 | 1.7 | 157° | 0.8 | 1 | 5 planks, 2 iron |
+| Greatsword | 8 | 0.95s | 8.4 | 2.2 | 215° | 1.6 | 2 | 2 planks, 6 iron, 1 bloodsteel (anvil) |
 | Flail | 6 | 0.75s | 8.0 | 2.0 | 203° | 2.2 | 1 | 2 planks, 4 iron (anvil) |
-| Mourning Star | 5 | 0.7s | 7.1 | 3.2 | a line | 1.2 | 1 | 2 planks, 3 iron, 2 chain, 1 silver (anvil) |
-| Warhammer | 14 | 1.8s | 7.8 | 1.8 | 169° | 3.2 | 1 | 2 planks, 2 stone, 4 iron (anvil) |
-| Holy Quarterstaff | 3 | 0.45s | 6.7 | 2.4 | 240° | 2.0 | 2 | 3 planks |
-| Cursed Glaive | 5.5 | 0.75s | 7.3 | 2.8 | 157° | 1.4 | 2 | 3 planks, 5 iron, 1 silver (anvil) |
-| Spiked gauntlet | 2.2 | 0.28s | 7.9 | 1.2 | 120° | 0.6 | 2 | 2 iron, 3 bone (anvil) |
+| Mourning Star | 5 | 0.8s | 6.3 | 3.2 | a line | 1.2 | 1 | 2 planks, 3 iron, 2 chain, 1 silver (anvil) |
+| Warhammer | 14 | 1.8s | 7.8 | 1.8 | 169° | 3.2 | 1 | 20 wood, 10 stone, 10 blood |
+| Holy Quarterstaff | 3 | 0.45s | 6.7 | 2.4 | 240° | 2.0 | 2 | 8 planks |
+| Cursed Glaive | 5.5 | 0.75s | 7.3 | 2.8 | 157° | 1.4 | 2 | 10 planks, 5 iron |
+| Spiked gauntlet | 2.6 | 0.22s | 11.8 | 1.2 | 120° | 0.6 | 2 | 2 iron, 3 bone (anvil) |
 
 ### Tricks and upgrades
 
 | Weapon | Trick | Each upgrade |
 |---|---|---|
 | Hammer | Every job; never breaks | Handy: chops, mines, and digs one more per hit |
-| Ghoul Poker | Stabs straight ahead: hits everything within 0.45 tiles of a line out to its reach (`line`), nothing beside it | +8% reach |
+| Spear | Stabs straight ahead: hits everything within 0.45 tiles of a line out to its reach (`line`), nothing beside it | +8% reach |
 | Stake | Kills a vampire in one hit; single use | Seasoned wood: one more use |
 | Ritual knife | Costs 1 heart only when a swing lands (it won't swing on your last); kills heal | Bloodthirst: each kill heals 2 more |
 | Scythe | A flat sweep nearly all the way around: low damage, but it hits everything near you at once | Soul harvest: +1 blood per kill |
 | Battle axe | Slow and heavy (0.7s windup, you slow down); `cleave`: +25% per other monster in the swing | +20% damage |
 | Short sword | Quick, one-handed, pairs with a shield | Swings 8% faster |
-| Hell's Greatsword | Huge sweeping blows | Execution: +25% damage to anything under half health |
+| Greatsword | Huge sweeping blows | Execution: +25% damage to anything under half health |
 | Flail | `crush`: ignores monster helmets, plate, and raised shields | +10% reach |
 | Mourning Star | A holy chain whip with a spiked ball (`buildWhip`): pulled back, swung up over the head and cracked out in front (0.35s windup) with a loud `whip-crack`: lashes 3.2 tiles in a line (`line` 0.5); `blessed` 2: double damage to vampires and witches, full damage to ghosts; `stagger` 25% (not brutes) | +15% stagger chance |
 | Warhammer | Slowest and heaviest (0.8s windup, you slow down); x1.5 to brutes and shoves them (`bruteBane`) | +20% damage |
@@ -55,9 +58,9 @@ All stats live in `shared/src/gear/` (`GEAR` in `gear-catalog.ts`, built from `d
 
 | Weapon | Dmg | Cooldown | Range | Ammo | Cost |
 |---|---|---|---|---|---|
-| Bow | 2.5, up to 5 drawn | 0.45s | 7 | Arrows | 2 wood |
-| CrossBones | 7 | 1.4s reload | 7.5 | Bolts | 2 wood, 3 planks |
-| Rattlebones | 3 | 0.2s in a burst, 1s reload | 7 | Bolts | 5 planks, 4 iron, 1 chain (anvil) |
+| Bow | 4.5, up to 9 drawn | 0.45s | 7 | Arrows | 2 wood |
+| CrossBones | 10 | 1.4s reload | 7.5 | Bolts | 2 wood, 3 planks |
+| Rattlebones | 5 | 0.2s in a burst, 1s reload | 7 | Bolts | 5 planks, 4 iron, 1 chain (anvil) |
 | Nightmare blunderbuss | 3 per pellet | 1.1s | 5 | 1 blood | 3 planks, 2 iron, 1 cursed core (anvil) |
 | Blood Lust Musket | 20 | 1.8s | 10 | 1 blood | 4 planks, 3 iron, 2 cursed cores (anvil) |
 
@@ -75,6 +78,17 @@ All stats live in `shared/src/gear/` (`GEAR` in `gear-catalog.ts`, built from `d
 - **Aim assist:** shots bend toward the monster closest to straight ahead within 0.35 rad (`AIM_ASSIST`).
 - **Range from height:** +2 tiles per level above the ground.
 
+### Infused shots
+
+- **Shots carry the shooter's stats** (`Shot.stats`, from `p.weapon()`), so tree levels and every infusion package and twist apply to arrows, bolts, and pellets (`ShotSystem.hitMonster` passes them to `horde.hit`). They fly as the variant's `shotKind` (`spirit-arrow`, `fire-arrow`, `ghost-bullet`) when it has one.
+- **Wall passing** (`wallPass`, `Shot.phasing`): Wraithstring only on a full draw; the Ephemeral Musket and Ghostlock always. A phasing shot also passes cliffs and rising ground.
+- **Ghostlock** pierces every monster out to its range (`pierceAll`).
+- **Bone Choir bounces** once off a wall, turning off the side it crossed (both sides at a corner; `Shot.bounces`, `ranged/helpers/bounce-off.ts`).
+- **Bone Rattler:** a kill banks one quick reload (`Player.reloadBanked`); the next reload `RangedSystem.startReload` starts takes half the time and spends it. A reload already running isn't sped up.
+- **Pyre Bow** lays a fire patch on every tile its arrow flies over (`PatchSystem.fireTrail`).
+- **Hellmouth** sprays instead of shooting (`FlameSpraySystem`), and the **Cursed Glaive's** hex path throws its stab (`GlaiveSystem`). Both are in [infusions.md](infusions.md).
+- **Reflected shots** (the Mirror Shield) belong to the blocker but never hit players (`Shot.reflected`).
+
 ## Damage rules (`damageTo`, `gear/damage-to.ts`)
 
 | Target | Rule |
@@ -82,14 +96,18 @@ All stats live in `shared/src/gear/` (`GEAR` in `gear-catalog.ts`, built from `d
 | The monster a weapon `slays` (stake: vampire) | Dies in one hit |
 | Vampire, holy weapon | Damage x `holy` |
 | Vampire or witch, blessed weapon (morning star) | Damage x `blessed` |
-| Vampire, blood weapon (blood ammo or a health cost) | 25% damage |
-| Ghost | 25% damage (at least 1), 5x knockback; full damage from a blessed weapon |
+| Vampire, blood weapon (blood ammo or a health cost) | 25% damage (`VAMPIRE_BLOOD_RESIST`), after any infusion multiplier, unless the weapon is `holy` |
+| Vampire or demon, Blessed infusion (`blessing`) | Damage x `blessing`, stacking with `holy` and `blessed` up to x4 in all (`BLESSED_CAP`) |
+| A kind the weapon is a bane of (`bane`: Ephemeral on skeletons, Enflamed on zombies, brutes, and ghouls, the Silvered Shortsword, Silver Bolter) | Damage x its bane |
+| Ghost | 25% damage (`GHOST_DAMAGE`, at least 1), 2x knockback; full damage from a blessed weapon; with Ephemeral (`ghostMult`) `ghostMult` x 25% and no minimum, and `ghostKnock` knockback |
+| Cursed monster | Every hit x the curse's `taken` (applied in `Afflicted`, see [monsters.md](monsters.md#statuses)) |
+| Pinned monster, hit by someone other than the pinner | x the pin's `bonus` (The Impaler 1.5) |
 | Monster wearing a helmet / plate | 75% / 55% of each hit (the flail ignores this) |
 | Another player | 25% damage (`PVP_DAMAGE`) |
 
 ## Junk
 
-Some zombies carry junk, hit 1 harder for it, and drop it when they die. Never craftable, never better than the hammer, each with one odd perk.
+Some zombies carry junk, hit 1 harder for it, and drop it when they die. At high world levels some carry a craftable weapon instead (see [monsters.md](monsters.md)). Never craftable, never better than the hammer, each with one odd perk.
 
 | Junk | Dmg | Cooldown | Reach | Odd perk |
 |---|---|---|---|---|
@@ -101,8 +119,8 @@ Some zombies carry junk, hit 1 harder for it, and drop it when they die. Never c
 
 | Item | Effect | Cost |
 |---|---|---|
-| Torch | Hand light, radius 3.5 (`build:torch` level widens it). Taken from a stack of torches; put away returns it to the stack. | 1 wood |
-| Shield | Held up with Block: hits from the front x0.12 (3% less per level). Only beside a one-handed weapon. | 2 wood |
+| Torch | Hand light, radius 3.5 (`build:torch` level widens it). Taken from a stack of torches; put away returns it to the stack. Not beside the infused hammer. The Brimstone Torch infusion reaches 60% farther and stays its own item. | 1 wood |
+| Shield | Held up with Block: hits from the front x0.12 (3% less per level). Only beside a one-handed weapon. The Mirror Shield infusion (4 silver) sends shots back. | 2 wood |
 | (empty) | A small lantern, radius 1.5, too dim to keep vampires off | - |
 
 ## Armor

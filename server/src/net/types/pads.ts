@@ -6,6 +6,11 @@ import type { WebSocket } from 'ws';
  */
 export interface PadPresses {
   /**
+   * USE presses.
+   */
+  use: number;
+
+  /**
    * Panic presses.
    */
   panic: number;

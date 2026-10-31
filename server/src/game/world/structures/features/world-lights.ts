@@ -7,6 +7,7 @@ import {
   PUMPKIN_LIGHT,
   WORKING_GLOW,
 } from '@halloween/shared/structures/lights';
+import { ALTAR_AWAKE_SECONDS } from '@halloween/shared/structures/occult';
 import { STATIONS } from '@halloween/shared/structures/stations';
 import { STRUCTURES, isStructure } from '@halloween/shared/structures/structure-catalog';
 import { bellRadius, lightIntensity, lightRadius } from '@halloween/shared/skill-tree/upgrades/structure-upgrades';
@@ -18,9 +19,12 @@ import { TickingFeature } from './ticking-feature';
 // Types
 import type { LightState } from '@halloween/shared/protocol/state/world-state';
 import type { StructureKind } from '@halloween/shared/structures/types/structures';
+import type { Tile } from '@halloween/shared/world/tiles';
+import type { WorldMap } from '@halloween/shared/world/world-map';
 import type { ActiveLight, Bell, Shine } from '../../types/lights';
 import type { WorldSite } from '../../types/site';
 import type { StructureState } from '../../types/structures';
+import type { Step } from '../../../pathing/types/path';
 import type { StructureQueries } from '../structure-queries';
 
 /**
@@ -28,6 +32,24 @@ import type { StructureQueries } from '../structure-queries';
  * posts, glowing stations and altars, and silver bells.
  */
 export class WorldLights extends TickingFeature {
+  /**
+   * Lights a blackout is putting out: tile index to when it goes out and
+   * how long it sputters first.
+   */
+  private readonly _doomed = new Map<number, { at: number; sputter: number }>();
+
+  /**
+   * Every pumpkin and lamp post on `_spotsMap`, by tile index, kept up to
+   * date as tiles change (`TileGrid.listen`) so `activeLights` never scans
+   * the whole map.
+   */
+  private readonly _spots = new Set<number>();
+
+  /**
+   * The map `_spots` indexes (a new world brings a new map).
+   */
+  private _spotsMap: WorldMap | null = null;
+
   /**
    * Sets the lights up.
    * @param site What every part of the world shares.
@@ -106,6 +128,43 @@ export class WorldLights extends TickingFeature {
   }
 
   /**
+   * A world event's blackout: every burning light a ghost could snuff
+   * (and Action relight) goes out at its own moment within `within`
+   * seconds, sputtering for `sputter` seconds first.
+   * @param within Seconds over which they all go out.
+   * @param sputter Seconds each sputters first.
+   */
+  blackout(within: number, sputter: number): void {
+    for (const [i, s] of this.structures.entries()) {
+      const tile = this.map.get(i % this.map.width, Math.floor(i / this.map.width));
+      if (s.fuel > 0 && isStructure(tile) && STRUCTURES[tile].light?.burn === Infinity && !GHOSTPROOF.has(tile)) {
+        this._doomed.set(i, { at: this.clock.now + sputter + Math.random() * within, sputter });
+      }
+    }
+  }
+
+  /**
+   * Puts out the blackout's lights whose moment has come (skipping any
+   * already out or torn down).
+   * @returns The tiles that went out.
+   */
+  stepBlackout(): Step[] {
+    const out: Step[] = [];
+    for (const [i, { at }] of this._doomed) {
+      if (this.clock.now < at) {
+        continue;
+      }
+      this._doomed.delete(i);
+      const s = this.structures.get(i);
+      if (s && s.fuel > 0) {
+        s.fuel = 0;
+        out.push({ tx: i % this.map.width, ty: Math.floor(i / this.map.width) });
+      }
+    }
+    return out;
+  }
+
+  /**
    * Every silver bell: its middle and how close ghosts may come.
    * @returns The bells.
    */
@@ -114,22 +173,24 @@ export class WorldLights extends TickingFeature {
   }
 
   /**
-   * Whether a burning campfire's tile center is within `radius` of (x, y).
+   * The best level among burning campfires (soul fires, blood fountains)
+   * whose tile center is within `radius` of (x, y).
    * @param x Where across, in tiles.
    * @param y Where down, in tiles.
    * @param radius How far to look, in tiles.
-   * @returns Whether one is that close.
+   * @returns The level, or null when none is that close.
    */
-  nearLitCampfire(x: number, y: number, radius: number): boolean {
+  litCampfireLevel(x: number, y: number, radius: number): number | null {
+    let best: number | null = null;
     for (const [i, s] of this.structures.entries()) {
       const tx = i % this.map.width;
       const ty = Math.floor(i / this.map.width);
       const tile = this.map.get(tx, ty);
       if (s.fuel > 0 && (tile === 'campfire' || tile === 'soul-fire' || tile === 'blood-fountain') && Math.hypot(tx + 0.5 - x, ty + 0.5 - y) <= radius) {
-        return true;
+        best = Math.max(best ?? 0, s.level ?? 0);
       }
     }
-    return false;
+    return best;
   }
 
   /**
@@ -139,13 +200,10 @@ export class WorldLights extends TickingFeature {
    */
   activeLights(): ActiveLight[] {
     const lights: ActiveLight[] = [];
-    for (let ty = 0; ty < this.map.height; ty++) {
-      for (let tx = 0; tx < this.map.width; tx++) {
-        const tile = this.map.get(tx, ty);
-        if (tile === 'pumpkin' || tile === 'lamp') {
-          lights.push({ tx, ty, radius: (tile === 'lamp' ? LAMP_LIGHT : PUMPKIN_LIGHT).radius, structure: false });
-        }
-      }
+    for (const i of this.lightSpots()) {
+      const tx = i % this.map.width;
+      const ty = Math.floor(i / this.map.width);
+      lights.push({ tx, ty, radius: (this.map.get(tx, ty) === 'lamp' ? LAMP_LIGHT : PUMPKIN_LIGHT).radius, structure: false });
     }
     for (const [i, s] of this.structures.entries()) {
       const tx = i % this.map.width;
@@ -160,6 +218,36 @@ export class WorldLights extends TickingFeature {
   }
 
   /**
+   * Every pumpkin and lamp post's tile index: found once per map, then
+   * kept up to date as tiles change.
+   * @returns The indexes.
+   */
+  private lightSpots(): Set<number> {
+    const map = this.map;
+    if (this._spotsMap !== map) {
+      this._spotsMap = map;
+      this._spots.clear();
+      for (let i = 0; i < map.size; i++) {
+        const tile = map.get(i % map.width, Math.floor(i / map.width));
+        if (tile === 'pumpkin' || tile === 'lamp') {
+          this._spots.add(i);
+        }
+      }
+      map.listen((i: number, tile: Tile): void => {
+        if (this._spotsMap !== map) {
+          return;
+        }
+        if (tile === 'pumpkin' || tile === 'lamp') {
+          this._spots.add(i);
+        } else {
+          this._spots.delete(i);
+        }
+      });
+    }
+    return this._spots;
+  }
+
+  /**
    * Every lit light and glowing station, with how far and bright it
    * shines.
    * @returns The lights, for the TV.
@@ -170,7 +258,9 @@ export class WorldLights extends TickingFeature {
       const tile = this.map.get(i % this.map.width, Math.floor(i / this.map.width));
       if (s.fuel > 0 && isStructure(tile) && STRUCTURES[tile].light) {
         const { radius, intensity } = this.shine(tile, s);
-        lights.push({ i, fuel: Math.round(Math.min(s.fuel, LOW_FUEL) * 10) / 10, radius: Math.round(radius * 100) / 100, intensity: Math.round(intensity * 100) / 100 });
+        const doom = this._doomed.get(i);
+        const dying = doom ? (doom.at - this.clock.now) / doom.sputter : Infinity;
+        lights.push({ i, fuel: Math.round(Math.min(s.fuel, tile === 'altar' ? ALTAR_AWAKE_SECONDS : LOW_FUEL) * 10) / 10, radius: Math.round(radius * 100) / 100, intensity: Math.round(intensity * 100) / 100, ...(dying <= 1 ? { dying: Math.max(0, Math.round(dying * 100) / 100) } : {}) });
       }
     }
     return lights;

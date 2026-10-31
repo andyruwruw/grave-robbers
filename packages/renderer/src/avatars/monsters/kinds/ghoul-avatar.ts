@@ -64,7 +64,7 @@ export class GhoulAvatar extends ChargingMonsterAvatar {
    * bends at its middle joint.
    */
   protected build(): void {
-    const { box } = this._parts;
+    const { box, eye } = this._parts;
     const rand = seededRandom(this.target.id * 7919 + 13);
     const skin = GHOUL_SKINS[Math.floor(rand() * GHOUL_SKINS.length)];
     const shirt = pickFrom(rand, ZOMBIE_SHIRTS);
@@ -89,8 +89,8 @@ export class GhoulAvatar extends ChargingMonsterAvatar {
       box([0.12, 0.24, 0.04], [0.07, -0.08, -0.08], GHOUL_HAIR),
       box([0.12, 0.24, 0.04], [0.07, -0.08, 0.08], GHOUL_HAIR),
       box([0.04, 0.2, 0.15], [-0.01, -0.04, 0], GHOUL_HAIR),
-      box([0.02, 0.022, 0.03], [0.15, 0.02, -0.04], GHOUL_EYE, true),
-      box([0.02, 0.022, 0.03], [0.15, 0.02, 0.04], GHOUL_EYE, true),
+      eye([0.02, 0.022, 0.03], [0.15, 0.02, -0.04], GHOUL_EYE),
+      eye([0.02, 0.022, 0.03], [0.15, 0.02, 0.04], GHOUL_EYE),
       box([0.02, 0.05, 0.08], [0.15, -0.05, 0], '#1a0e0e'),
       box([0.022, 0.015, 0.07], [0.152, -0.03, 0], GHOUL_TEETH),
     );

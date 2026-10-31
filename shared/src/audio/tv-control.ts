@@ -47,7 +47,8 @@ export interface TvStatus {
   music: MusicStatus;
 
   /**
-   * Whether Incognito is showing.
+   * Whether Incognito is turned on (it only shows while no player is
+   * connected).
    */
   incognito: boolean;
 }

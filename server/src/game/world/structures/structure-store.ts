@@ -1,8 +1,5 @@
-// Packages
-import { STASH_SLOTS, STATIONS } from '@halloween/shared/structures/stations';
-import { STRUCTURES } from '@halloween/shared/structures/structure-catalog';
-import { TURRETS } from '@halloween/shared/structures/turrets';
-import { lightBurn, structureHp } from '@halloween/shared/skill-tree/upgrades/structure-upgrades';
+// Local Imports
+import { freshStructure } from '../helpers/fresh-structure';
 
 // Types
 import type { StructureKind } from '@halloween/shared/structures/types/structures';
@@ -76,22 +73,10 @@ export class StructureStore {
    * @param ty The tile's row.
    * @param kind What to build.
    * @param level The builder's skill level for it.
-   * @param owner The builder's id (a coffin's owner) or name (a stash's keeper).
+   * @param owner The builder's id (a coffin's or digger's owner) or name (a stash's keeper).
    */
   place(tx: number, ty: number, kind: StructureKind, level: number, owner: string | null = null): void {
-    const fuel = STRUCTURES[kind].light && !STATIONS[kind] ? lightBurn(kind) : 0;
-    this._byIndex.set(ty * this._map.width + tx, {
-      hp: structureHp(kind, level),
-      fuel,
-      floor: this._map.get(tx, ty),
-      level,
-      ...(STATIONS[kind] ? { queue: 0, progress: 0, buffer: {} } : {}),
-      ...(kind === 'digger' ? { progress: 0 } : {}),
-      ...(TURRETS[kind] ? { ammo: 0, readyAt: 0 } : {}),
-      ...(kind === 'seeds' ? { readyAt: 0 } : {}),
-      ...(kind === 'coffin' && owner ? { owner } : {}),
-      ...(kind === 'stash' ? { stash: Array.from({ length: STASH_SLOTS }, (): null => null), keeper: owner ?? '' } : {}),
-    });
+    this._byIndex.set(ty * this._map.width + tx, freshStructure(kind, level, this._map.get(tx, ty), owner));
     this._map.set(tx, ty, kind);
   }
 }

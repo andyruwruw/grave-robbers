@@ -13,6 +13,7 @@ import WorldActions from './world-actions';
 import type { MapGenSettings } from '@halloween/shared/map-gen/settings';
 import type { GameSettings } from '@halloween/shared/protocol/game-settings';
 import type { SpawnKind } from '@halloween/shared/protocol/tv-tools';
+import type { WorldEventKind } from '@halloween/shared/world-events/types/world-events';
 import type { TvView } from '../../types/tv-view';
 
 /**
@@ -25,9 +26,9 @@ interface GamePanelProps {
   settings: GameSettings;
 
   /**
-   * Whether a blood moon is up right now.
+   * The world events that are up right now.
    */
-  bloodMoon: boolean;
+  worldEvents: WorldEventKind[];
 
   /**
    * The hidden world level right now.
@@ -45,9 +46,9 @@ interface GamePanelProps {
   onSpawn: (kind: SpawnKind) => void;
 
   /**
-   * Summons a blood moon.
+   * Starts a world event.
    */
-  onBloodMoon: () => void;
+  onStartEvent: (kind: WorldEventKind) => void;
 
   /**
    * Kills every monster on the map.
@@ -103,11 +104,11 @@ interface GamePanelProps {
  */
 function GamePanel({
   settings,
-  bloodMoon,
+  worldEvents,
   worldLevel,
   onChange,
   onSpawn,
-  onBloodMoon,
+  onStartEvent,
   onKillMonsters,
   onEditMap,
   shortcuts = false,
@@ -131,10 +132,10 @@ function GamePanel({
       <SpawnCard onSpawn={onSpawn} />
 
       <WorldActions
-        bloodMoon={bloodMoon}
+        worldEvents={worldEvents}
         daytime={settings.daytime}
         shortcuts={shortcuts}
-        onBloodMoon={onBloodMoon}
+        onStartEvent={onStartEvent}
         onDaytime={(): void => onChange({ daytime: !settings.daytime })}
         onKillMonsters={onKillMonsters} />
 

@@ -55,7 +55,8 @@ export class Sight<P extends Target> extends HordePart<P> {
 
   /**
    * The closest player the monster can see this tick (see `look`), or
-   * null. Seeing someone refreshes where the monster last saw them.
+   * while a world event hunts the closest player anywhere, or null. Seeing
+   * someone refreshes where the monster last saw them.
    * @param m The monster.
    * @param prey Players monsters may go after.
    * @param world The world.
@@ -64,7 +65,7 @@ export class Sight<P extends Target> extends HordePart<P> {
   perceive(m: Monster<P>, prey: P[], world: World): P | null {
     let best: P | null = null;
     let bestDist = Infinity;
-    for (const p of this._sightings.get(m.id) ?? []) {
+    for (const p of this._horde.mods.hunt ? prey : this._sightings.get(m.id) ?? []) {
       const d = distance(m, p);
       if (d < bestDist && prey.includes(p)) {
         best = p;

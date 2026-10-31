@@ -1,6 +1,7 @@
 // Types
 import type { BagItem } from '@halloween/shared/inventory/bag-items';
 import type { Bundle } from '@halloween/shared/goods/goods';
+import type { SortKey, SortSide } from '@halloween/shared/structures/sorting';
 import type { StructureKind } from '@halloween/shared/structures/types/structures';
 import type { Tile } from '@halloween/shared/world/tiles';
 
@@ -60,9 +61,15 @@ export interface StructureState {
   pumped?: number;
 
   /**
-   * The id of the player a coffin belongs to (they rise from it).
+   * The id of the player a coffin or bone digger belongs to (they rise
+   * from the coffin; they collect what the digger kept).
    */
   owner?: string;
+
+  /**
+   * What a bone digger dug up and kept for its builder.
+   */
+  hoard?: Partial<Bundle>;
 
   /**
    * A storage chest's slots.
@@ -74,6 +81,18 @@ export interface StructureState {
    * it. By name so it survives a restart.
    */
   keeper?: string;
+
+  /**
+   * A belt sorter's routes: which thing goes out each side (anything else
+   * rolls straight on, see `SORT_SIDES`).
+   */
+  routes?: Partial<Record<SortSide, SortKey>>;
+
+  /**
+   * What a station, digger, or fountain made and holds for a belt leading
+   * away to pull (see `OUTPUT_HOLD`).
+   */
+  out?: Partial<Bundle>;
 }
 
 /**

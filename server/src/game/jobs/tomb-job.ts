@@ -1,10 +1,8 @@
 // Packages
 import { stock } from '@halloween/shared/goods/goods';
-import { DIG_BONES, ROB_BLUEPRINT_CHANCE, ROB_CANDY, ROB_GEAR_CHANCE } from '@halloween/shared/loot/graves';
+import { DIG_BONES, ROB_BLUEPRINT_CHANCE, ROB_CANDY } from '@halloween/shared/loot/graves';
 
 // Local Imports
-import { NO_TREE } from '../config/loot';
-import { randomLoot } from '../helpers/loot-rolls';
 import { DiggingJob } from './digging-job';
 
 // Types
@@ -34,7 +32,7 @@ export class TombJob extends DiggingJob {
 
   /**
    * Digs at a statue, crypt, or mausoleum. The dig that robs it spills
-   * candy and bones, maybe a piece of gear, and maybe a blueprint; one
+   * candy and bones, and maybe a blueprint; one
    * already robbed has nothing left for a while.
    * @param p The player.
    * @param tx The tile's column.
@@ -60,9 +58,6 @@ export class TombJob extends DiggingJob {
     }
     const { x, y } = this.spillSpot(p, tx, ty);
     this._game.pickups.award(p, stock({ candy: this.roll(ROB_CANDY[tile]), bone: this.roll(DIG_BONES) }), x, y);
-    if (Math.random() < ROB_GEAR_CHANCE) {
-      this._game.pickups.pocket(p, randomLoot(NO_TREE), x, y);
-    }
     this.findBlueprint(p, ROB_BLUEPRINT_CHANCE);
   }
 

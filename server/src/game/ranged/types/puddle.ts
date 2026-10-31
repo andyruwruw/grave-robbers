@@ -31,4 +31,9 @@ export interface Puddle {
    * Whose it is for the kill feed.
    */
   by: string;
+
+  /**
+   * A bloater's bile rather than a witch's potion.
+   */
+  bile: boolean;
 }

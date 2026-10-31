@@ -44,7 +44,7 @@ export function useTvKeys(
       } else if (e.key.toLowerCase() === 'i') {
         setIncognito((on: boolean): boolean => !on);
       } else if (e.key.toLowerCase() === 'b') {
-        sendRef.current({ t: 'force-blood-moon' });
+        sendRef.current({ t: 'start-world-event', kind: 'blood-moon' });
       } else if (e.key.toLowerCase() === 'k') {
         sendRef.current({ t: 'kill-monsters' });
       } else if (GAME_KEYS[e.key.toLowerCase()]) {

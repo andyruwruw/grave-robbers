@@ -13,8 +13,8 @@ export const GHOST_SCARE_TIME = 4;
  * Ghosts lob slow balls of ectoplasm at anyone within GHOST_SHOT_RANGE
  * tiles, one every GHOST_SHOT_COOLDOWN seconds (give or take a quarter).
  * A hit does a little damage and slows the player to GHOST_SLOW of their
- * speed for GHOST_SLOW_SECONDS. Like ghosts, the balls drift through walls,
- * but they're slow enough to step out of the way.
+ * speed for GHOST_SLOW_SECONDS. The balls drift through walls (the ghosts
+ * themselves don't), but they're slow enough to step out of the way.
  */
 export const GHOST_SHOT_RANGE = 5;
 
@@ -39,7 +39,7 @@ export const GHOST_DAMAGE = 0.25;
 /**
  * How many times as far hits knock a ghost.
  */
-export const GHOST_KNOCKBACK = 5;
+export const GHOST_KNOCKBACK = 2;
 
 /**
  * Seconds between a ghost's shots (give or take a quarter).

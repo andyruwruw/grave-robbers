@@ -16,3 +16,13 @@ export const WATER_BLOOD = 1;
  * Least seconds between waterings of seeds or a sprout.
  */
 export const GROW_SECONDS = 30;
+
+/**
+ * Chance a smashed pumpkin has candy inside.
+ */
+export const PUMPKIN_CANDY_CHANCE = 0.3;
+
+/**
+ * Candy inside a pumpkin when there is some, least to most.
+ */
+export const PUMPKIN_CANDY: [number, number] = [1, 2];

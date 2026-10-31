@@ -1,19 +1,17 @@
+// Local Imports
+import { Wound } from './wound';
+
+// Types
+import type { RaiseTrick } from '@halloween/shared/gear/types/special-tricks';
+
 /**
- * A bleeding wound: damage a second, until when, and who made it.
+ * A bleeding wound. It remembers whether the weapon that opened it
+ * raises what dies of it (Grave Fists).
  */
-export class Bleeding<P> {
+export class Bleeding<P> extends Wound<P> {
   /**
-   * Damage a second.
+   * What a death from this bleed rises as on its maker's side, if
+   * anything (the last bleeding hit's `raise`).
    */
-  rate = 0;
-
-  /**
-   * Game-clock time it stops.
-   */
-  until = 0;
-
-  /**
-   * Who made it, credited with a bleed kill.
-   */
-  by: P | null = null;
+  raise: RaiseTrick | null = null;
 }

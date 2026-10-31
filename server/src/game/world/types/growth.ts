@@ -7,6 +7,12 @@ import type { GrownTile } from '@halloween/shared/protocol/game-events';
 export type StockedTile = 'tree' | 'pumpkin' | 'chest';
 
 /**
+ * What regrowth keeps topped up to a target: the stocked tiles, plus
+ * hedges (which grow back with the trees).
+ */
+export type RestockedTile = StockedTile | 'hedge' | 'rock';
+
+/**
  * Someone standing somewhere, for keeping regrowth off their tile.
  */
 export interface Occupant {

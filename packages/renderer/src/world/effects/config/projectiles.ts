@@ -1,5 +1,6 @@
 // Packages
 import { BoxGeometry } from 'three';
+import { VARIANTS } from '@halloween/shared/gear/infusions/config/variants';
 import { BOLT_SPEED } from '@halloween/shared/gear/ranged-rules';
 import { GHOST_SHOT_SPEED } from '@halloween/shared/monsters/kinds/ghost';
 import { ARROW_SPEED } from '@halloween/shared/monsters/kinds/skeleton';
@@ -7,6 +8,7 @@ import { POTION_SPEED } from '@halloween/shared/monsters/kinds/witch';
 
 // Types
 import type { ShotState } from '@halloween/shared/protocol/state/world-state';
+import type { ShotSlot } from '../../../types/effects';
 
 /**
  * How many shots in flight can be drawn at once.
@@ -117,4 +119,96 @@ export const POTION_ARC = 1.4;
 /**
  * How fast each kind of shot flies, to carry it forward between ticks.
  */
-export const SHOT_SPEEDS: Record<ShotState['kind'], number> = { bolt: BOLT_SPEED, blood: BOLT_SPEED, ecto: GHOST_SHOT_SPEED, arrow: ARROW_SPEED, potion: POTION_SPEED };
+export const SHOT_SPEEDS: Record<ShotState['kind'], number> = {
+  'bolt': BOLT_SPEED,
+  'blood': BOLT_SPEED,
+  'ecto': GHOST_SHOT_SPEED,
+  'arrow': ARROW_SPEED,
+  'potion': POTION_SPEED,
+  'glaive': VARIANTS.glaive!.hex![0].twist.throwStab!.speed!,
+  'fire-arrow': BOLT_SPEED,
+  'spirit-arrow': BOLT_SPEED,
+  'ghost-bullet': BOLT_SPEED,
+};
+
+/**
+ * Which slot mesh draws each kind of shot.
+ */
+export const SHOT_MESHES: Record<ShotState['kind'], keyof ShotSlot> = {
+  'bolt': 'bolt',
+  'blood': 'gob',
+  'ecto': 'ecto',
+  'arrow': 'arrow',
+  'potion': 'potion',
+  'glaive': 'glaive',
+  'fire-arrow': 'fireArrow',
+  'spirit-arrow': 'spiritArrow',
+  'ghost-bullet': 'ghostBullet',
+};
+
+/**
+ * A thrown glaive: two crossed steel blades round a glowing hex core,
+ * spinning flat.
+ */
+export const GLAIVE_COLORS = { blade: '#c4c8d4', core: '#b04aff' };
+
+/**
+ * A glaive blade's box.
+ */
+export const GLAIVE_BLADE_BOX = new BoxGeometry(0.46, 0.03, 0.09);
+
+/**
+ * The glaive's core's box.
+ */
+export const GLAIVE_CORE_BOX = new BoxGeometry(0.1, 0.06, 0.1);
+
+/**
+ * How fast a thrown glaive spins, in radians a second.
+ */
+export const GLAIVE_SPIN = 22;
+
+/**
+ * A fire arrow: a burning head and a flickering tail of fire behind it.
+ */
+export const FIRE_ARROW_COLORS = { head: '#ffd27a', tail: '#ff6a1a', ember: '#ff4a1a' };
+
+/**
+ * A fire arrow's burning head's box.
+ */
+export const FIRE_HEAD_BOX = new BoxGeometry(0.1, 0.07, 0.07);
+
+/**
+ * A fire arrow's tail's box (one of two, the second smaller).
+ */
+export const FIRE_TAIL_BOX = new BoxGeometry(0.22, 0.06, 0.06);
+
+/**
+ * A spirit arrow: a see-through green shaft with a glowing head.
+ */
+export const SPIRIT_ARROW_COLORS = { shaft: '#7dffb0', head: '#e0fff0' };
+
+/**
+ * A spirit arrow's head's box.
+ */
+export const SPIRIT_HEAD_BOX = new BoxGeometry(0.08, 0.06, 0.06);
+
+/**
+ * A ghost bullet: a small pale core in a green see-through halo, trailing
+ * a wisp.
+ */
+export const GHOST_BULLET_COLORS = { core: '#f0fff6', halo: '#7dffb0' };
+
+/**
+ * A ghost bullet's core's box.
+ */
+export const GHOST_CORE_BOX = new BoxGeometry(0.08, 0.08, 0.08);
+
+/**
+ * A ghost bullet's halo's box.
+ */
+export const GHOST_HALO_BOX = new BoxGeometry(0.16, 0.16, 0.16);
+
+/**
+ * A ghost bullet's trailing wisp's box.
+ */
+export const GHOST_WISP_BOX = new BoxGeometry(0.34, 0.05, 0.05);

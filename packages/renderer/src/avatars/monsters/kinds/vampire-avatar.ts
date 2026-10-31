@@ -64,7 +64,7 @@ export class VampireAvatar extends MonsterAvatar {
    * hair with a widow's peak, glowing eyes, fangs, and clawed hands.
    */
   protected build(): void {
-    const { box } = this._parts;
+    const { box, eye } = this._parts;
     const legL = box([0.12, 0.26, 0.12], [0, 0.13, -0.08], VAMPIRE_SUIT);
     const legR = box([0.12, 0.26, 0.12], [0, 0.13, 0.08], VAMPIRE_SUIT);
     this._limbs.push(legL, legR);
@@ -85,8 +85,8 @@ export class VampireAvatar extends MonsterAvatar {
       box([0.12, 0.14, 0.3], [-0.1, 0.2, 0], VAMPIRE_HAIR),
       box([0.03, 0.02, 0.09], [0.145, 0.2, -0.07], VAMPIRE_HAIR),
       box([0.03, 0.02, 0.09], [0.145, 0.2, 0.07], VAMPIRE_HAIR),
-      box([0.03, 0.06, 0.08], [0.14, 0.15, -0.07], VAMPIRE_EYE, true),
-      box([0.03, 0.06, 0.08], [0.14, 0.15, 0.07], VAMPIRE_EYE, true),
+      eye([0.03, 0.06, 0.08], [0.14, 0.15, -0.07], VAMPIRE_EYE),
+      eye([0.03, 0.06, 0.08], [0.14, 0.15, 0.07], VAMPIRE_EYE),
       box([0.02, 0.05, 0.02], [0.14, 0.03, -0.035], VAMPIRE_FANG),
       box([0.02, 0.05, 0.02], [0.14, 0.03, 0.035], VAMPIRE_FANG),
     );

@@ -20,6 +20,7 @@ import {
   STONE_DARK,
   VIAL_GLASS,
 } from './config/palette';
+import { essenceModel } from './essence-models';
 import { iconBox } from './icon-box';
 
 // Types
@@ -65,17 +66,17 @@ export function materialModel(material: Material, make: BoxFactory = iconBox.box
         make([0.07, 0.05, 0.2], [0, 0.075, 0], color),
       ];
     case 'bolts':
-      return [-0.05, 0, 0.05].flatMap((z: number, i: number): Mesh[] => [
-        make([0.28, 0.025, 0.025], [0, 0.02 + i * 0.02, z], color),
-        make([0.05, 0.035, 0.035], [0.16, 0.02 + i * 0.02, z], BOLT_TIP),
-        make([0.05, 0.04, 0.01], [-0.13, 0.02 + i * 0.02, z], FLETCH),
-      ]);
+      return [-0.5, 0.05, 0.6].flatMap((turn: number, i: number): Mesh[] => fanned(turn, [
+        make([0.28, 0.025, 0.025], [0, 0.02 + i * 0.025, 0], color),
+        make([0.05, 0.035, 0.035], [0.16, 0.02 + i * 0.025, 0], BOLT_TIP),
+        make([0.05, 0.04, 0.01], [-0.13, 0.02 + i * 0.025, 0], FLETCH),
+      ]));
     case 'arrows':
-      return [-0.06, -0.02, 0.02, 0.06].flatMap((z: number, i: number): Mesh[] => [
-        make([0.34, 0.02, 0.02], [0, 0.02 + (i % 2) * 0.02, z], color),
-        make([0.04, 0.035, 0.03], [0.18, 0.02 + (i % 2) * 0.02, z], BOLT_TIP),
-        make([0.07, 0.045, 0.008], [-0.15, 0.02 + (i % 2) * 0.02, z], FLETCH),
-      ]);
+      return [-0.7, -0.25, 0.2, 0.65].flatMap((turn: number, i: number): Mesh[] => fanned(turn, [
+        make([0.34, 0.02, 0.02], [0, 0.02 + i * 0.022, 0], color),
+        make([0.04, 0.035, 0.03], [0.18, 0.02 + i * 0.022, 0], BOLT_TIP),
+        make([0.07, 0.045, 0.008], [-0.15, 0.02 + i * 0.022, 0], FLETCH),
+      ]));
     case 'bone':
       return [
         ...[-1, 1].flatMap((side: number): Mesh[] => {
@@ -149,5 +150,26 @@ export function materialModel(material: Material, make: BoxFactory = iconBox.box
         make([0.05, 0.05, 0.05], [0.26, 0.15, 0], IRON_EDGE),
         make([0.03, 0.03, 0.03], [0.29, 0.15, 0], BLOOD_SHINE, true),
       ];
+    case 'holy-water':
+    case 'brute-tendon':
+    case 'ghoul-fang':
+    case 'hex-shard':
+    case 'brimstone':
+      return essenceModel(material, make);
   }
+}
+
+/**
+ * Turns the parts of one shaft (an arrow or a bolt) about the pile's
+ * middle, so a pile of them fans out instead of lying side by side.
+ * @param turn How far it's turned about straight up.
+ * @param parts The shaft's parts, laid along x.
+ * @returns The same parts, turned.
+ */
+function fanned(turn: number, parts: Mesh[]): Mesh[] {
+  for (const part of parts) {
+    part.position.applyAxisAngle(UP, turn);
+    part.rotation.y = turn;
+  }
+  return parts;
 }
