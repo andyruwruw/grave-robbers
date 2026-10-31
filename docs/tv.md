@@ -215,7 +215,21 @@ Not while typing or in the map editor. The Game tab shows each letter beside its
 
 ### Incognito
 
-`apps/tv/src/components/incognito-screen.tsx` shows the album art, title, and artist over the live graveyard, hides the kill feed, and mutes SFX; the join QR stays up so people can still jump in. Off when the page opens. It's a mode: turned on (I, the music panel, a remote control), it shows only while no player is connected. It fades away as soon as one connects and comes back once all have left, as long as the mode is still on; Escape or the toggle turns the mode off (`incognitoMode` and `playersHere` in `display-page.tsx`). While the music shows, the graveyard behind it turns more scenic: chromatic aberration eases up to 0.9, the ground fog to 1.7 (past the Fog setting's 0 to 1, a heavy mist), and the pixels to 1.8 times their size (`WorldRenderer.setPixelBoost`) over the screen's 1.5s fade, and back to the TV's own settings when it hides (`useScenicLook`, `SCENIC_ABERRATION`, `SCENIC_FOG`, `SCENIC_PIXELATION`, `SCENIC_FADE_MS`).
+`apps/tv/src/components/incognito-screen.tsx` shows the album art, title, and artist over the live graveyard, hides the kill feed, and mutes SFX; the join QR stays up so people can still jump in. Off when the page opens. It's a mode: turned on (I, the music panel, a remote control), it shows only while no player is connected. It fades away as soon as one connects and comes back once all have left, as long as the mode is still on; Escape or the toggle turns the mode off (`incognitoMode` and `playersHere` in `display-page.tsx`). While the music shows, the graveyard behind it turns more scenic over the screen's 1.5s fade, and back to the TV's own settings when it hides (`useScenicLook`, `SCENIC_FADE_MS`): chromatic aberration eases up to 0.9 (`SCENIC_ABERRATION`), and brightness, contrast, fog, its shade, and pixelation to the Incognito look.
+
+#### Incognito look
+
+The Music tab's Incognito Look card (`IncognitoLookCard`) has a slider for each, kept per browser once one moves (`useIncognitoLook`, `INCOGNITO_LOOK_STORAGE_KEY`). Moving one while the music screen shows applies at once.
+
+| Slider | Range | Default | What it sets |
+|---|---|---|---|
+| Incognito Brightness | 30% to 160% | 80% | Canvas `brightness()` filter |
+| Incognito Contrast | 50% to 180% | 105% | Canvas `contrast()` filter (`DisplaySettings.contrast`) |
+| Incognito Pixelation | 1.0x to 4.0x | 1.3x | The zoom's pixel size times this (`WorldRenderer.setPixelBoost`) |
+| Incognito Fog | 0% to 300% | 160% | Ground fog thickness; past 100% is heavier than the Fog setting allows |
+| Incognito Fog Color | 20% to 300% | Normal (100%) | The fog's color times this: under 100% darker, over lighter (`DisplaySettings.fogShade`, `Fog.setShade`) |
+
+Ranges and defaults are `INCOGNITO_LOOK_RANGES` and `DEFAULT_INCOGNITO_LOOK` in `packages/controls/src/config/incognito-look.ts`.
 
 ## Controllers on the TV
 

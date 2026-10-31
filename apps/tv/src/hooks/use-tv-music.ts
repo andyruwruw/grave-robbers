@@ -60,7 +60,7 @@ export interface TvMusic {
   /**
    * Everything the Music tab works.
    */
-  buildControls: (send: (msg: ClientMessage) => void, closeSidebar: () => void) => MusicControls;
+  buildControls: (send: (msg: ClientMessage) => void, closeSidebar: () => void) => Omit<MusicControls, 'look' | 'onLook'>;
 }
 
 /**
@@ -163,7 +163,7 @@ export function useTvMusic(incognito: boolean, incognitoMode: boolean, setIncogn
    * @param closeSidebar - Closes the sidebar.
    * @returns The controls.
    */
-  const buildControls = (send: (msg: ClientMessage) => void, closeSidebar: () => void): MusicControls => ({
+  const buildControls = (send: (msg: ClientMessage) => void, closeSidebar: () => void): Omit<MusicControls, 'look' | 'onLook'> => ({
     settings: audio,
     status: musicStatus,
     onAudio: setAudio,

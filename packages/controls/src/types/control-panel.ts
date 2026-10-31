@@ -2,6 +2,7 @@
 import type { LucideIcon } from 'lucide-react';
 import type { AudioSettings } from '@halloween/shared/audio/audio-settings';
 import type { MusicStatus } from '@halloween/shared/audio/music-status';
+import type { IncognitoLook } from './incognito-look';
 
 /**
  * The control panel's tabs.
@@ -35,7 +36,7 @@ export type ControlTabInfo = TabInfo<ControlTab>;
 
 /**
  * Everything the Music tab works: the music choices, what's playing, and
- * incognito.
+ * incognito and its look.
  */
 export interface MusicControls {
   /**
@@ -88,4 +89,14 @@ export interface MusicControls {
    * Turns incognito on or off.
    */
   onIncognito: (on: boolean) => void;
+
+  /**
+   * How the graveyard looks behind the Incognito screen.
+   */
+  look: IncognitoLook;
+
+  /**
+   * Called with the full updated look.
+   */
+  onLook: (look: IncognitoLook) => void;
 }

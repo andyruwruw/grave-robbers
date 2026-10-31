@@ -167,7 +167,9 @@ function ControlPanel({
           onMove={music.onMove}
           onClaimMusic={music.onClaimMusic}
           incognito={music.incognito}
-          onIncognito={music.onIncognito} />
+          onIncognito={music.onIncognito}
+          look={music.look}
+          onLook={music.onLook} />
       )}
       {tab === 'game' && (
         <GamePanel

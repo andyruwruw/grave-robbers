@@ -13,6 +13,11 @@ export interface DisplaySettings {
   brightness: number;
 
   /**
+   * Overall contrast, 1 as the game is drawn.
+   */
+  contrast: number;
+
+  /**
    * Scale of small details. Stored for now; what it scales is still to be
    * decided.
    */
@@ -37,6 +42,11 @@ export interface DisplaySettings {
    * Thickness of the ground fog, 0 (off) to 1.
    */
   fog: number;
+
+  /**
+   * The ground fog's shade: under 1 darker, over 1 lighter.
+   */
+  fogShade: number;
 
   /**
    * How hard the screen shakes on hits, 0 (never) to 1.
@@ -100,7 +110,7 @@ export interface DisplaySettings {
 /**
  * The numeric display settings.
  */
-export type DisplayNumber = 'brightness' | 'details' | 'viewAngle' | 'glow' | 'aberration' | 'fog' | 'shake' | 'turnSpeed' | 'blood';
+export type DisplayNumber = 'brightness' | 'contrast' | 'details' | 'viewAngle' | 'glow' | 'aberration' | 'fog' | 'fogShade' | 'shake' | 'turnSpeed' | 'blood';
 
 /**
  * The on/off display settings.

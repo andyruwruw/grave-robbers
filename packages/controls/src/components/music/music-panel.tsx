@@ -3,6 +3,7 @@ import React from 'react';
 
 // Local Imports
 import { useSpotifyAccount } from '../../hooks/use-spotify-account';
+import IncognitoLookCard from './incognito-look-card';
 import MusicSourcesCard from './music-sources-card';
 import NowPlayingCard from './now-playing-card';
 import SpotifyCard from './spotify-card';
@@ -12,6 +13,7 @@ import VolumeCard from './volume-card';
 // Types
 import type { AudioSettings } from '@halloween/shared/audio/audio-settings';
 import type { MusicStatus } from '@halloween/shared/audio/music-status';
+import type { IncognitoLook } from '../../types/incognito-look';
 
 /**
  * Props for the MusicPanel component.
@@ -66,13 +68,24 @@ interface MusicPanelProps {
    * Turns incognito on or off.
    */
   onIncognito: (on: boolean) => void;
+
+  /**
+   * How the graveyard looks behind the Incognito screen.
+   */
+  look: IncognitoLook;
+
+  /**
+   * Called with the full updated look.
+   */
+  onLook: (look: IncognitoLook) => void;
 }
 
 /**
  * Music controls for the TV, as cards: the music, ambience, and sound
  * effect volumes; what's playing (play/pause and skip, Incognito, which
  * hides the game's chrome behind a plain now-playing screen until someone
- * joins); what's up next (each of the player's own songs can move up or
+ * joins); the Incognito look (brightness, contrast, pixelation, and fog
+ * behind that screen); what's up next (each of the player's own songs can move up or
  * down or come out); what to play (the Spotify account's queue first, a
  * Spotify playlist, the custom songs, in any mix, with a slider under each
  * shuffled source for how often it's picked against the other); and the
@@ -93,6 +106,8 @@ function MusicPanel({
   onClaimMusic,
   incognito,
   onIncognito,
+  look,
+  onLook,
 }: MusicPanelProps): React.JSX.Element {
   const account = useSpotifyAccount(settings, onChange);
 
@@ -109,6 +124,10 @@ function MusicPanel({
         onClaimMusic={onClaimMusic}
         incognito={incognito}
         onIncognito={onIncognito} />
+
+      <IncognitoLookCard
+        look={look}
+        onChange={onLook} />
 
       {status.upNext.length > 0 && (
         <UpNextCard

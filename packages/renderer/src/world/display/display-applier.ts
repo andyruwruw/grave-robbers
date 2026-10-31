@@ -43,20 +43,23 @@ export class DisplayApplier extends ScenePart {
   }
 
   /**
-   * Applies a display's settings: brightness on the canvas, the camera's
-   * elevation, glow, aberration, and fog (focus and vibrance stay at
+   * Applies a display's settings: brightness and contrast on the canvas, the camera's
+   * elevation, glow, aberration, fog, and the fog's shade (focus and vibrance stay at
    * DEFAULT_STYLE), and whether health bars show; the rest are read live
    * from the context each frame.
    * @param settings The settings.
    */
   apply(settings: DisplaySettings): void {
     Object.assign(this._ctx.display, settings);
-    this._ctx.renderer.domElement.style.filter = settings.brightness === 1 ? '' : `brightness(${settings.brightness})`;
+    const brightness = settings.brightness === 1 ? '' : `brightness(${settings.brightness})`;
+    const contrast = settings.contrast === 1 ? '' : `contrast(${settings.contrast})`;
+    this._ctx.renderer.domElement.style.filter = `${brightness} ${contrast}`.trim();
     this._rig.setElevation((settings.viewAngle * Math.PI) / 180);
     this._style.glow = settings.glow;
     this._style.aberration = settings.aberration;
     this._style.fog = settings.fog;
     this.setStyle(this._style);
+    this._ctx.fog.setShade(settings.fogShade);
     this._ctx.healthBars.setShown(settings.showHealthBars);
   }
 }

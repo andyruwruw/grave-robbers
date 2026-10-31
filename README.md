@@ -1,28 +1,242 @@
+<p align="center">
 <img src="./docs/media/fight.jpg" />
+</p>
 
-# Grave Robbers
+<h1 align="center">
+Grave Robbers
+</h1>
 
-*Candy is power. The dark is hungry.*
+<p align="center">
+<img src="./docs/media/models/materials/candy.gif" width="40" alt="Candy" title="Candy" />
+<img src="./docs/media/models/materials/candy.gif" width="40" alt="Candy" title="Candy" />
+<img src="./docs/media/models/materials/candy.gif" width="40" alt="Candy" title="Candy" />
+<img src="./docs/media/models/materials/candy.gif" width="40" alt="Candy" title="Candy" />
+<img src="./docs/media/models/materials/candy.gif" width="40" alt="Candy" title="Candy" />
+<img src="./docs/media/models/materials/candy.gif" width="40" alt="Candy" title="Candy" />
+<img src="./docs/media/models/materials/candy.gif" width="40" alt="Candy" title="Candy" />
+<img src="./docs/media/models/materials/candy.gif" width="40" alt="Candy" title="Candy" />
+</p>
 
-A spooky top-down survival party game for Halloween nights. Up to 8 players rob graves, chop and mine, craft weapons, and build walls, lamps, and traps in a graveyard that's always dark. The horde comes for anyone outside the light: zombies, vampires, ghosts, werewolves, necromancers, and more, worse under a blood moon. Candy from graves and blood from monsters buy skill tree upgrades. Die and you drop half of both, and your bag spills where you fell.
+<p align="center">
+<i>
+Candy, candy, candy, CANDY, CANDY, CANDY
+</i>
+</p>
 
-<img src="./docs/media/tv.jpg" />
+A spooky top-down survival party game for Halloween nights. Up to 8 players rob graves, chop and mine, craft weapons, and build walls, lamps, and traps in a graveyard that's always dark.
 
-## Join away!
+The horde comes: zombies, vampires, ghosts, werewolves, necromancers, and more, worse under a blood moon. Candy from graves and blood from monsters buy skill tree upgrades.
 
-- **One screen is the window.** A TV (or any big screen) shows the whole graveyard from above, in pixelated voxels.
-- **Every phone is a controller.** Scan the QR code on the TV, pick a name and a color, and you rise from the grave. No app, no account, no lobby.
+## Play from the couch
+
+- **One screen is the window.** A TV (or any big screen) shows the whole graveyard.
+- **Every phone is a controller.** Scan the QR code on the TV, pick a name and a color, and you rise from the grave.
 - **Drop in, drop out.** There are no rounds. Join mid-night, put your phone down, come back tomorrow: your character waits where you left them.
 
-The rest of this page covers sound, music, saves, and running a server. The game itself is explained in [docs/overview.md](docs/overview.md).
+This whole project was meant as a joke, but also to see how far Claude has come. The TV at the party will be playing music from Spotify, displaying the album art and name large. The map behind is filled with zombies and hopefully will look more like scenery.
 
+Guests will notice a small QR code in the corner (or not), which will throw them into the map, and turn their phone into a controller. Inventory, crafting, knowledge tree, all on the phone. If wanted, we can hook a controller to the computer and it can be connected to a player.
+
+The more they play, the more they'll realize how much is built out.
+
+With that said the map displayed in full on the TV and not zoomed in. I didn't want that to be the only way to enjoy it, so I made a separate page where you can be zoomed in, use mouse, keyboard or controller, and have inventory and all that on screen.
+
+Maps are also allowed to be generated large, no need to limit it.
+
+<p align="center">
+<img src="./docs/media/tv.jpg" />
+</p>
+
+## The Rest is Controlled Hell
+
+Create occult alters, research weapons, automate resource gathering, create assembly lines, defend your base with automated flame throwers. The monsters get meaner and meaner.
+
+<p align="center">
 <img src="./docs/media/blood.jpg" />
-
+</p>
+<p align="center">
 <img src="./docs/media/base.jpg" />
-
+</p>
+<p align="center">
 <img src="./docs/media/knowledge.jpg" />
-
+</p>
+<p align="center">
 <img src="./docs/media/automation.jpg" />
+</p>
+
+## The cast
+
+#### The horde
+
+<p align="center">
+<img src="./docs/media/models/monsters/bloater.gif" width="120" alt="Bloater" title="Bloater" />
+<img src="./docs/media/models/monsters/brute.gif" width="120" alt="Brute" title="Brute" />
+<img src="./docs/media/models/monsters/demon.gif" width="120" alt="Demon" title="Demon" />
+<img src="./docs/media/models/monsters/ghost.gif" width="120" alt="Ghost" title="Ghost" />
+<img src="./docs/media/models/monsters/ghoul.gif" width="120" alt="Ghoul" title="Ghoul" />
+<img src="./docs/media/models/monsters/necromancer.gif" width="120" alt="Necromancer" title="Necromancer" />
+<img src="./docs/media/models/monsters/skeleton.gif" width="120" alt="Skeleton" title="Skeleton" />
+<img src="./docs/media/models/monsters/vampire.gif" width="120" alt="Vampire" title="Vampire" />
+<img src="./docs/media/models/monsters/werewolf.gif" width="120" alt="Werewolf" title="Werewolf" />
+<img src="./docs/media/models/monsters/witch.gif" width="120" alt="Witch" title="Witch" />
+<img src="./docs/media/models/monsters/zombie.gif" width="120" alt="Zombie" title="Zombie" />
+</p>
+
+#### Weapons and armor
+
+<p align="center">
+<img src="./docs/media/models/gear/battle-axe.gif" width="120" alt="Battle axe" title="Battle axe" />
+<img src="./docs/media/models/gear/blood-gun.gif" width="120" alt="Blood gun" title="Blood gun" />
+<img src="./docs/media/models/gear/bone-armor.gif" width="120" alt="Bone armor" title="Bone armor" />
+<img src="./docs/media/models/gear/bow.gif" width="120" alt="Bow" title="Bow" />
+<img src="./docs/media/models/gear/crossbow.gif" width="120" alt="Crossbow" title="Crossbow" />
+<img src="./docs/media/models/gear/femur.gif" width="120" alt="Femur" title="Femur" />
+<img src="./docs/media/models/gear/flail.gif" width="120" alt="Flail" title="Flail" />
+<img src="./docs/media/models/gear/glaive.gif" width="120" alt="Glaive" title="Glaive" />
+<img src="./docs/media/models/gear/greatsword.gif" width="120" alt="Greatsword" title="Greatsword" />
+<img src="./docs/media/models/gear/hammer.gif" width="120" alt="Hammer" title="Hammer" />
+<img src="./docs/media/models/gear/infused-hammer.gif" width="120" alt="Infused hammer" title="Infused hammer" />
+<img src="./docs/media/models/gear/morning-star.gif" width="120" alt="Morning star" title="Morning star" />
+<img src="./docs/media/models/gear/musket.gif" width="120" alt="Musket" title="Musket" />
+<img src="./docs/media/models/gear/plate.gif" width="120" alt="Plate" title="Plate" />
+<img src="./docs/media/models/gear/quarterstaff.gif" width="120" alt="Quarterstaff" title="Quarterstaff" />
+<img src="./docs/media/models/gear/repeating-crossbow.gif" width="120" alt="Repeating crossbow" title="Repeating crossbow" />
+<img src="./docs/media/models/gear/ritual-knife.gif" width="120" alt="Ritual knife" title="Ritual knife" />
+<img src="./docs/media/models/gear/scythe.gif" width="120" alt="Scythe" title="Scythe" />
+<img src="./docs/media/models/gear/shield.gif" width="120" alt="Shield" title="Shield" />
+<img src="./docs/media/models/gear/short-sword.gif" width="120" alt="Short sword" title="Short sword" />
+<img src="./docs/media/models/gear/shovel.gif" width="120" alt="Shovel" title="Shovel" />
+<img src="./docs/media/models/gear/spear.gif" width="120" alt="Spear" title="Spear" />
+<img src="./docs/media/models/gear/spiked-gauntlet.gif" width="120" alt="Spiked gauntlet" title="Spiked gauntlet" />
+<img src="./docs/media/models/gear/stake.gif" width="120" alt="Stake" title="Stake" />
+<img src="./docs/media/models/gear/stick.gif" width="120" alt="Stick" title="Stick" />
+<img src="./docs/media/models/gear/stone-armor.gif" width="120" alt="Stone armor" title="Stone armor" />
+<img src="./docs/media/models/gear/torch.gif" width="120" alt="Torch" title="Torch" />
+<img src="./docs/media/models/gear/warhammer.gif" width="120" alt="Warhammer" title="Warhammer" />
+<img src="./docs/media/models/gear/wood-armor.gif" width="120" alt="Wood armor" title="Wood armor" />
+<img src="./docs/media/models/gear/wrench.gif" width="120" alt="Wrench" title="Wrench" />
+</p>
+
+#### Buildables
+
+<p align="center">
+<img src="./docs/media/models/buildables/altar.gif" width="120" alt="Altar" title="Altar" />
+<img src="./docs/media/models/buildables/anvil.gif" width="120" alt="Anvil" title="Anvil" />
+<img src="./docs/media/models/buildables/ballista.gif" width="120" alt="Ballista" title="Ballista" />
+<img src="./docs/media/models/buildables/barbed-wire.gif" width="120" alt="Barbed wire" title="Barbed wire" />
+<img src="./docs/media/models/buildables/bell.gif" width="120" alt="Bell" title="Bell" />
+<img src="./docs/media/models/buildables/belt.gif" width="120" alt="Belt" title="Belt" />
+<img src="./docs/media/models/buildables/blood-fountain.gif" width="120" alt="Blood fountain" title="Blood fountain" />
+<img src="./docs/media/models/buildables/bloodforge.gif" width="120" alt="Bloodforge" title="Bloodforge" />
+<img src="./docs/media/models/buildables/bolt-turret.gif" width="120" alt="Bolt turret" title="Bolt turret" />
+<img src="./docs/media/models/buildables/bone-wall.gif" width="120" alt="Bone wall" title="Bone wall" />
+<img src="./docs/media/models/buildables/campfire.gif" width="120" alt="Campfire" title="Campfire" />
+<img src="./docs/media/models/buildables/cauldron.gif" width="120" alt="Cauldron" title="Cauldron" />
+<img src="./docs/media/models/buildables/coffin.gif" width="120" alt="Coffin" title="Coffin" />
+<img src="./docs/media/models/buildables/digger.gif" width="120" alt="Digger" title="Digger" />
+<img src="./docs/media/models/buildables/door.gif" width="120" alt="Door" title="Door" />
+<img src="./docs/media/models/buildables/effigy.gif" width="120" alt="Effigy" title="Effigy" />
+<img src="./docs/media/models/buildables/flamethrower.gif" width="120" alt="Flamethrower" title="Flamethrower" />
+<img src="./docs/media/models/buildables/furnace.gif" width="120" alt="Furnace" title="Furnace" />
+<img src="./docs/media/models/buildables/ghost-lamp.gif" width="120" alt="Ghost lamp" title="Ghost lamp" />
+<img src="./docs/media/models/buildables/iron-spikes.gif" width="120" alt="Iron spikes" title="Iron spikes" />
+<img src="./docs/media/models/buildables/lantern.gif" width="120" alt="Lantern" title="Lantern" />
+<img src="./docs/media/models/buildables/obelisk.gif" width="120" alt="Obelisk" title="Obelisk" />
+<img src="./docs/media/models/buildables/oven.gif" width="120" alt="Oven" title="Oven" />
+<img src="./docs/media/models/buildables/palisade.gif" width="120" alt="Palisade" title="Palisade" />
+<img src="./docs/media/models/buildables/platform.gif" width="120" alt="Platform" title="Platform" />
+<img src="./docs/media/models/buildables/quarry.gif" width="120" alt="Quarry" title="Quarry" />
+<img src="./docs/media/models/buildables/research-table.gif" width="120" alt="Research table" title="Research table" />
+<img src="./docs/media/models/buildables/sawmill.gif" width="120" alt="Sawmill" title="Sawmill" />
+<img src="./docs/media/models/buildables/scarecrow.gif" width="120" alt="Scarecrow" title="Scarecrow" />
+<img src="./docs/media/models/buildables/seeds.gif" width="120" alt="Seeds" title="Seeds" />
+<img src="./docs/media/models/buildables/sentry.gif" width="120" alt="Sentry" title="Sentry" />
+<img src="./docs/media/models/buildables/sifter.gif" width="120" alt="Sifter" title="Sifter" />
+<img src="./docs/media/models/buildables/sorter.gif" width="120" alt="Sorter" title="Sorter" />
+<img src="./docs/media/models/buildables/soul-cage.gif" width="120" alt="Soul cage" title="Soul cage" />
+<img src="./docs/media/models/buildables/soul-fire.gif" width="120" alt="Soul fire" title="Soul fire" />
+<img src="./docs/media/models/buildables/spikes.gif" width="120" alt="Spikes" title="Spikes" />
+<img src="./docs/media/models/buildables/sprout.gif" width="120" alt="Sprout" title="Sprout" />
+<img src="./docs/media/models/buildables/stash.gif" width="120" alt="Stash" title="Stash" />
+<img src="./docs/media/models/buildables/steps.gif" width="120" alt="Steps" title="Steps" />
+<img src="./docs/media/models/buildables/stone-wall.gif" width="120" alt="Stone wall" title="Stone wall" />
+<img src="./docs/media/models/buildables/swiper.gif" width="120" alt="Swiper" title="Swiper" />
+<img src="./docs/media/models/buildables/torch.gif" width="120" alt="Torch" title="Torch" />
+<img src="./docs/media/models/buildables/wood-fence.gif" width="120" alt="Wood fence" title="Wood fence" />
+<img src="./docs/media/models/buildables/wood-wall.gif" width="120" alt="Wood wall" title="Wood wall" />
+</p>
+
+#### Materials and loot
+
+<p align="center">
+<img src="./docs/media/models/materials/arrows.gif" width="120" alt="Arrows" title="Arrows" />
+<img src="./docs/media/models/materials/blood.gif" width="120" alt="Blood" title="Blood" />
+<img src="./docs/media/models/materials/bloodsteel.gif" width="120" alt="Bloodsteel" title="Bloodsteel" />
+<img src="./docs/media/models/materials/bolts.gif" width="120" alt="Bolts" title="Bolts" />
+<img src="./docs/media/models/materials/bone.gif" width="120" alt="Bone" title="Bone" />
+<img src="./docs/media/models/materials/brimstone.gif" width="120" alt="Brimstone" title="Brimstone" />
+<img src="./docs/media/models/materials/brute-tendon.gif" width="120" alt="Brute tendon" title="Brute tendon" />
+<img src="./docs/media/models/materials/candy.gif" width="120" alt="Candy" title="Candy" />
+<img src="./docs/media/models/materials/chain.gif" width="120" alt="Chain" title="Chain" />
+<img src="./docs/media/models/materials/cursed-core.gif" width="120" alt="Cursed core" title="Cursed core" />
+<img src="./docs/media/models/materials/ectoplasm.gif" width="120" alt="Ectoplasm" title="Ectoplasm" />
+<img src="./docs/media/models/materials/ghoul-fang.gif" width="120" alt="Ghoul fang" title="Ghoul fang" />
+<img src="./docs/media/models/materials/hex-shard.gif" width="120" alt="Hex shard" title="Hex shard" />
+<img src="./docs/media/models/materials/holy-water.gif" width="120" alt="Holy water" title="Holy water" />
+<img src="./docs/media/models/materials/iron.gif" width="120" alt="Iron" title="Iron" />
+<img src="./docs/media/models/materials/planks.gif" width="120" alt="Planks" title="Planks" />
+<img src="./docs/media/models/materials/pumpkin.gif" width="120" alt="Pumpkin" title="Pumpkin" />
+<img src="./docs/media/models/materials/silver.gif" width="120" alt="Silver" title="Silver" />
+<img src="./docs/media/models/materials/stone.gif" width="120" alt="Stone" title="Stone" />
+<img src="./docs/media/models/materials/tonic.gif" width="120" alt="Tonic" title="Tonic" />
+<img src="./docs/media/models/materials/watering-can.gif" width="120" alt="Watering can" title="Watering can" />
+<img src="./docs/media/models/materials/wood.gif" width="120" alt="Wood" title="Wood" />
+</p>
+
+# Setup
+
+#### Requirements
+
+- Node.js 22 or newer (developed on Node 24) and npm.
+- A computer to run the server and show the TV page.
+- Phones on the same Wi-Fi network as that computer.
+
+```sh
+% npm install
+```
+
+One install at the root covers every workspace (`shared`, `server`, `packages/*`, `apps/*`).
+
+## Running locally
+
+```sh
+% npm run dev
+```
+
+This starts:
+
+- the game server on port **3021** (Express + WebSocket, restarts on file changes), and
+- a Vite dev server per app (hot reload, proxies `/ws` to the game server, listens on your LAN): the phone on **5181**, which also passes `/tv`, `/play`, and `/admin` through to the TV (5182), play (5183), and admin (5184) servers, so everything opens from 5181.
+
+Then:
+
+1. On the TV machine, open **http://localhost:5181/tv**.
+2. Scan the small QR code in the bottom left of the TV with a phone: white squares on a dark glow, which phone cameras read fine (hovering it with the mouse brightens it and shows the URL; it stays up during Incognito). The QR swaps `localhost` for this computer's LAN address and always points at the phone app, so it reads something like `http://192.168.1.20:5181/` in dev even if the TV was opened on its own port (5182; the dev servers pass it in as `__PHONE_PORT__`, see `apps/vite.base.ts`).
+3. Pick a name and color, then turn the phone sideways.
+
+## Phones can't connect?
+
+- Make sure the phone is on the same network (not mobile data, not a guest network that isolates devices).
+- On Windows, allow Node.js through the firewall for private networks when prompted, or add an inbound rule for TCP 5181 (dev) and 3021 (production).
+- If the QR shows the wrong IP (VPNs and virtual adapters can confuse it), type the right address into the phone's browser by hand. The server prefers `192.168.x`, then `10.x`, then `172.x` addresses and skips WSL, Docker, Hyper-V and VPN adapters (`server/src/net/helpers/lan-address.ts`, adapter rules in `net/config/lan.ts`).
+
+## Production-style run
+
+```sh
+% npm run party 
+```
+
+Open **http://localhost:3021/tv** on the TV, phones use the QR as before.
 
 # Sound and music
 
@@ -75,22 +289,6 @@ The **Music** tab (TV sidebar) has cards: **Music** (checkboxes for Spotify play
 
 Only one TV page plays music: the newest one opened. Any other open TV page goes quiet and its Music tab shows **Play music here** to take it back.
 
-## Controls (phone, landscape)
-
-| Control | What it does |
-|---|---|
-| Joystick (drag anywhere on the left half) | Move. You face the way you last moved. |
-| ACT (hold to repeat) | Also a stick: drag your thumb from where it lands toward a direction (behind you too, snapped to 8 ways) to turn and act that way while you keep walking; a plain tap acts the way you last faced. Acts on whatever is in front of you: hits a player, chops a tree, digs up a grave, mines a rock, smashes a pumpkin, breaks open a chest, refuels a torch or campfire that's burning low (costs 1 wood), feeds a station from your pockets, offers 2 hearts at a sacrificial altar for blood, loads a blood sentry (1 blood for 3 shots), or damages a structure (full lights included). |
-| Picking up | There's no button: walk over gear, crated structures, or piles to pick them up into the bag (never equipped); something you just dropped waits 2 seconds. |
-| BLOCK (hold) | Shows with a shield beside a one-handed weapon: raises the shield square in front of you (see Shields). |
-| Bag (middle) | Opens your equipped slots (weapon, off-hand, armor), candy and blood, and sixteen bag slots, all little 3D icons; the bag also holds wood, planks, stone, iron, bolts, and crated structures as stacks. ACT and BLOCK step aside (with a Panic button above the bag) while it's open. Tap a stack of structures to start building: the bag closes and the right side shows what you're building with a **Turn** stick (drag it to face where it should go; the left joystick still walks), **Back** (to the bag), and **Build**. The TV previews it (a dim white outline where it will go, light red with whatever is in the way outlined if it can't); it always goes on the tile in front of you, pushed on past you if you're standing on that one, never on top of you. Tap anything else to pick it up, then tap another slot to move it there (onto a matching stack, swapping places, or into its equipped slot), or tap it again to use it: equip or put away gear, or drink a tonic. While something is picked up a drop slot appears that throws it in front of you (candy and blood 5 at a time, for a teammate). Hold anything to see its details. |
-| Craft (middle) | Opens the Craft list by category, with a Panic button: what you've unlocked shows as icons (dimmed if you're short on materials), and everything else is a plain lock until you tick **Show locked**. Tap one to pick it: a bar along the bottom shows its name, a count with **-** and **+** (up to as many as you can afford), and **Craft**, which makes that many with a hammering chime. What's made goes into your bag (structures stack up to 99 per slot); costs come out of your bag. Hold one to see its details: its name, its model slowly turning, labeled stat bars (red is weak, amber middling, green strong), special traits in words, its cost, and what unlocks it. |
-| Tree (middle) | Opens your own skill tree full screen (kept when you die): every piece of gear and structure as an icon, linked to what it grows from, with level pips. The next thing you could open is a locked question mark: tap it for a heavily blurred glimpse and what opens it. Past that, only lines fading into the dark hint at more, and each new row slowly fades in as it comes into sight. Tap an open node to see what the next level does and, standing by a research table, upgrade it with candy and blood; hold it for its details. **Back** closes it. The details sidebar on the right can be dragged wider or narrower. **Panic** (also on the Bag and Craft lists) closes the menu and makes your character run from any monster within 4 tiles for a second, then walk back to where you were once it's safe. |
-| Top of the screen | Whenever you gain candy or blood, a toast pops up with its icon ("+6 candy", "+3 blood"), adding up while it shows, so you learn what the orange and red things are. |
-| Leave (top right) | Leaves the game. Just putting the phone down (or the screen going off) doesn't: your character slumps where it stands, still in the game and still fair game for monsters, until you pick the phone back up. |
-
-The tile you're about to act on is outlined in your color on the TV.
-
 ## World, saves, and resets
 
 - The world and every character are saved under `server/data/saves/` (gitignored) every 30 seconds, after a reset, and on shutdown, with hourly backups. Each world slot is a folder; the admin's **Worlds** page makes and switches them. See [docs/architecture.md](docs/architecture.md#persistence).
@@ -101,56 +299,6 @@ The tile you're about to act on is outlined in your color on the TV.
   - stop the server and delete `server/data/saves/`.
 - New worlds start on the **King of the Hill** map preset (`server/presets/king-of-the-hill.json`: a generated map, hand-edited: a lumpy, wooded hill with a higher crown on the middle right, the pit's stairs moved to its top right corner, rocks in the walled courtyard, a round well plaza, and extra graves), unless the Game tab picks **Random map**. `WORLD_PRESET` picks another preset file by name; any `.json` dropped into `server/presets/` shows up in the Game tab's list.
 - Saves from older versions of the game still load: anything missing gets its default, anything that no longer exists is dropped, and the server logs what it fixed. Only a file that isn't readable at all is set aside as `*.unreadable-<time>` (never deleted).
-
-## Setup
-
-#### Requirements
-
-- Node.js 22 or newer (developed on Node 24) and npm.
-- A computer to run the server and show the TV page.
-- Phones on the same Wi-Fi network as that computer.
-
-```sh
-% npm install
-```
-
-One install at the root covers every workspace (`shared`, `server`, `packages/*`, `apps/*`).
-
-### Running locally
-
-```sh
-npm run dev
-```
-
-This starts:
-
-- the game server on port **3021** (Express + WebSocket, restarts on file changes), and
-- a Vite dev server per app (hot reload, proxies `/ws` to the game server, listens on your LAN): the phone on **5181**, which also passes `/tv`, `/play`, and `/admin` through to the TV (5182), play (5183), and admin (5184) servers, so everything opens from 5181.
-
-Then:
-
-1. On the TV machine, open **http://localhost:5181/tv**.
-2. Scan the small QR code in the bottom left of the TV with a phone: white squares on a dark glow, which phone cameras read fine (hovering it with the mouse brightens it and shows the URL; it stays up during Incognito). The QR swaps `localhost` for this computer's LAN address and always points at the phone app, so it reads something like `http://192.168.1.20:5181/` in dev even if the TV was opened on its own port (5182; the dev servers pass it in as `__PHONE_PORT__`, see `apps/vite.base.ts`).
-3. Pick a name and color, then turn the phone sideways.
-
-#### Phones can't connect?
-
-- Make sure the phone is on the same network (not mobile data, not a guest network that isolates devices).
-- On Windows, allow Node.js through the firewall for private networks when prompted, or add an inbound rule for TCP 5181 (dev) and 3021 (production).
-- If the QR shows the wrong IP (VPNs and virtual adapters can confuse it), type the right address into the phone's browser by hand. The server prefers `192.168.x`, then `10.x`, then `172.x` addresses and skips WSL, Docker, Hyper-V and VPN adapters (`server/src/net/helpers/lan-address.ts`, adapter rules in `net/config/lan.ts`).
-
-### Production-style run
-
-```sh
-npm run build   # builds every app into apps/<name>/dist
-npm start       # server on :3021 also serves the built apps
-```
-
-Open **http://localhost:3021/tv** on the TV; phones use the QR as before. Set `PORT` to change the port (the dev servers proxy to 3021 unless `GAME_PORT` says otherwise; `APPS_PORT` moves their 5181 to 5184) and `SAVE_DIR` to use a different save folder, e.g. to run a second server alongside `npm run dev`:
-
-```sh
-PORT=3031 SAVE_DIR=/tmp/test-saves npm start
-```
 
 ## Testing
 

@@ -107,6 +107,11 @@ export class Fog {
   private _day = 0;
 
   /**
+   * What the fog's color is multiplied by: under 1 darker, over 1 lighter.
+   */
+  private _shade = 1;
+
+  /**
    * Seconds of fog animation so far.
    */
   private _time = 0;
@@ -216,6 +221,14 @@ export class Fog {
   }
 
   /**
+   * Darkens (under 1) or lightens (over 1) the fog's color.
+   * @param shade The multiplier, 1 as drawn.
+   */
+  setShade(shade: number): void {
+    this._shade = shade;
+  }
+
+  /**
    * 0..1: daylight burns most of the fog off.
    * @param amount How bright day it is, 0..1.
    */
@@ -239,7 +252,7 @@ export class Fog {
     for (const m of this._materials) {
       m.uniforms.time.value = this._time;
       m.uniforms.density.value = this._thickness * (1 + this._tintAmount * this._thicken) * (1 - this._day * 0.8);
-      (m.uniforms.fogColor.value as Color).copy(FOG_COLOR).lerp(this._tint ?? FOG_COLOR, this._tintAmount);
+      (m.uniforms.fogColor.value as Color).copy(FOG_COLOR).lerp(this._tint ?? FOG_COLOR, this._tintAmount).multiplyScalar(this._shade);
     }
   }
 

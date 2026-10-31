@@ -230,7 +230,7 @@ export class WorldRenderer extends WorldScene {
 
   /**
    * Applies a display's settings (see `DisplaySettings`): brightness,
-   * camera angle, glow, aberration, fog, screen shake, blood, pickups,
+   * contrast, camera angle, glow, aberration, fog, screen shake, blood, pickups,
    * names, and health bars. The overlay flags (TPS, FPS, server ticks) are
    * the app's to draw.
    * @param settings The settings.

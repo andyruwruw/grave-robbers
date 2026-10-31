@@ -27,6 +27,7 @@ import Sidebar from './components/sidebar';
 import SoundHint from './components/sound-hint';
 import { SPOTIFY_RETURN } from './helpers/audio-settings';
 import { usePanes } from './hooks/use-panes';
+import { useIncognitoLook } from './hooks/use-incognito-look';
 import { useScenicLook } from './hooks/use-scenic-look';
 import { useTvKeys } from './hooks/use-tv-keys';
 import { useTvMusic } from './hooks/use-tv-music';
@@ -54,7 +55,8 @@ import type { WorldRenderer } from '@halloween/renderer/world/world-renderer';
  * off until someone clicks or presses a key, so a faded hint sits in the
  * corner until then. Incognito (off when the page opens; toggled from the
  * Music tab) puts a now-playing
- * screen over the live graveyard, hides the kill feed, and silences
+ * screen over the live graveyard (its look set by the Music tab's
+ * Incognito Look sliders, `useIncognitoLook`), hides the kill feed, and silences
  * the game. It never shows while a player is connected: it fades away as
  * soon as one joins and comes back once all have left, while the mode stays
  * on (Escape turns it off); the I key toggles it. Letter keys work the Game tab too (`useTvKeys`, `GAME_KEYS`: U all
@@ -94,6 +96,7 @@ function DisplayPage(): React.JSX.Element {
   const [gameSettings, setGameSettings] = useState<GameSettings>(DEFAULT_GAME_SETTINGS);
   const [tab, setTab] = useState<ControlTab>(SPOTIFY_RETURN ? 'music' : 'overview');
   const [display] = useState<DisplaySettings>(DEFAULT_DISPLAY_SETTINGS);
+  const [incognitoLook, setIncognitoLook] = useIncognitoLook();
   const { stats, latestStats } = useStatsTicker((): { fps: number; ping: number | null } => ({ fps: rendererRef.current?.fps ?? 0, ping: pingRef.current }), sidebarOpen && tab === 'overview', true);
   const { audio, musicStatus, musicHere, soundOn, director, applyControl, onOwner, buildControls } = useTvMusic(incognito, incognitoMode, setIncognito);
 
@@ -172,7 +175,7 @@ function DisplayPage(): React.JSX.Element {
 
   const { renderers, all, panes, tvView, setTvView, aim, onWorld, onLocals } = usePanes(rendererRef, editor, status, send);
   useEditorView(editor, all);
-  const look = useScenicLook(incognito, display, all);
+  const look = useScenicLook(incognito, incognitoLook, display, all);
   useEffect(() => {
     all((renderer: WorldRenderer): void => renderer.setDisplaySettings(look.current));
   }, [panes]);
@@ -220,7 +223,7 @@ function DisplayPage(): React.JSX.Element {
           roster={roster}
           connected={status === 'open'}
           stats={stats}
-          music={buildControls(send, (): void => setSidebarOpen(false))}
+          music={{ ...buildControls(send, (): void => setSidebarOpen(false)), look: incognitoLook, onLook: setIncognitoLook }}
           shortcuts
           localPads
           onEditMap={(): void => {
