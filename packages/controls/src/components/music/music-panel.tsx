@@ -4,6 +4,7 @@ import React from 'react';
 // Local Imports
 import { useSpotifyAccount } from '../../hooks/use-spotify-account';
 import IncognitoLookCard from './incognito-look-card';
+import TvLookCard from './tv-look-card';
 import MusicSourcesCard from './music-sources-card';
 import NowPlayingCard from './now-playing-card';
 import SpotifyCard from './spotify-card';
@@ -78,13 +79,23 @@ interface MusicPanelProps {
    * Called with the full updated look.
    */
   onLook: (look: IncognitoLook) => void;
+
+  /**
+   * The largest pixel the TV's zoom may grow to, in screen pixels.
+   */
+  pixelSize: number;
+
+  /**
+   * Called with the new pixel size.
+   */
+  onPixelSize: (size: number) => void;
 }
 
 /**
  * Music controls for the TV, as cards: the music, ambience, and sound
  * effect volumes; what's playing (play/pause and skip, Incognito, which
  * hides the game's chrome behind a plain now-playing screen until someone
- * joins); the Incognito look (brightness, contrast, pixelation, and fog
+ * joins); the TV's own pixel size; the Incognito look (brightness, contrast, pixelation, and fog
  * behind that screen); what's up next (each of the player's own songs can move up or
  * down or come out); what to play (the Spotify account's queue first, a
  * Spotify playlist, the custom songs, in any mix, with a slider under each
@@ -108,6 +119,8 @@ function MusicPanel({
   onIncognito,
   look,
   onLook,
+  pixelSize,
+  onPixelSize,
 }: MusicPanelProps): React.JSX.Element {
   const account = useSpotifyAccount(settings, onChange);
 
@@ -124,6 +137,10 @@ function MusicPanel({
         onClaimMusic={onClaimMusic}
         incognito={incognito}
         onIncognito={onIncognito} />
+
+      <TvLookCard
+        pixelSize={pixelSize}
+        onPixelSize={onPixelSize} />
 
       <IncognitoLookCard
         look={look}

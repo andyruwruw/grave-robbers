@@ -99,4 +99,14 @@ export interface MusicControls {
    * Called with the full updated look.
    */
   onLook: (look: IncognitoLook) => void;
+
+  /**
+   * The largest pixel the TV's zoom may grow to, in screen pixels.
+   */
+  pixelSize: number;
+
+  /**
+   * Called with the new pixel size.
+   */
+  onPixelSize: (size: number) => void;
 }

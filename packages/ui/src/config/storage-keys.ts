@@ -20,6 +20,12 @@ export const AUDIO_STORAGE_KEY = 'graveyard.audio';
 export const INCOGNITO_LOOK_STORAGE_KEY = 'graveyard.incognito';
 
 /**
+ * localStorage key holding the TV's pixel size (the Music tab's Pixel Size
+ * slider).
+ */
+export const TV_PIXEL_SIZE_STORAGE_KEY = 'graveyard.tvPixelSize';
+
+/**
  * localStorage key holding the settings for the next random map.
  */
 export const MAP_GEN_STORAGE_KEY = 'graveyard.mapGen';

@@ -229,6 +229,16 @@ export class WorldRenderer extends WorldScene {
   }
 
   /**
+   * Caps how big the zoom's own pixels may grow, in screen pixels (1 is no
+   * pixelation; below PIXEL_SCALE it's that size at every zoom). Ignored
+   * while a pixel size is fixed.
+   * @param limit The largest pixel size.
+   */
+  setPixelLimit(limit: number): void {
+    this._pixelLimit = Math.max(1, Math.round(limit));
+  }
+
+  /**
    * Applies a display's settings (see `DisplaySettings`): brightness,
    * contrast, camera angle, glow, aberration, fog, screen shake, blood, pickups,
    * names, and health bars. The overlay flags (TPS, FPS, server ticks) are

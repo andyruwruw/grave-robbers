@@ -28,6 +28,7 @@ import SoundHint from './components/sound-hint';
 import { SPOTIFY_RETURN } from './helpers/audio-settings';
 import { usePanes } from './hooks/use-panes';
 import { useIncognitoLook } from './hooks/use-incognito-look';
+import { useTvPixelSize } from './hooks/use-tv-pixel-size';
 import { useScenicLook } from './hooks/use-scenic-look';
 import { useTvKeys } from './hooks/use-tv-keys';
 import { useTvMusic } from './hooks/use-tv-music';
@@ -71,7 +72,8 @@ import type { WorldRenderer } from '@halloween/renderer/world/world-renderer';
  * surroundings; the mouse works the first pane (`usePanes`). How much each pane shows
  * is the Game tab's TV view preset (`saveTvView`, kept per browser).
  * Clicking outside the open sidebar closes it. The TV holds its own
- * display settings (the defaults, with no menu to change them), given to
+ * display settings (the defaults, with no menu to change them, but for
+ * the Music tab's Pixel Size, `useTvPixelSize`), given to
  * every pane's renderer with no player of its own, and shows the TPS, FPS,
  * and server ticks overlay when they turn it on (`PerfOverlay`).
  *
@@ -97,6 +99,7 @@ function DisplayPage(): React.JSX.Element {
   const [tab, setTab] = useState<ControlTab>(SPOTIFY_RETURN ? 'music' : 'overview');
   const [display] = useState<DisplaySettings>(DEFAULT_DISPLAY_SETTINGS);
   const [incognitoLook, setIncognitoLook] = useIncognitoLook();
+  const [pixelSize, setPixelSize] = useTvPixelSize();
   const { stats, latestStats } = useStatsTicker((): { fps: number; ping: number | null } => ({ fps: rendererRef.current?.fps ?? 0, ping: pingRef.current }), sidebarOpen && tab === 'overview', true);
   const { audio, musicStatus, musicHere, soundOn, director, applyControl, onOwner, buildControls } = useTvMusic(incognito, incognitoMode, setIncognito);
 
@@ -179,6 +182,9 @@ function DisplayPage(): React.JSX.Element {
   useEffect(() => {
     all((renderer: WorldRenderer): void => renderer.setDisplaySettings(look.current));
   }, [panes]);
+  useEffect(() => {
+    all((renderer: WorldRenderer): void => renderer.setPixelLimit(pixelSize));
+  }, [panes, pixelSize]);
 
   const play = useTvMouse(rendererRef, gameSettings, send);
   const edit = useMapEditor(rendererRef, editor, cache.blends, changeEditor, send);
@@ -223,7 +229,7 @@ function DisplayPage(): React.JSX.Element {
           roster={roster}
           connected={status === 'open'}
           stats={stats}
-          music={{ ...buildControls(send, (): void => setSidebarOpen(false)), look: incognitoLook, onLook: setIncognitoLook }}
+          music={{ ...buildControls(send, (): void => setSidebarOpen(false)), look: incognitoLook, onLook: setIncognitoLook, pixelSize, onPixelSize: setPixelSize }}
           shortcuts
           localPads
           onEditMap={(): void => {

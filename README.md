@@ -192,7 +192,7 @@ The TV keeps its own queue. With **Spotify playback** ticked, whatever is queued
 
 With both ticked, a slider under each sets how often it's picked against the other (3 to 1 for the playlist by default). Spotify tracks play one at a time and fade out at the end; Spotify pauses while a custom song plays. Spotify playback needs the `user-read-currently-playing` scope: if Up next never shows your queued songs, click **Disconnect Spotify** and connect again.
 
-The **Music** tab (TV sidebar) has cards: **Music** (checkboxes for Spotify playback, Spotify playlist, and Custom songs), **Spotify** (connect, playlist, disconnect), **Volume** (music, ambience, sound effects; saved per TV), and **Now playing** (cover, play/pause, skip, Incognito), and **Up next** (where each song comes from; the TV's own songs can move up or down or come out, songs queued on Spotify stay). Music dips briefly when someone dies and when the blood moon rises.
+The **Music** tab (TV sidebar) has cards: **Music** (checkboxes for Spotify playback, Spotify playlist, and Custom songs), **Spotify** (connect, playlist, disconnect), **Volume** (music, ambience, sound effects; saved per TV), **TV Look** (Pixel Size: how chunky the graveyard is outside Incognito; saved per TV), and **Now playing** (cover, play/pause, skip, Incognito), and **Up next** (where each song comes from; the TV's own songs can move up or down or come out, songs queued on Spotify stay). Music dips briefly when someone dies and when the blood moon rises.
 
 Only one TV page plays music: the newest one opened. Any other open TV page goes quiet and its Music tab shows **Play music here** to take it back.
 
