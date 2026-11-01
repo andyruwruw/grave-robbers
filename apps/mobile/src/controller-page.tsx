@@ -43,6 +43,7 @@ function ControllerPage(): React.JSX.Element {
     naughty,
     endNaughty,
     stash,
+    stashYours,
     using,
     pads,
     padMenu,
@@ -65,6 +66,7 @@ function ControllerPage(): React.JSX.Element {
             stash={stash}
             onMove={commands.stashMove}
             onClose={commands.stashClose}
+            yours={stashYours}
             onTakeDown={commands.stashTakeDown}
             onPanic={commands.stashPanic} />
         )}

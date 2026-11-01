@@ -56,9 +56,9 @@ A chest holds only raw goods (`CHEST_LOOT` in `shared/src/loot/chests.ts`, rolle
 
 | Facing | USE |
 |---|---|
-| Your own storage chest | Opens it (see [Storage chests](#storage-chests)) |
+| A storage chest (anyone's) | Opens it (see [Storage chests](#storage-chests)) |
 | Your own bone digger | Opens its panel: what it dug up out of 60, its next dig, and Collect (`use-collect`) |
-| A station (sawmill, furnace, sifter, bloodforge, quarry, cauldron, oven) | Opens its panel: what it turns into what, batches queued out of 5 and the current one's progress, what it pulled from piles, and Feed 1 / Feed all from the bag (`use-feed`) |
+| A station (sawmill, furnace, sifter, bloodforge, quarry, cauldron, oven) | Opens its panel: what it turns into what, batches queued out of 5 and the current one's progress, its output slot (what it has made, out of `STATION_HOLD`; tap to collect, `use-collect`), what it pulled from piles, and Feed 1 / Feed all from the bag (`use-feed`) |
 | A belt sorter | Opens its panel: what goes out each side (see [Belt sorters](#belt-sorters)) |
 | A research table | Opens the skill tree (`pad-menu`) |
 | An anvil | Opens the Armory |
@@ -150,7 +150,7 @@ Vampires won't enter the brighter 75% of any light. Pumpkins and lamp posts ligh
 | Structure | Cost | HP | Unlock | Does |
 |---|---|---|---|---|
 | Research table | 12 wood, 6 stone | 30 | start | Upgrades within 2.5 tiles cost 25% less (+10% a level) |
-| Storage chest | 12 wood | 30 | start | 16 slots of private storage; see below |
+| Storage chest | 12 wood | 30 | start | 16 slots of shared storage; see below |
 | Coffin | 15 wood | 30 | blueprint | Its builder respawns beside it |
 | Sawmill | 16 wood, 8 stone | 30 | Research table Lv 1 | 1 wood in, 1 plank every 4s |
 | Furnace | 20 stone, 8 wood | 40 | Research table Lv 2 | 1 stone in, 1 iron every 6s |
@@ -205,13 +205,13 @@ flowchart LR
 
 ## Storage chests
 
-A storage chest (`stash`) belongs to whoever built it, by name (`StructureState.keeper`), so it survives a restart and nobody else can open or damage it.
+A storage chest (`stash`) belongs to whoever built it, by name (`StructureState.keeper`), so it survives a restart. Anyone can open it and move things in and out; only its keeper can pick it up, and nobody can damage it.
 
 | Action | Result |
 |---|---|
-| USE on your own chest | Opens it on the phone (`StashPanel`): your bag on the left, the chest on the right (a swing does nothing to it) |
+| USE on any chest | Opens it on the phone (`StashPanel`): your bag on the left, the chest on the right (a swing does nothing to it) |
 | Tap an item on either side | Moves it across, onto matching stacks first (`StashSystem.stashMove`, `putInto`) |
-| Pick up (only when empty) | Takes the chest back as a crate |
+| Pick up (its keeper only, when empty) | Takes the chest back as a crate (`StashSystem.stashTakeDown`; the button only shows for the keeper, `stash.yours`) |
 | Walk more than 2.5 tiles away | Closes it (`STASH_REACH`) |
 | Monsters break it | Its contents spill around it for the owner alone (`StructureDamage.takeSpilledStashes`) |
 
@@ -234,7 +234,7 @@ Wood walls, stone walls, and bone walls come in a few looks to build in (`WALL_S
 
 ## Automation
 
-A station pulls what it needs from piles within 1.6 tiles of its middle (`STATION_REACH`), and hands what it makes to another station that close which takes it. Otherwise, with a belt beside it leading away, it holds what it made for the belt to pull (`StructureState.out`, up to `OUTPUT_HOLD` 10; a full station stops working until the belt takes some), else drops it beside itself. Each holds up to two batches of each input waiting, plus a queue of 5. Bone diggers and blood fountains hand off the same way (`StationOutput.deliver`); when their hold is full they drop the rest beside them.
+A station pulls what it needs from piles within 1.6 tiles of its middle (`STATION_REACH`), and hands what it makes to another station that close which takes it. Otherwise it holds what it made in its output slot (`StructureState.out`, up to `STATION_HOLD`, one stack of 99), for a belt beside it to pull or a player to collect from its panel (`UseSystem.collect`, `PickupSystem.handOver`: what doesn't fit in the bag stays). A full station stops working until some is taken. Broken, it spills what it held. Each holds up to two batches of each input waiting, plus a queue of 5. Bone diggers and blood fountains hand off the same way (`StationOutput.deliver`); when their hold is full they drop the rest beside them.
 
 ### Belts
 

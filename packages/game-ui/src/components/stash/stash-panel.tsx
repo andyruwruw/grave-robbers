@@ -34,6 +34,11 @@ interface StashPanelProps {
   onClose: () => void;
 
   /**
+   * Whether the player built it (only its keeper can pick it up).
+   */
+  yours: boolean;
+
+  /**
    * Picks the (empty) chest up as a crate.
    */
   onTakeDown: () => void;
@@ -47,8 +52,8 @@ interface StashPanelProps {
 /**
  * A storage chest, open full screen: the player's bag on the left and the
  * chest on the right; tapping an item moves it to the other side (stacking
- * where it can). Only its builder can open it. Pick up takes the chest
- * back as a crate once it's empty. It closes on Back, or when the player
+ * where it can). Anyone can open it; only its builder sees Pick up, which
+ * takes the chest back as a crate once it's empty. It closes on Back, or when the player
  * walks away from it.
  *
  * @param {StashPanelProps} props - Component props.
@@ -59,6 +64,7 @@ function StashPanel({
   stash,
   onMove,
   onClose,
+  yours,
   onTakeDown,
   onPanic,
 }: StashPanelProps): React.JSX.Element {
@@ -74,6 +80,7 @@ function StashPanel({
           Back
         </button>
         <span className='flex-1 font-medium text-sm text-foreground'>Storage chest</span>
+        {yours && (
         <button
           type='button'
           disabled={!empty}
@@ -82,6 +89,7 @@ function StashPanel({
           <PackageOpen size={14} />
           Pick up
         </button>
+        )}
         {onPanic && <PanicButton onPanic={onPanic} />}
       </header>
       <div className='flex min-h-0 flex-1 gap-lg overflow-y-auto p-md'>

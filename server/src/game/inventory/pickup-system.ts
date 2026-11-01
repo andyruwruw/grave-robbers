@@ -67,6 +67,40 @@ export class PickupSystem extends GameSystem {
    * bag (never equipped). Something they just dropped waits a moment.
    * @param p The player.
    */
+  /**
+   * Hands a player as much of a store as fits in their bag, taking it out
+   * of the store and leaving the rest there (a station's output slot).
+   * @param p The player.
+   * @param store What's on offer; emptied of what was taken.
+   * @returns Whether anything was taken.
+   */
+  handOver(p: Player, store: Partial<Bundle>): boolean {
+    const took = stock();
+    for (const g of GOODS) {
+      const n = store[g] ?? 0;
+      if (n <= 0) {
+        continue;
+      }
+      took[g] = this._game.bag.take(p, g, n);
+      if (n - took[g] > 0) {
+        store[g] = n - took[g];
+      } else {
+        delete store[g];
+      }
+    }
+    if (GOODS.every((g: Goods): boolean => took[g] === 0)) {
+      return false;
+    }
+    for (const g of GOODS) {
+      if (took[g] > 0) {
+        this.outbox.events.push(g === 'candy' ? { t: 'candy', x: p.x, y: p.y, amount: took[g] } : { t: 'pickup', x: p.x, y: p.y, goods: g });
+      }
+    }
+    this.outbox.inventoryChanged.add(p.token);
+    this.outbox.sound(p, took.candy > 0 ? 'candy' : 'pickup');
+    return true;
+  }
+
   autoGrab(p: Player): void {
     for (const item of this.world.items.heldUnder(p.id, p.x, p.y)) {
       const left = this._game.bag.takeIn(p, item.held, false);

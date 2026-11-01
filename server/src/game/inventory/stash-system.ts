@@ -64,7 +64,10 @@ export class StashSystem extends GameSystem {
     const p = this.players.get(token);
     const at = p?.stashAt;
     const stash = at ? this.world.structureDamage.stashAt(at.tx, at.ty) : null;
-    if (!p || !at || !stash || stash.items.some((item: BagItem | null): boolean => item !== null)) {
+    if (!p || !at || !stash || stash.keeper !== p.name.toLowerCase() || stash.items.some((item: BagItem | null): boolean => item !== null)) {
+      if (p) {
+        this.outbox.sound(p, 'error');
+      }
       return;
     }
     this.world.structureDamage.damage(at.tx, at.ty, Infinity);

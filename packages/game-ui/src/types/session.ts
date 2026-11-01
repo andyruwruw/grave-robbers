@@ -141,6 +141,12 @@ export interface ControllerSession {
   stash: (BagItem | null)[] | null;
 
   /**
+   * Whether the player built the open chest (only its keeper can pick it
+   * up).
+   */
+  stashYours: boolean;
+
+  /**
    * The digger or station panel USE opened, null when none is open.
    */
   using: UsePanel | null;

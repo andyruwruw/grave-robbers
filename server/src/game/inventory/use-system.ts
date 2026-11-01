@@ -1,7 +1,7 @@
 // Packages
 import { GOODS, stock } from '@halloween/shared/goods/goods';
 import { DIGGER_CAPACITY } from '@halloween/shared/structures/automation';
-import { STASH_REACH, STATIONS } from '@halloween/shared/structures/stations';
+import { STASH_REACH, STATIONS, STATION_HOLD } from '@halloween/shared/structures/stations';
 import { isStructure } from '@halloween/shared/structures/structure-catalog';
 import { diggerSeconds, stationSeconds } from '@halloween/shared/skill-tree/upgrades/structure-upgrades';
 import { SORT_SIDES, sideOf, sortableKeys } from '@halloween/shared/structures/sorting';
@@ -90,7 +90,7 @@ export class UseSystem extends GameSystem {
    */
   private open(p: Player, tx: number, ty: number, tile: Tile): boolean {
     if (tile === 'stash') {
-      if (this.world.structureDamage.stashAt(tx, ty)?.keeper === p.name.toLowerCase()) {
+      if (this.world.structureDamage.stashAt(tx, ty)) {
         p.stashAt = { tx, ty };
         this.outbox.stashChanged.add(p.token);
         this.outbox.sound(p, 'equip');
@@ -155,12 +155,21 @@ export class UseSystem extends GameSystem {
   }
 
   /**
-   * Takes what the open bone digger dug up.
+   * Takes what the open station holds (as much as fits in the bag), or
+   * what the open bone digger dug up.
    * @param token The player's token.
    */
   collect(token: string): void {
     const p = this.players.get(token);
     const at = p?.usingAt;
+    const tile = at ? this.world.map.get(at.tx, at.ty) : null;
+    if (p && !p.dead && at && tile && isStructure(tile) && STATIONS[tile]) {
+      const out = this.world.structures.get(at.ty * this.world.map.width + at.tx)?.out;
+      if (!out || !this._game.pickups.handOver(p, out)) {
+        this.outbox.sound(p, 'error');
+      }
+      return;
+    }
     const s = at && this.world.map.get(at.tx, at.ty) === 'digger' ? this.world.structures.get(at.ty * this.world.map.width + at.tx) : undefined;
     if (!p || p.dead || !at || !s?.hoard || !GOODS.some((g): boolean => (s.hoard![g] ?? 0) > 0)) {
       if (p) {
@@ -253,7 +262,7 @@ export class UseSystem extends GameSystem {
       return null;
     }
     const seconds = stationSeconds(tile as StructureKind, level);
-    return { kind: 'station', station: tile, level, queue: s.queue ?? 0, max: station.queue, progress: Math.round(((s.progress ?? 0) / seconds) * 10) / 10, seconds, buffer: stock(s.buffer) };
+    return { kind: 'station', station: tile, level, queue: s.queue ?? 0, max: station.queue, progress: Math.round(((s.progress ?? 0) / seconds) * 10) / 10, seconds, buffer: stock(s.buffer), made: stock(s.out), hold: STATION_HOLD };
   }
 
   /**

@@ -6,6 +6,7 @@ import { STATIONS } from '@halloween/shared/structures/stations';
 // Local Imports
 import StationFlow from '../item-details/station-flow';
 import GoodsRow from '../items/goods-row';
+import StationOutputSlot from './station-output-slot';
 import UseMeter from './use-meter';
 
 // Types
@@ -30,18 +31,24 @@ interface StationViewProps {
    * Feeds it one batch, or as many as fit.
    */
   onFeed: (all: boolean) => void;
+
+  /**
+   * Takes what it has made into the bag.
+   */
+  onCollect: () => void;
 }
 
 /**
  * An open station: what it turns into what, its batches (queued out of
  * how many it holds, and how far the current one is), what it has pulled
- * in from piles nearby, and Feed 1 / Feed all from the bag (a quarry takes
- * nothing and works on its own).
+ * in from piles nearby, what it has made (a slot to tap to collect), and
+ * Feed 1 / Feed all from the bag (a quarry takes nothing and works on its
+ * own).
  *
  * @param {StationViewProps} props - Component props.
  * @returns {React.JSX.Element} The rendered view.
  */
-function StationView({ panel, have, onFeed }: StationViewProps): React.JSX.Element {
+function StationView({ panel, have, onFeed, onCollect }: StationViewProps): React.JSX.Element {
   const station = STATIONS[panel.station]!;
   const takes = GOODS.some((g: Goods): boolean => station.input[g] > 0);
   const pulled = GOODS.some((g: Goods): boolean => panel.buffer[g] > 0);
@@ -59,6 +66,11 @@ function StationView({ panel, have, onFeed }: StationViewProps): React.JSX.Eleme
         filled={panel.queue}
         slots={panel.max}
         progress={panel.queue > 0 ? panel.progress : 0} />
+      <StationOutputSlot
+        output={station.output}
+        made={panel.made}
+        hold={panel.hold}
+        onCollect={onCollect} />
       {pulled && (
         <div className='flex items-center justify-between gap-sm'>
           <span className='text-[13px] text-foreground-muted'>From piles nearby</span>

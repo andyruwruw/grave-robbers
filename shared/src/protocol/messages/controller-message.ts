@@ -53,7 +53,7 @@ export type ControllerMessage =
   /**
    * The open storage chest's slots, or null once it's closed.
    */
-  | { t: 'stash'; items: (BagItem | null)[] | null }
+  | { t: 'stash'; items: (BagItem | null)[] | null; yours: boolean }
   /**
    * The digger or station panel USE opened, or null once it's closed.
    */

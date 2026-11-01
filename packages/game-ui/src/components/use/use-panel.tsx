@@ -119,7 +119,8 @@ function UsePanel({ panel, bag, inventory, tree, onFeed, onCollect, onRoute, onC
           <StationView
             panel={panel}
             have={have}
-            onFeed={onFeed} />
+            onFeed={onFeed}
+            onCollect={onCollect} />
         )}
       </div>
     </div>

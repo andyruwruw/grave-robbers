@@ -64,10 +64,10 @@ export class StateBroadcaster extends HubPart {
           this.sessions.send(ws, { t: 'vitals', vitals });
         }
       }
-      for (const [token, items] of this.game.outbox.takeStashChanges()) {
+      for (const [token, items, yours] of this.game.outbox.takeStashChanges()) {
         const ws = this.sessions.controllers.get(token);
         if (ws) {
-          this.sessions.send(ws, { t: 'stash', items });
+          this.sessions.send(ws, { t: 'stash', items, yours });
         }
       }
       for (const [token, panel] of this.game.use.takeChanges()) {

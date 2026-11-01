@@ -6,8 +6,8 @@ import type { Tile } from '@halloween/shared/world/tiles';
 import type { Player } from '../players/player';
 
 /**
- * A storage chest: a swing never breaks it (its keeper opens it with USE,
- * see `UseSystem`, and picks it up from there once it's empty).
+ * A storage chest: a swing never breaks it (anyone opens it with USE,
+ * see `UseSystem`, and its keeper picks it up from there once it's empty).
  */
 export class StashJob extends TileJob {
   /**

@@ -1,8 +1,7 @@
 // Packages
-import { GOODS } from '@halloween/shared/goods/goods';
-import { OUTPUT_HOLD } from '@halloween/shared/structures/automation';
+import { GOODS, stock } from '@halloween/shared/goods/goods';
 import { WORKING_GLOW } from '@halloween/shared/structures/lights';
-import { STATIONS, STATION_REACH } from '@halloween/shared/structures/stations';
+import { STATIONS, STATION_HOLD, STATION_REACH } from '@halloween/shared/structures/stations';
 import { isStructure } from '@halloween/shared/structures/structure-catalog';
 import { stationSeconds } from '@halloween/shared/skill-tree/upgrades/structure-upgrades';
 
@@ -32,8 +31,10 @@ export class Stations extends TickingFeature {
   }
 
   /**
-   * Pulls in goods, works on the current batch, hands it out when done,
-   * and glows while there is work queued.
+   * Pulls in goods, works on the current batch, hands it out when done
+   * (to a station in reach, else it holds it: for a belt to pull or a
+   * player to collect, pausing once it holds STATION_HOLD), and glows while
+   * there is work queued.
    * @param tx The station's tile column.
    * @param ty The station's tile row.
    * @param s The station's state.
@@ -42,12 +43,20 @@ export class Stations extends TickingFeature {
   tick(tx: number, ty: number, s: StructureState, dt: number): void {
     const kind = this.map.get(tx, ty) as StructureKind;
     this.supply(tx, ty, s, STATIONS[kind]!);
-    const waiting = heldFor(s) >= OUTPUT_HOLD;
+    const waiting = heldFor(s) >= STATION_HOLD;
     s.progress = s.queue! > 0 ? (s.progress ?? 0) + (waiting ? 0 : dt) : 0;
     if (s.queue! > 0 && s.progress >= stationSeconds(kind, s.level ?? 0)) {
       s.queue!--;
       s.progress = 0;
-      this._output.deliver(tx, ty, STATIONS[kind]!.output);
+      this._output.deliver(tx, ty, STATIONS[kind]!.output, (left: Bundle): Bundle => {
+        s.out ??= {};
+        for (const g of GOODS) {
+          if (left[g] > 0) {
+            s.out[g] = (s.out[g] ?? 0) + left[g];
+          }
+        }
+        return stock();
+      });
     }
     s.fuel = s.queue! > 0 ? WORKING_GLOW : 0;
   }

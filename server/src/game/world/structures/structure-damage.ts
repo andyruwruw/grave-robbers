@@ -27,7 +27,7 @@ export class StructureDamage extends WorldFeature {
   /**
    * Damages the structure on a tile, restoring the floor if it breaks (a
    * mound under it starts filling again, a bone digger's hoard spills for
-   * its builder alone, and a turret spills its loaded ammo and, unless
+   * its builder alone, what a station held spills, and a turret spills its loaded ammo and, unless
    * taken down by hand, the gear it was built with).
    * @param tx The tile's column.
    * @param ty The tile's row.
@@ -54,6 +54,9 @@ export class StructureDamage extends WorldFeature {
       }
       if (s.hoard && GOODS.some((g): boolean => (s.hoard![g] ?? 0) > 0)) {
         this.items.addItem(tx + 0.5, ty + 0.5, stock(s.hoard), null, s.owner ?? null);
+      }
+      if (s.out && GOODS.some((g): boolean => (s.out![g] ?? 0) > 0)) {
+        this.items.addItem(tx + 0.5, ty + 0.5, stock(s.out), null);
       }
       if (s.stash?.some((item: BagItem | null): boolean => item !== null)) {
         this._spilledStashes.push({ x: tx + 0.5, y: ty + 0.5, keeper: s.keeper ?? '', items: s.stash.filter((item): item is BagItem => item !== null) });

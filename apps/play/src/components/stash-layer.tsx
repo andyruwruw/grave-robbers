@@ -26,6 +26,11 @@ interface StashLayerProps {
   stash: readonly (BagItem | null)[];
 
   /**
+   * Whether the player built the chest.
+   */
+  yours: boolean;
+
+  /**
    * The player's commands.
    */
   commands: PlayerCommands;
@@ -37,7 +42,7 @@ interface StashLayerProps {
  * @param {StashLayerProps} props - Component props.
  * @returns {React.JSX.Element} The rendered layer.
  */
-function StashLayer({ menuRef, bag, stash, commands }: StashLayerProps): React.JSX.Element {
+function StashLayer({ menuRef, bag, stash, yours, commands }: StashLayerProps): React.JSX.Element {
   return (
     <div ref={menuRef}>
       <StashPanel
@@ -45,6 +50,7 @@ function StashLayer({ menuRef, bag, stash, commands }: StashLayerProps): React.J
         stash={stash}
         onMove={commands.stashMove}
         onClose={commands.stashClose}
+        yours={yours}
         onTakeDown={commands.stashTakeDown} />
     </div>
   );

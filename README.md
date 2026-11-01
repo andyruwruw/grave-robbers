@@ -17,11 +17,11 @@ A spooky top-down survival party game for Halloween nights. Up to 8 players rob 
 The horde comes: zombies, vampires, ghosts, werewolves, necromancers, and more, worse under a blood moon. Candy from graves and blood from monsters buy skill tree upgrades.
 
 <p align="center">
-<img src="./docs/media/models/gear/battle-axe.gif" width="120" alt="Battle axe" title="Battle axe" />
-<img src="./docs/media/models/gear/greatsword.gif" width="120" alt="Greatsword" title="Greatsword" />
-<img src="./docs/media/models/gear/morning-star.gif" width="120" alt="Morning star" title="Morning star" />
-<img src="./docs/media/models/gear/repeating-crossbow.gif" width="120" alt="Repeating crossbow" title="Repeating crossbow" />
-<img src="./docs/media/models/gear/ritual-knife.gif" width="120" alt="Ritual knife" title="Ritual knife" />
+<img src="./docs/media/models/gear/battle-axe.png" width="120" alt="Battle axe" title="Battle axe" />
+<img src="./docs/media/models/gear/greatsword.png" width="120" alt="Greatsword" title="Greatsword" />
+<img src="./docs/media/models/gear/morning-star.png" width="120" alt="Morning star" title="Morning star" />
+<img src="./docs/media/models/gear/repeating-crossbow.png" width="120" alt="Repeating crossbow" title="Repeating crossbow" />
+<img src="./docs/media/models/gear/ritual-knife.png" width="120" alt="Ritual knife" title="Ritual knife" />
 </p>
 
 ## Play from the couch
@@ -49,10 +49,10 @@ Maps are also allowed to be generated large, no need to limit it.
 Create occult alters, research weapons, automate resource gathering, create assembly lines, defend your base with automated flame throwers. The monsters get meaner and meaner.
 
 <p align="center">
-<img src="./docs/media/models/monsters/brute.gif" width="120" alt="Brute" title="Brute" />
-<img src="./docs/media/models/monsters/ghoul.gif" width="120" alt="Ghoul" title="Ghoul" />
-<img src="./docs/media/models/monsters/werewolf.gif" width="120" alt="Werewolf" title="Werewolf" />
-<img src="./docs/media/models/monsters/zombie.gif" width="120" alt="Zombie" title="Zombie" />
+<img src="./docs/media/models/monsters/brute.png" width="120" alt="Brute" title="Brute" />
+<img src="./docs/media/models/monsters/ghoul.png" width="120" alt="Ghoul" title="Ghoul" />
+<img src="./docs/media/models/monsters/werewolf.png" width="120" alt="Werewolf" title="Werewolf" />
+<img src="./docs/media/models/monsters/zombie.png" width="120" alt="Zombie" title="Zombie" />
 </p>
 
 <p align="center">
@@ -61,10 +61,10 @@ Create occult alters, research weapons, automate resource gathering, create asse
 
 
 <p align="center">
-<img src="./docs/media/models/buildables/altar.gif" width="120" alt="Altar" title="Altar" />
-<img src="./docs/media/models/buildables/bloodforge.gif" width="120" alt="Bloodforge" title="Bloodforge" />
-<img src="./docs/media/models/buildables/effigy.gif" width="120" alt="Effigy" title="Effigy" />
-<img src="./docs/media/models/buildables/cauldron.gif" width="120" alt="Cauldron" title="Cauldron" />
+<img src="./docs/media/models/buildables/altar.png" width="120" alt="Altar" title="Altar" />
+<img src="./docs/media/models/buildables/bloodforge.png" width="120" alt="Bloodforge" title="Bloodforge" />
+<img src="./docs/media/models/buildables/effigy.png" width="120" alt="Effigy" title="Effigy" />
+<img src="./docs/media/models/buildables/cauldron.png" width="120" alt="Cauldron" title="Cauldron" />
 </p>
 
 <p align="center">
@@ -72,10 +72,10 @@ Create occult alters, research weapons, automate resource gathering, create asse
 </p>
 
 <p align="center">
-<img src="./docs/media/models/buildables/ballista.gif" width="120" alt="Ballista" title="Ballista" />
-<img src="./docs/media/models/buildables/iron-spikes.gif" width="120" alt="Iron spikes" title="Iron spikes" />
-<img src="./docs/media/models/buildables/swiper.gif" width="120" alt="Swiper" title="Swiper" />
-<img src="./docs/media/models/buildables/palisade.gif" width="120" alt="Palisade" title="Palisade" />
+<img src="./docs/media/models/buildables/ballista.png" width="120" alt="Ballista" title="Ballista" />
+<img src="./docs/media/models/buildables/iron-spikes.png" width="120" alt="Iron spikes" title="Iron spikes" />
+<img src="./docs/media/models/buildables/swiper.png" width="120" alt="Swiper" title="Swiper" />
+<img src="./docs/media/models/buildables/palisade.png" width="120" alt="Palisade" title="Palisade" />
 </p>
 
 <p align="center">
@@ -83,10 +83,10 @@ Create occult alters, research weapons, automate resource gathering, create asse
 </p>
 
 <p align="center">
-<img src="./docs/media/models/buildables/research-table.gif" width="120" alt="Research table" title="Research table" />
-<img src="./docs/media/models/buildables/furnace.gif" width="120" alt="Furnace" title="Furnace" />
-<img src="./docs/media/models/buildables/sawmill.gif" width="120" alt="Sawmill" title="Sawmill" />
-<img src="./docs/media/models/buildables/stash.gif" width="120" alt="Stash" title="Stash" />
+<img src="./docs/media/models/buildables/research-table.png" width="120" alt="Research table" title="Research table" />
+<img src="./docs/media/models/buildables/furnace.png" width="120" alt="Furnace" title="Furnace" />
+<img src="./docs/media/models/buildables/sawmill.png" width="120" alt="Sawmill" title="Sawmill" />
+<img src="./docs/media/models/buildables/stash.png" width="120" alt="Stash" title="Stash" />
 </p>
 
 <p align="center">
@@ -94,10 +94,10 @@ Create occult alters, research weapons, automate resource gathering, create asse
 </p>
 
 <p align="center">
-<img src="./docs/media/models/buildables/belt.gif" width="120" alt="Belt" title="Belt" />
-<img src="./docs/media/models/buildables/sifter.gif" width="120" alt="Sifter" title="Sifter" />
-<img src="./docs/media/models/buildables/sorter.gif" width="120" alt="Sorter" title="Sorter" />
-<img src="./docs/media/models/buildables/oven.gif" width="120" alt="Oven" title="Oven" />
+<img src="./docs/media/models/buildables/belt.png" width="120" alt="Belt" title="Belt" />
+<img src="./docs/media/models/buildables/sifter.png" width="120" alt="Sifter" title="Sifter" />
+<img src="./docs/media/models/buildables/sorter.png" width="120" alt="Sorter" title="Sorter" />
+<img src="./docs/media/models/buildables/oven.png" width="120" alt="Oven" title="Oven" />
 </p>
 
 # Setup

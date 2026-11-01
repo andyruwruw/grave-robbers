@@ -88,6 +88,16 @@ export interface StationPanel {
    * Goods it has pulled in from piles toward its next batch.
    */
   buffer: Bundle;
+
+  /**
+   * What it has made and is holding to be collected.
+   */
+  made: Bundle;
+
+  /**
+   * How much it holds before it stops (STATION_HOLD).
+   */
+  hold: number;
 }
 
 /**

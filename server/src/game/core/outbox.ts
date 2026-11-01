@@ -123,11 +123,11 @@ export class Outbox extends GameSystem {
    * closed).
    * @returns Each token with its chest's contents (null: closed).
    */
-  takeStashChanges(): [string, (BagItem | null)[] | null][] {
-    const changes = [...this.stashChanged].flatMap((token: string): [string, (BagItem | null)[] | null][] => {
+  takeStashChanges(): [string, (BagItem | null)[] | null, boolean][] {
+    const changes = [...this.stashChanged].flatMap((token: string): [string, (BagItem | null)[] | null, boolean][] => {
       const p = this.players.get(token);
       const stash = p?.stashAt ? this.world.structureDamage.stashAt(p.stashAt.tx, p.stashAt.ty) : null;
-      return p ? [[token, stash ? structuredClone(stash.items) : null]] : [];
+      return p ? [[token, stash ? structuredClone(stash.items) : null, stash?.keeper === p.name.toLowerCase()]] : [];
     });
     this.stashChanged.clear();
     return changes;

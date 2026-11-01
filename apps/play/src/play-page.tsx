@@ -76,7 +76,7 @@ function PlayPage(): React.JSX.Element {
   const rumbleOn = useRef(settings.rumble);
   rumbleOn.current = settings.rumble;
   const session = useControllerSession(PLAY_TOKEN_KEY, padRumble(padIndex, rumbleOn));
-  const { identity, gear, inventory, tree, research, anvil, vitals, stash, using, padMenu, send } = session;
+  const { identity, gear, inventory, tree, research, anvil, vitals, stash, stashYours, using, padMenu, send } = session;
   const commands = usePlayerCommands(send);
   const [menu, setMenu] = useState<Menu | null>(null);
   const [capturing, setCapturing] = useState<Capture | null>(null);
@@ -205,6 +205,7 @@ function PlayPage(): React.JSX.Element {
                 menuRef={menu === null ? menuRef : undefined}
                 bag={gear.bag}
                 stash={stash}
+                yours={stashYours}
                 commands={commands} />
             )}
             {using && (

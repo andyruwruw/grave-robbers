@@ -90,6 +90,7 @@ export function useControllerSession(tokenKey: string, rumble: (pattern: Rumble)
   const [respawnAt, setRespawnAt] = useState(0);
   const [naughty, setNaughty] = useState<NaughtyNotice | null>(null);
   const [stash, setStash] = useState<(BagItem | null)[] | null>(null);
+  const [stashYours, setStashYours] = useState(false);
   const [using, setUsing] = useState<UsePanel | null>(null);
   const [pads, setPads] = useState<PadInfo[]>([]);
   const [padMenu, setPadMenu] = useState<PadMenuRequest | null>(null);
@@ -172,6 +173,7 @@ export function useControllerSession(tokenKey: string, rumble: (pattern: Rumble)
         return;
       case 'stash':
         setStash(msg.items);
+        setStashYours(msg.yours);
         return;
       case 'using':
         setUsing(msg.panel);
@@ -229,5 +231,5 @@ export function useControllerSession(tokenKey: string, rumble: (pattern: Rumble)
     send({ t: 'join', name, color, tokens: readKnown(`${tokenKey}-known`), code });
   }, [send, tokenKey]);
 
-  return { welcomed, identity, joinError, joining, needsCode, transfer, inventory, gear, tree, research, anvil, toasts, buildError, vitals, respawnAt, naughty, endNaughty, stash, using, pads, padMenu, send, join };
+  return { welcomed, identity, joinError, joining, needsCode, transfer, inventory, gear, tree, research, anvil, toasts, buildError, vitals, respawnAt, naughty, endNaughty, stash, stashYours, using, pads, padMenu, send, join };
 }

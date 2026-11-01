@@ -1,5 +1,5 @@
 // Local Imports
-import { stock } from '../goods/goods';
+import { MATERIAL_STACK, stock } from '../goods/goods';
 
 // Types
 import type { Station, StructureKind } from './types/structures';
@@ -24,6 +24,13 @@ export const STATIONS: Partial<Record<StructureKind, Station>> = {
  * this close that takes it, so a row of them runs on its own.
  */
 export const STATION_REACH = 1.6;
+
+/**
+ * How much of what it made a station holds (one bag stack) until it's
+ * collected from its panel, pulled by a belt, or handed to a station next
+ * to it; full, it stops working.
+ */
+export const STATION_HOLD = MATERIAL_STACK;
 
 /**
  * Crafting late gear and parts needs an anvil within ANVIL_RADIUS tiles;

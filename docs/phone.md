@@ -23,7 +23,7 @@ flowchart LR
 | Control | What it does |
 |---|---|
 | Joystick (left half) | Move. You face the way you last moved. Sampled on an interval and only sent when it changes. |
-| USE | Opens or works the first thing within 2.2 tiles the way you face (else the tile in front) without ever hurting it: your storage chest, a bone digger, station, or belt sorter (a panel, below), the skill tree at a research table, the Armory at an anvil; offers at an altar, loads a turret, waters, relights, opens a chest (see [building.md](building.md#structures)) |
+| USE | Opens or works the first thing within 2.2 tiles the way you face (else the tile in front) without ever hurting it: a storage chest, a bone digger, station, or belt sorter (a panel, below), the skill tree at a research table, the Armory at an anvil; offers at an altar, loads a turret, waters, relights, opens a chest (see [building.md](building.md#structures)) |
 | ACT (hold to repeat) | Hits and works the tile in front: attack, chop, dig, rob, smash, knock a structure down. Also a stick: drag from where the thumb lands (snapped to 8 ways) to turn and act that way while walking. |
 | BLOCK (hold) | Shows with a shield beside a one-handed weapon: raises it |
 | Bag | Equipped slots and the 24-slot bag |
@@ -83,10 +83,10 @@ Tapping a stack of structures in the bag goes straight to building:
 The TV previews it: a dim white outline where it will go, light red with whatever's in the way outlined if it can't.
 
 ### Storage chest
-USE on your own storage chest opens it full screen: your bag on the left, the chest on the right. Tap an item to move it to the other side. Pick up takes the empty chest back. It closes on Back or when you walk away. See [building.md](building.md#storage-chests).
+USE on any storage chest opens it full screen: your bag on the left, the chest on the right. Tap an item to move it to the other side. Pick up takes the empty chest back, and only shows on a chest you built. It closes on Back or when you walk away. See [building.md](building.md#storage-chests).
 
 ### Bone digger, station, and belt sorter
-USE on your own bone digger or any station opens it full screen (`UsePanel` in `packages/game-ui/src/components/use/`): its icon, name and level, then for a digger what it has dug up (of 60), a bar to its next dig, and Collect; for a station what it turns into what, its batches as pips with a bar for the current one, what it pulled from piles nearby, the cost of one batch against what you carry, and Feed 1 / Feed all (a quarry works on its own). It closes on Back, Panic, or when you walk away.
+USE on your own bone digger or any station opens it full screen (`UsePanel` in `packages/game-ui/src/components/use/`): its icon, name and level, then for a digger what it has dug up (of 60), a bar to its next dig, and Collect; for a station what it turns into what, its batches as pips with a bar for the current one, its output slot (`StationOutputSlot`: what it has made, out of 99; tap to collect, and it stops when full), what it pulled from piles nearby, the cost of one batch against what you carry, and Feed 1 / Feed all (a quarry works on its own). It closes on Back, Panic, or when you walk away.
 
 A belt sorter's panel (`SorterView`, no level) says "Pick what goes out each side. Everything else rolls on <forward>." and lists one row per side in `SORT_SIDES` order (Up, Down, Left, Right, labels in `SORT_SIDE_LABELS` in `packages/game-ui/src/config/sorting.ts`):
 
